@@ -5,7 +5,7 @@
 // stretch: bird name on hover
 
 let maximumData;
-const EXCLUDE_BIRDS = [
+const TOP_BIRDS = [
   'American Crow',
   'American Robin',
   'Black-capped chickadee',
@@ -21,47 +21,29 @@ let hoveredBirdName = null;
 // -----------------------------------
 
 function preload() {
-  loadTable('./wi_histogram.tsv', 'tsv', (data) => {
+  loadTable('./data/wi_histogram.tsv', 'tsv', (data) => {
     maximumData = toMaximumInfoColumns(data);
+    console.debug(groupByBirdName(maximumData));
   });
 }
 
 function setup() {
-  init()
-
   const canvasHeight = windowHeight - 128;
   const canvasWidth = windowWidth - 64;
 
   const canvas = createCanvas(canvasWidth, canvasHeight);
   canvas.parent('canvas_container');
-
-  // renderBarChart();
 }
 
 function windowResized() {
   const canvasHeight = windowHeight - 128;
   const canvasWidth = windowWidth - 64;
 
-  resizeCanvas(canvasWidth, canvasHeight)
-
+  resizeCanvas(canvasWidth, canvasHeight);
 }
 
 function draw() {
   renderBarChart();
-}
-
-// -------
-function init() {
-  class P5Interoperator extends EventTarget {
-
-  }
-
-  const op = new P5Interoperator();
-  op.addEventListener('honk', (event) => {
-    console.debug('honk from inside p5', event.detail)
-  })
-
-  window.__secret_p5_interop = op;
 }
 
 // -----------------------------------
@@ -72,11 +54,14 @@ function renderBarChart() {
   background('lemonchiffon');
 
   const maxWidth = width / maximumData.length;
-  const gap = 0;
+  const gap = 2;
   const barWidth = maxWidth - gap;
-  textAlign(CENTER)
+  textAlign(CENTER);
 
-  const rectData = []
+  const rectData = [];
+
+  // translate(50,50)
+  // const absoluteMaximum = max(maximumData.map(m => m.maximum))
 
   for (let index = 0; index < maximumData.length; index += 1) {
     const { maximum, birdName } = maximumData[index];
@@ -84,7 +69,7 @@ function renderBarChart() {
     const xStart = maxWidth * index;
     const barHeight = -1 * map(maximum, 0, 1, 0, height);
 
-    let tooltipText = ''
+    let tooltipText = '';
 
     if (mouseX > xStart && mouseX < xStart + barWidth) {
       if (mouseY < height && mouseY > barHeight) {
@@ -96,29 +81,31 @@ function renderBarChart() {
     if (mouseX > width || mouseY > height || mouseY < 0 || mouseX < 0) {
       // reset view state
       tooltipText = '';
-      hoveredBirdName = null
+      hoveredBirdName = null;
     }
-
-    // console.debug({mouseX, mouseY})
 
     text(tooltipText, width / 2, height / 6);
 
-    rectData.push({ xStart, height, barWidth, barHeight, birdName  });
+    rectData.push({ xStart, height, barWidth, barHeight, birdName });
   }
 
-  for (const {xStart, height, barWidth, barHeight, birdName } of rectData) {
-    push()
+  for (const { xStart, height, barWidth, barHeight, birdName } of rectData) {
+    push();
 
     if (birdName === hoveredBirdName) {
-      fill('orange')
+      fill('orange');
     } else {
-      fill('white')
+      fill('plum');
     }
 
-    rect(xStart, height, barWidth, barHeight)
+    // translate(xStart, 0)
 
-    pop()
+    rect(xStart, height, barWidth, barHeight)
+    // drawFeather(barHeight * -1 / 2);
+
+    pop();
   }
+
 }
 
 // -----------------------------------
@@ -150,9 +137,9 @@ function parseToColumns(tableData) {
       if (columnIndex > 0) {
         const datumAsFloat = parseFloat(datum, 10);
         // idea: let user pick maximum abundance
-        if (datumAsFloat > 0.5) {
-          continue;
-        }
+        // if (datumAsFloat > 0.15) {
+        //   continue;
+        // }
 
         currentColumns.push(datumAsFloat);
       } else {
@@ -203,4 +190,58 @@ function groupByBirdName(columnMaxes) {
   }, {});
 
   return result;
+}
+
+//////////
+
+function drawFeather(_length) {
+  push();
+  scale(1, 2);
+  drawFeatherSide(_length);
+  scale(-1, 1);
+  drawFeatherSide(_length);
+  pop();
+}
+
+function drawFeatherSide(_length) {
+  let hf = 0.5;
+  let w = _length * 0.15;
+  let h = _length * hf;
+  let step = 5;
+  let end = createVector(0, h);
+
+  let stack = 0;
+  let stuck = false;
+
+  for (let i = 0; i < _length; i += step) {
+    if (!stuck && random(100) < 10) {
+      stuck = true;
+    }
+    if (stuck && random(100) < 20) {
+      stuck = !stuck;
+    }
+
+    //three points
+    // let vh = 200;
+    let aw = sin(map(i, 0, _length, 0, PI)) * w;
+
+    if (!stuck) {
+      stack += step * hf + pow(i, 0.2) * 0.75 * hf;
+    }
+
+    let p0 = createVector(0, i * hf * 0.75);
+    let p1 = createVector(aw, stack);
+    let p2 = p1.lerp(end, map(i, 0, _length, 0, 1));
+
+    if (i < _length * 0.1) {
+      p2.x *= random(0.8, 1.2);
+      p2.y *= random(0.8, 1.2);
+    }
+
+    console.debug(p0.x, p0.y,p1.x, p1.y)
+    beginShape();
+    vertex(p0.x, p0.y);
+    vertex(p1.x, p1.y);
+    endShape();
+  }
 }
