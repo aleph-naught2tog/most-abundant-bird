@@ -6,41 +6,104 @@
 
 let maximumData;
 const EXCLUDE_BIRDS = [
-  "American Crow",
-  "American Robin",
-  "Black-capped chickadee",
-  "American goldfinch",
-  "blue jay",
-  "canada goose",
+  'American Crow',
+  'American Robin',
+  'Black-capped chickadee',
+  'American goldfinch',
+  'blue jay',
+  'canada goose',
 ];
+
+let hoveredBirdName = null;
 
 // -----------------------------------
 // ------- Lifecycle functions -------
 // -----------------------------------
 
 function preload() {
-  loadTable("./wi_histogram.tsv", "tsv", (data) => {
+  loadTable('./wi_histogram.tsv', 'tsv', (data) => {
     maximumData = toMaximumInfoColumns(data);
   });
 }
 
 function setup() {
-  const canvas = createCanvas(600, 400);
-  canvas.parent("canvas_container");
+  const canvasHeight = windowHeight - 128;
+  const canvasWidth = windowWidth - 64;
 
-  renderBarChart();
+  const canvas = createCanvas(canvasWidth, canvasHeight);
+  canvas.parent('canvas_container');
+
+  // renderBarChart();
 }
 
+function windowResized() {
+  const canvasHeight = windowHeight - 128;
+  const canvasWidth = windowWidth - 64;
+
+  resizeCanvas(canvasWidth, canvasHeight)
+
+}
+
+function draw() {
+  renderBarChart();
+}
 
 // -----------------------------------
 // ---------- Render functions ---------
 // -----------------------------------
 
-// function renderBarChart() {
-//   for (const {  } of maximumData) {
-    
-//   }
-// }
+function renderBarChart() {
+  background('lemonchiffon');
+
+  const maxWidth = width / maximumData.length;
+  const gap = 0;
+  const barWidth = maxWidth - gap;
+  textAlign(CENTER)
+
+  const rectData = []
+
+  for (let index = 0; index < maximumData.length; index += 1) {
+    const { maximum, birdName } = maximumData[index];
+
+    const xStart = maxWidth * index;
+    const barHeight = -1 * map(maximum, 0, 1, 0, height);
+
+    let tooltipText = ''
+
+    if (mouseX > xStart && mouseX < xStart + barWidth) {
+      if (mouseY < height && mouseY > barHeight) {
+        hoveredBirdName = birdName;
+        tooltipText = birdName;
+      }
+    }
+
+    if (mouseX > width || mouseY > height || mouseY < 0 || mouseX < 0) {
+      // reset view state
+      tooltipText = '';
+      hoveredBirdName = null
+    }
+
+    console.debug({mouseX, mouseY})
+
+    text(tooltipText, width / 2, height / 6);
+
+    rectData.push({ xStart, height, barWidth, barHeight, birdName  });
+  }
+
+  for (const {xStart, height, barWidth, barHeight, birdName } of rectData) {
+    push()
+
+    if (birdName === hoveredBirdName) {
+      fill('orange')
+    } else {
+      fill('white')
+    }
+
+    rect(xStart, height, barWidth, barHeight)
+
+    pop()
+  }
+}
 
 // -----------------------------------
 // ---------- Data functions ---------
@@ -52,8 +115,6 @@ function toMaximumInfoColumns(tableData) {
   const maxInfo = columns.map((col) =>
     calculateMaximumFromColumn(col, birdNames)
   );
-  
-  console.debug({ maxInfo })
 
   return maxInfo;
 }
@@ -73,17 +134,17 @@ function parseToColumns(tableData) {
       if (columnIndex > 0) {
         const datumAsFloat = parseFloat(datum, 10);
         // idea: let user pick maximum abundance
-        // if (datumAsFloat > 0.5) {
-        //   continue;
-        // }
-        
+        if (datumAsFloat > 0.5) {
+          continue;
+        }
+
         currentColumns.push(datumAsFloat);
       } else {
         // // idea: let user pick which birds to exclude
         // if (EXCLUDE_BIRDS.some(ebn => datum.toLowerCase().startsWith(ebn.toLowerCase()))) {
         //   continue;
         // }
-        
+
         currentColumns.push(datum);
       }
     }
@@ -107,7 +168,7 @@ function calculateMaximumFromColumn(col, birdNames) {
         return { maximum, maximumIndex, birdName };
       }
     },
-    { maximum: -1, maximumIndex: -1, birdName: null }
+    { maximum: -1, maximumIndex: -1, birdName: '' }
   );
 }
 
@@ -124,6 +185,6 @@ function groupByBirdName(columnMaxes) {
 
     return birdGrouping;
   }, {});
-  
+
   return result;
 }
