@@ -5,16 +5,38 @@
 // stretch: bird name on hover
 
 let maximumData;
-const TOP_BIRDS = [
-  'American Crow',
-  'American Robin',
-  'Black-capped chickadee',
-  'American goldfinch',
-  'blue jay',
-  'canada goose',
-];
+
+const TOP_BIRD_INFO = {
+  'American Crow': {
+    imageUrl: './images/american_crow.jpg',
+    palette: null,
+    palettePoints: { start: [], end: [] },
+  },
+  'American Robin': {
+    imageUrl: './images/american_robin.jpg',
+    palettePoints: { start: [], end: [] },
+  },
+  'Black-capped Chickadee': {
+    imageUrl: './images/black_capped_chickadee.jpg',
+    palettePoints: { start: [], end: [] },
+  },
+  'American Goldfinch': {
+    imageUrl: './images/american_goldfinch.jpg',
+    palettePoints: { start: [], end: [] },
+  },
+  'Blue Jay': {
+    imageUrl: './images/blue_jay.jpg',
+    palettePoints: { start: [536, 475], end: [958, 628] },
+  },
+  'Canada Goose': {
+    imageUrl: './images/canada_goose.jpg',
+    palettePoints: { start: [], end: [] },
+  },
+};
 
 let hoveredBirdName = null;
+
+let blueJayImage;
 
 // -----------------------------------
 // ------- Lifecycle functions -------
@@ -25,6 +47,15 @@ function preload() {
     maximumData = toMaximumInfoColumns(data);
     console.debug(groupByBirdName(maximumData));
   });
+
+  blueJayImage = loadImage('./images/blue_jay.jpeg');
+
+  const blueJayPalette = createPalette(
+    blueJayImage,
+    20,
+    [536, 475],
+    [958, 628]
+  );
 }
 
 function setup() {
@@ -33,6 +64,8 @@ function setup() {
 
   const canvas = createCanvas(canvasWidth, canvasHeight);
   canvas.parent('canvas_container');
+
+  renderRadialChart();
 }
 
 function windowResized() {
@@ -43,12 +76,55 @@ function windowResized() {
 }
 
 function draw() {
-  renderBarChart();
+  // renderBarChart();
+  // renderRadialChart();
 }
 
 // -----------------------------------
 // ---------- Render functions ---------
 // -----------------------------------
+
+function renderRadialChart() {
+  const absoluteMaximum = max(maximumData.map((m) => m.maximum));
+  const absoluteMinimum = min(maximumData.map((m) => m.maximum));
+  console.debug({ absoluteMaximum, absoluteMinimum });
+
+  background('lemonchiffon');
+  // fill('plum');
+
+  const donutHole = 0.2;
+  const chartDiameter = window.width / 2;
+  textAlign(CENTER);
+
+  const palette = createPalette(blueJayImage, 20, [536, 475], [958, 628]);
+  console.debug({ palette });
+
+  for (let index = 0; index < maximumData.length; index++) {
+    const num = maximumData[index].maximum;
+    const theta = map(index, 0, 48, 0, TAU);
+    const radius = map(num, 0, 1, 0, chartDiameter / 2);
+
+    push();
+    // going from 0 to absoluteMaximum is much tamer
+    // but who wants that
+    const strokeColor = color(
+      map(num, absoluteMinimum, absoluteMaximum, 0, 360),
+      100,
+      100
+    );
+    stroke(strokeColor);
+    translate(chartDiameter / 2, chartDiameter / 2);
+
+    // go back a quarter circle
+    rotate(theta - PI / 2);
+
+    // this bumps the feathers to outside of the inner implicit circle
+    translate(0, (chartDiameter * donutHole) / 2);
+
+    drawFeather(radius, palette);
+    pop();
+  }
+}
 
 function renderBarChart() {
   background('lemonchiffon');
@@ -100,12 +176,11 @@ function renderBarChart() {
 
     // translate(xStart, 0)
 
-    rect(xStart, height, barWidth, barHeight)
+    rect(xStart, height, barWidth, barHeight);
     // drawFeather(barHeight * -1 / 2);
 
     pop();
   }
-
 }
 
 // -----------------------------------
@@ -136,18 +211,8 @@ function parseToColumns(tableData) {
 
       if (columnIndex > 0) {
         const datumAsFloat = parseFloat(datum, 10);
-        // idea: let user pick maximum abundance
-        // if (datumAsFloat > 0.15) {
-        //   continue;
-        // }
-
         currentColumns.push(datumAsFloat);
       } else {
-        // // idea: let user pick which birds to exclude
-        // if (EXCLUDE_BIRDS.some(ebn => datum.toLowerCase().startsWith(ebn.toLowerCase()))) {
-        //   continue;
-        // }
-
         currentColumns.push(datum);
       }
     }
@@ -194,16 +259,16 @@ function groupByBirdName(columnMaxes) {
 
 //////////
 
-function drawFeather(_length) {
+function drawFeather(_length, _colors) {
   push();
   scale(1, 2);
-  drawFeatherSide(_length);
+  drawFeatherSide(_length, _colors);
   scale(-1, 1);
-  drawFeatherSide(_length);
+  drawFeatherSide(_length, _colors);
   pop();
 }
 
-function drawFeatherSide(_length) {
+function drawFeatherSide(_length, _colors) {
   let hf = 0.5;
   let w = _length * 0.15;
   let h = _length * hf;
@@ -214,9 +279,14 @@ function drawFeatherSide(_length) {
   let stuck = false;
 
   for (let i = 0; i < _length; i += step) {
+    if (_colors) {
+      stroke(_colors[floor(map(i, 0, _length, 0, _colors.length))]);
+    }
+
     if (!stuck && random(100) < 10) {
       stuck = true;
     }
+
     if (stuck && random(100) < 20) {
       stuck = !stuck;
     }
@@ -238,10 +308,21 @@ function drawFeatherSide(_length) {
       p2.y *= random(0.8, 1.2);
     }
 
-    console.debug(p0.x, p0.y,p1.x, p1.y)
+    noFill();
+
     beginShape();
     vertex(p0.x, p0.y);
     vertex(p1.x, p1.y);
     endShape();
   }
+}
+
+function createPalette(_img, _num, _start, _end) {
+  let _pal = [];
+  for (let i = 0; i < _num; i++) {
+    let x = map(i, 0, _num, _start[0], _end[0]);
+    let y = map(i, 0, _num, _start[1], _end[1]);
+    _pal.push(_img.get(floor(x), floor(y)));
+  }
+  return _pal;
 }
