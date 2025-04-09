@@ -9,28 +9,40 @@ let maximumData;
 const TOP_BIRD_INFO = {
   'American Crow': {
     imageUrl: './images/american_crow.jpg',
+    palettePoints: { start: [1534, 1296], end: [2079, 491] },
+    image: null,
     palette: null,
-    palettePoints: { start: [], end: [] },
   },
   'American Robin': {
     imageUrl: './images/american_robin.jpg',
-    palettePoints: { start: [], end: [] },
+    palettePoints: { start: [712, 812], end: [1059, 280] },
+    image: null,
+    palette: null,
   },
   'Black-capped Chickadee': {
     imageUrl: './images/black_capped_chickadee.jpg',
-    palettePoints: { start: [], end: [] },
+    palettePoints: { start: [471, 422], end: [528, 137] },
+    image: null,
+    palette: null,
   },
   'American Goldfinch': {
     imageUrl: './images/american_goldfinch.jpg',
-    palettePoints: { start: [], end: [] },
+    // palettePoints: { start: [1088, 564], end: [793, 443] },
+    palettePoints: { start: [734,469], end: [920,437] },
+    image: null,
+    palette: null,
   },
   'Blue Jay': {
     imageUrl: './images/blue_jay.jpg',
     palettePoints: { start: [536, 475], end: [958, 628] },
+    image: null,
+    palette: null,
   },
   'Canada Goose': {
     imageUrl: './images/canada_goose.jpg',
-    palettePoints: { start: [], end: [] },
+    palettePoints: { start: [838, 654], end: [1016, 31] },
+    image: null,
+    palette: null,
   },
 };
 
@@ -45,17 +57,13 @@ let blueJayImage;
 function preload() {
   loadTable('./data/wi_histogram.tsv', 'tsv', (data) => {
     maximumData = toMaximumInfoColumns(data);
-    console.debug(groupByBirdName(maximumData));
   });
 
-  blueJayImage = loadImage('./images/blue_jay.jpeg');
+  for (const birdName in TOP_BIRD_INFO) {
+    const metadata = TOP_BIRD_INFO[birdName];
 
-  const blueJayPalette = createPalette(
-    blueJayImage,
-    20,
-    [536, 475],
-    [958, 628]
-  );
+    metadata.image = loadImage(metadata.imageUrl);
+  }
 }
 
 function setup() {
@@ -87,20 +95,36 @@ function draw() {
 function renderRadialChart() {
   const absoluteMaximum = max(maximumData.map((m) => m.maximum));
   const absoluteMinimum = min(maximumData.map((m) => m.maximum));
-  console.debug({ absoluteMaximum, absoluteMinimum });
 
   background('lemonchiffon');
-  // fill('plum');
 
   const donutHole = 0.2;
   const chartDiameter = window.width / 2;
   textAlign(CENTER);
 
-  const palette = createPalette(blueJayImage, 20, [536, 475], [958, 628]);
-  console.debug({ palette });
+  for (const birdName in TOP_BIRD_INFO) {
+    const metadata = TOP_BIRD_INFO[birdName];
+
+    metadata.palette = createPalette(
+      metadata.image,
+      50,
+      metadata.palettePoints.start,
+      metadata.palettePoints.end
+    );
+  }
 
   for (let index = 0; index < maximumData.length; index++) {
     const num = maximumData[index].maximum;
+    const closestBirdName = Object.keys(TOP_BIRD_INFO).find((key) =>
+      maximumData[index].birdName.toLowerCase().startsWith(key.toLowerCase())
+    );
+
+    if (!closestBirdName) {
+      throw new Error(`Unexpected bird name: ${maximumData[index].birdName}`);
+    }
+
+    const metadata = TOP_BIRD_INFO[closestBirdName];
+
     const theta = map(index, 0, 48, 0, TAU);
     const radius = map(num, 0, 1, 0, chartDiameter / 2);
 
@@ -121,7 +145,8 @@ function renderRadialChart() {
     // this bumps the feathers to outside of the inner implicit circle
     translate(0, (chartDiameter * donutHole) / 2);
 
-    drawFeather(radius, palette);
+    // console.debug({ metadata })
+    drawFeather(radius, metadata.palette);
     pop();
   }
 }
@@ -240,30 +265,13 @@ function calculateMaximumFromColumn(col, birdNames) {
   );
 }
 
-// this is just to see if there are any that just dominate everything
-// like, say, a goose
-function groupByBirdName(columnMaxes) {
-  const result = columnMaxes.reduce((birdGrouping, currentMaxInfo) => {
-    // I hate how the negation of `in` looks
-    if (!(currentMaxInfo.birdName in birdGrouping)) {
-      birdGrouping[currentMaxInfo.birdName] = 0;
-    }
-
-    birdGrouping[currentMaxInfo.birdName] += 1;
-
-    return birdGrouping;
-  }, {});
-
-  return result;
-}
-
 //////////
 
 function drawFeather(_length, _colors) {
   push();
   scale(1, 2);
   drawFeatherSide(_length, _colors);
-  scale(-1, 1);
+  scale(-2, 1);
   drawFeatherSide(_length, _colors);
   pop();
 }
@@ -292,7 +300,6 @@ function drawFeatherSide(_length, _colors) {
     }
 
     //three points
-    // let vh = 200;
     let aw = sin(map(i, 0, _length, 0, PI)) * w;
 
     if (!stuck) {
