@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <!-- 
+    <!--
       This is an HTML comment
       You can write text in a comment and the content won't be visible in the page
     -->
@@ -23,6 +23,7 @@
     <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.js"></script>
     <!-- The website JavaScript file -->
     <script src="/script.js" defer></script>
+
   </head>
   <body>
     <main>
@@ -30,6 +31,7 @@
         <h1>
           Most Abundant Birds in Wisconsin
         </h1>
+        <button id="clicker">click me</button>
       </header>
       <div id="canvas_container"></div>
     </main>
@@ -49,4 +51,15 @@
       </a>
     </footer>
   </body>
+  <script>
+    function test() {
+      console.debug('test from the script tag')
+      const honkEvent = new CustomEvent('honk', {detail: clicker.getBoundingClientRect() });
+      window.__secret_p5_interop.dispatchEvent(honkEvent)
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('clicker').addEventListener('click', test);
+    })
+  </script>
 </html>

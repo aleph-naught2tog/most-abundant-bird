@@ -27,6 +27,8 @@ function preload() {
 }
 
 function setup() {
+  init()
+
   const canvasHeight = windowHeight - 128;
   const canvasWidth = windowWidth - 64;
 
@@ -46,6 +48,20 @@ function windowResized() {
 
 function draw() {
   renderBarChart();
+}
+
+// -------
+function init() {
+  class P5Interoperator extends EventTarget {
+
+  }
+
+  const op = new P5Interoperator();
+  op.addEventListener('honk', (event) => {
+    console.debug('honk from inside p5', event.detail)
+  })
+
+  window.__secret_p5_interop = op;
 }
 
 // -----------------------------------
@@ -83,7 +99,7 @@ function renderBarChart() {
       hoveredBirdName = null
     }
 
-    console.debug({mouseX, mouseY})
+    // console.debug({mouseX, mouseY})
 
     text(tooltipText, width / 2, height / 6);
 
