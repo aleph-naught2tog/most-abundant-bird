@@ -7,13 +7,15 @@ const TOP_BIRD_INFO = {
     palette: null,
   },
   "American Robin": {
-    imageUrl: "https://cdn.glitch.global/00f42083-b668-494f-ace0-e024365392d8/american_robin.jpg?v=1744300413633",
+    imageUrl:
+      "https://cdn.glitch.global/00f42083-b668-494f-ace0-e024365392d8/american_robin.jpg?v=1744300413633",
     palettePoints: { start: [712, 812], end: [1059, 280] },
     image: null,
     palette: null,
   },
   "Black-capped Chickadee": {
-    imageUrl: "https://cdn.glitch.global/00f42083-b668-494f-ace0-e024365392d8/black_capped_chickadee.jpeg?v=1744300413387",
+    imageUrl:
+      "https://cdn.glitch.global/00f42083-b668-494f-ace0-e024365392d8/black_capped_chickadee.jpeg?v=1744300413387",
     palettePoints: { start: [471, 422], end: [528, 137] },
     image: null,
     palette: null,
@@ -143,10 +145,10 @@ function renderRadialChart(preppedData) {
     // this bumps the feathers to outside of the inner implicit circle
     translate(0, (chartDiameter * donutHole) / 2);
 
-    drawFeather(radius, metadata.palette);
-    // const featherPoints = calculateFeatherPoints(radius, metadata.palette);
-    // console.debug({ featherPoints })
-    // drawFeatherFromPoints(featherPoints);
+    // drawFeather(radius, metadata.palette);
+    const featherPoints = calculateFeatherPoints(radius, metadata.palette);
+    console.debug({ featherPoints });
+    drawFeatherFromPoints(featherPoints);
 
     pop();
   }
@@ -220,12 +222,33 @@ function calculateMaximumFromColumn(col, birdNames) {
 }
 
 function drawFeatherFromPoints(pointsArray) {
-  for (const { first, second } of pointsArray) {
+  const lengthDivider = floor(pointsArray.length / 2);
+  const leftHalf = pointsArray.slice(0, lengthDivider);
+  const rightHalf = pointsArray.slice(lengthDivider);
+
+  scale(1, 2);
+
+  for (const { first, second } of leftHalf) {
     console.debug(first, second);
 
     push();
     stroke(first.strokeColor);
-    scale(1, 2);
+
+    beginShape();
+    vertex(first.x, first.y);
+    vertex(second.x, second.y);
+    endShape();
+
+    pop();
+  }
+
+  scale(-2, 1);
+
+  for (const { first, second } of rightHalf) {
+    console.debug(first, second);
+
+    push();
+    stroke(first.strokeColor);
 
     beginShape();
     vertex(first.x, first.y);
