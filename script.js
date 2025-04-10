@@ -45,7 +45,7 @@ const TOP_BIRD_INFO = {
 
 let hoveredBirdName = null;
 let maximumData;
-let savedFeatherPoints;
+let savedFeatherPoints = [];
 
 // -----------------------------------
 // ------- Lifecycle functions -------
@@ -73,6 +73,8 @@ function setup() {
   maximumData = toMaximumInfoColumns(loadedTableData, 2);
 
   renderRadialChart(maximumData);
+  
+  console.debug(savedFeatherPoints.length)
 }
 
 function windowResized() {
@@ -93,7 +95,7 @@ function draw() {}
 function renderRadialChart(preppedData) {
   //   TODO: BUG: something is super weird here
   const absoluteMaximum = max(preppedData.map((m) => m.maximum));
-  const absoluteMinimum = min(preppedData.map((m) => m.minimum));
+  const absoluteMinimum = min(preppedData.map((m) => m.maximum));
 
   console.debug({ absoluteMaximum, absoluteMinimum });
 
@@ -131,7 +133,7 @@ function renderRadialChart(preppedData) {
       num,
       absoluteMinimum, // This looks better, but gives us a 0 at the lowest
       absoluteMaximum,
-      0,
+      10,
       chartDiameter / 2
     );
 
@@ -147,11 +149,12 @@ function renderRadialChart(preppedData) {
     translate(0, (chartDiameter * donutHole) / 2);
 
 
-    // if (!savedFeatherPoints) {
+    // if (savedFeatherPoints.length !== 1440) {
       console.debug({ radius })
-      savedFeatherPoints = calculateFeatherPoints(radius, metadata.palette);  
+      savedFeatherPoints = calculateFeatherPoints(radius, metadata.palette);
+    // savedFeatherPoints.push(...calculateFeatherPoints(radius, metadata.palette))
 //       console.debug({ radius, savedFeatherPoints })
-//     }
+    // }
     
     console.debug({ radius, savedFeatherPoints })
     
