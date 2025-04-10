@@ -1,9 +1,3 @@
-// load up a hotspot tsv
-// act columnarily on it
-// for each COLUMN, find the ROW with the MAX value
-// graph that (start with bar, then radial)
-// stretch: bird name on hover
-
 const TOP_BIRD_INFO = {
   'American Crow': {
     imageUrl: './images/american_crow.jpg',
@@ -53,7 +47,7 @@ let maximumData;
 
 function preload() {
   loadTable('./data/wi_histogram.tsv', 'tsv', (data) => {
-    loadedTableData = data
+    loadedTableData = data;
   });
 
   for (const birdName in TOP_BIRD_INFO) {
@@ -90,9 +84,7 @@ function windowResized() {
   renderRadialChart(maximumData);
 }
 
-function draw() {
-
-}
+function draw() {}
 
 // -----------------------------------
 // ---------- Render functions ---------
@@ -101,6 +93,8 @@ function draw() {
 function renderRadialChart(preppedData) {
   const absoluteMaximum = max(preppedData.map((m) => m.maximum));
   const absoluteMinimum = min(preppedData.map((m) => m.maximum));
+
+  console.debug({ absoluteMaximum, absoluteMinimum });
 
   background('lemonchiffon');
 
@@ -134,31 +128,28 @@ function renderRadialChart(preppedData) {
     const theta = map(index, 0, preppedData.length, 0, TAU);
     const radius = map(
       num,
-      absoluteMinimum,
+      0,
+      // absoluteMinimum, // This looks better, but gives us a 0 at the lowest
       absoluteMaximum,
       0,
       chartDiameter / 2
     );
 
-    console.debug({index, theta, radius})
-
     push();
 
     translate(chartDiameter / 2, chartDiameter / 2);
 
-    // go back a quarter circle
-    rotate(theta - PI / 2);
-
-    push()
-    line(20, 20, 50, 50)
-    pop()
+    // QUESTION: why did I have to do this instead of theta - PI/2 to get a
+    // normal "clock" alignment?
+    rotate(theta - PI);
 
     // this bumps the feathers to outside of the inner implicit circle
     translate(0, (chartDiameter * donutHole) / 2);
 
-    console.debug({ radius, palette: metadata.palette })
-
-    drawFeather(radius, metadata.palette);
+    // drawFeather(radius, metadata.palette);
+    const featherPoints = calculateFeatherPoints(radius, metadata.palette);
+    // console.debug({ featherPoints })
+    drawFeatherFromPoints(featherPoints);
 
     pop();
   }
@@ -209,7 +200,7 @@ function parseToColumns(tableData, chunkSize) {
     }
   }
 
-  console.debug({ columnarData })
+  console.debug({ columnarData });
 
   return columnarData.filter((arr) => arr.length);
 }
@@ -229,6 +220,81 @@ function calculateMaximumFromColumn(col, birdNames) {
     },
     { maximum: -1, maximumIndex: -1, birdName: '' }
   );
+}
+
+function drawFeatherFromPoints(pointsArray) {
+  for (const { first, second } of pointsArray) {
+    console.debug(first, second);
+
+    push();
+    stroke(first.strokeColor);
+    scale(1, 2);
+
+    beginShape();
+    vertex(first.x, first.y);
+    vertex(second.x, second.y);
+    endShape();
+
+    pop();
+  }
+}
+
+function calculateFeatherPoints(length, colors) {
+  const firstSide = calculateFeatherSide(length, colors);
+  const secondSide = calculateFeatherSide(length, colors);
+
+  return firstSide.concat(secondSide);
+}
+
+function calculateFeatherSide(_length, _colors) {
+  let hf = 0.5;
+  let w = _length * 0.15;
+  let h = _length * hf;
+  let step = 5;
+  let end = createVector(0, h);
+
+  let stack = 0;
+  let stuck = false;
+
+  const featherPoints = [];
+
+  for (let i = 0; i < _length; i += step) {
+    let strokeColor;
+    if (_colors) {
+      strokeColor = _colors[floor(map(i, 0, _length, 0, _colors.length))];
+    }
+
+    if (!stuck && random(100) < 10) {
+      stuck = true;
+    }
+
+    if (stuck && random(100) < 20) {
+      stuck = !stuck;
+    }
+
+    //three points
+    let aw = sin(map(i, 0, _length, 0, PI)) * w;
+
+    if (!stuck) {
+      stack += step * hf + pow(i, 0.2) * 0.75 * hf;
+    }
+
+    let p0 = createVector(0, i * hf * 0.75);
+    let p1 = createVector(aw, stack);
+    let p2 = p1.lerp(end, map(i, 0, _length, 0, 1));
+
+    if (i < _length * 0.1) {
+      p2.x *= random(0.8, 1.2);
+      p2.y *= random(0.8, 1.2);
+    }
+
+    featherPoints.push({
+      first: { x: p0.x, y: p0.y, strokeColor },
+      second: { x: p1.x, y: p1.y, strokeColor },
+    });
+  }
+
+  return featherPoints;
 }
 
 ////////// Not my functions
