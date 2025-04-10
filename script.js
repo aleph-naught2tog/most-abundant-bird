@@ -91,8 +91,9 @@ function draw() {}
 // -----------------------------------
 
 function renderRadialChart(preppedData) {
+  //   TODO: BUG: something is super weird here
   const absoluteMaximum = max(preppedData.map((m) => m.maximum));
-  const absoluteMinimum = min(preppedData.map((m) => m.maximum));
+  const absoluteMinimum = min(preppedData.map((m) => m.minimum));
 
   console.debug({ absoluteMaximum, absoluteMinimum });
 
@@ -124,11 +125,10 @@ function renderRadialChart(preppedData) {
     }
 
     const metadata = TOP_BIRD_INFO[closestBirdName];
-
+    
     const theta = map(index, 0, preppedData.length, 0, TAU);
     const radius = map(
       num,
-      0.1,
       absoluteMinimum, // This looks better, but gives us a 0 at the lowest
       absoluteMaximum,
       0,
