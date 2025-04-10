@@ -72,17 +72,13 @@ function setup() {
   maximumData = toMaximumInfoColumns(loadedTableData, 2);
 
   renderRadialChart(maximumData);
-  
-  console.debug(savedFeatherPoints.length)
 }
 
 function windowResized() {
-  const canvasHeight = windowHeight - 128;
-  const canvasWidth = windowWidth - 64;
-
-  resizeCanvas(canvasWidth, canvasHeight);
-
-  renderRadialChart(maximumData);
+  // const canvasHeight = windowHeight - 128;
+  // const canvasWidth = windowWidth - 64;
+  // resizeCanvas(canvasWidth, canvasHeight);
+  // renderRadialChart(maximumData);
 }
 
 function draw() {}
@@ -92,17 +88,13 @@ function draw() {}
 // -----------------------------------
 
 function renderRadialChart(preppedData) {
-  //   TODO: BUG: something is super weird here
   const absoluteMaximum = max(preppedData.map((m) => m.maximum));
   const absoluteMinimum = min(preppedData.map((m) => m.maximum));
 
-  console.debug({ absoluteMaximum, absoluteMinimum });
-
-  background("lemonchiffon");
+  background('plum');
 
   const donutHole = 0.2;
   const chartDiameter = window.width / 2;
-  textAlign(CENTER);
 
   for (const birdName in TOP_BIRD_INFO) {
     const metadata = TOP_BIRD_INFO[birdName];
@@ -147,17 +139,9 @@ function renderRadialChart(preppedData) {
     // this bumps the feathers to outside of the inner implicit circle
     translate(0, (chartDiameter * donutHole) / 2);
 
+    const points = calculateFeatherPoints(radius, metadata.palette);
 
-    // if (savedFeatherPoints.length !== 1440) {
-      console.debug({ radius })
-      savedFeatherPoints = calculateFeatherPoints(radius, metadata.palette);
-    // savedFeatherPoints.push(...calculateFeatherPoints(radius, metadata.palette))
-//       console.debug({ radius, savedFeatherPoints })
-    // }
-    
-    console.debug({ radius, savedFeatherPoints })
-    
-    drawFeatherFromPoints(savedFeatherPoints);
+    drawFeatherFromPoints(points, radius);
 
     pop();
   }
@@ -208,8 +192,6 @@ function parseToColumns(tableData, chunkSize) {
     }
   }
 
-  console.debug({ columnarData });
-
   return columnarData.filter((arr) => arr.length);
 }
 
@@ -238,8 +220,6 @@ function drawFeatherFromPoints(pointsArray) {
   scale(1, 2);
 
   for (const { first, second } of leftHalf) {
-    console.debug(first, second);
-
     push();
     stroke(first.strokeColor);
 
@@ -254,8 +234,6 @@ function drawFeatherFromPoints(pointsArray) {
   scale(-2, 1);
 
   for (const { first, second } of rightHalf) {
-    console.debug(first, second);
-
     push();
     stroke(first.strokeColor);
 
@@ -327,61 +305,6 @@ function calculateFeatherSidePoints(_length, _colors) {
 }
 
 ////////// Not my functions
-
-function drawFeather(_length, _colors) {
-  push();
-  scale(1, 2);
-  drawFeatherSide(_length, _colors);
-  scale(-2, 1);
-  drawFeatherSide(_length, _colors);
-  pop();
-}
-
-function drawFeatherSide(_length, _colors) {
-  let hf = 0.5;
-  let w = _length * 0.15;
-  let h = _length * hf;
-  let step = 5;
-  let end = createVector(0, h);
-
-  let stack = 0;
-  let stuck = false;
-
-  for (let i = 0; i < _length; i += step) {
-    if (_colors) {
-      stroke(_colors[floor(map(i, 0, _length, 0, _colors.length))]);
-    }
-
-    if (!stuck && random(100) < 10) {
-      stuck = true;
-    }
-
-    if (stuck && random(100) < 20) {
-      stuck = !stuck;
-    }
-
-    //three points
-    let aw = sin(map(i, 0, _length, 0, PI)) * w;
-
-    if (!stuck) {
-      stack += step * hf + pow(i, 0.2) * 0.75 * hf;
-    }
-
-    let p0 = createVector(0, i * hf * 0.75);
-    let p1 = createVector(aw, stack);
-    let p2 = p1.lerp(end, map(i, 0, _length, 0, 1));
-
-    if (i < _length * 0.1) {
-      p2.x *= random(0.8, 1.2);
-      p2.y *= random(0.8, 1.2);
-    }
-
-    beginShape();
-    vertex(p0.x, p0.y);
-    vertex(p1.x, p1.y);
-    endShape();
-  }
-}
 
 function createPalette(_img, _num, _start, _end) {
   let _pal = [];
