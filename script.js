@@ -45,6 +45,7 @@ const TOP_BIRD_INFO = {
 
 let hoveredBirdName = null;
 let maximumData;
+let savedFeatherPoints;
 
 // -----------------------------------
 // ------- Lifecycle functions -------
@@ -127,7 +128,7 @@ function renderRadialChart(preppedData) {
     const theta = map(index, 0, preppedData.length, 0, TAU);
     const radius = map(
       num,
-      // 0,
+      0.1,
       absoluteMinimum, // This looks better, but gives us a 0 at the lowest
       absoluteMaximum,
       0,
@@ -145,10 +146,16 @@ function renderRadialChart(preppedData) {
     // this bumps the feathers to outside of the inner implicit circle
     translate(0, (chartDiameter * donutHole) / 2);
 
-    // drawFeather(radius, metadata.palette);
-    const featherPoints = calculateFeatherPoints(radius, metadata.palette);
-    console.debug({ featherPoints });
-    drawFeatherFromPoints(featherPoints);
+
+    // if (!savedFeatherPoints) {
+      console.debug({ radius })
+      savedFeatherPoints = calculateFeatherPoints(radius, metadata.palette);  
+//       console.debug({ radius, savedFeatherPoints })
+//     }
+    
+    console.debug({ radius, savedFeatherPoints })
+    
+    drawFeatherFromPoints(savedFeatherPoints);
 
     pop();
   }
@@ -260,13 +267,13 @@ function drawFeatherFromPoints(pointsArray) {
 }
 
 function calculateFeatherPoints(length, colors) {
-  const firstSide = calculateFeatherSide(length, colors);
-  const secondSide = calculateFeatherSide(length, colors);
+  const firstSide = calculateFeatherSidePoints(length, colors);
+  const secondSide = calculateFeatherSidePoints(length, colors);
 
   return firstSide.concat(secondSide);
 }
 
-function calculateFeatherSide(_length, _colors) {
+function calculateFeatherSidePoints(_length, _colors) {
   let hf = 0.5;
   let w = _length * 0.15;
   let h = _length * hf;
