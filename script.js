@@ -74,12 +74,7 @@ function setup() {
   renderRadialChart(maximumData);
 }
 
-function windowResized() {
-  // const canvasHeight = windowHeight - 128;
-  // const canvasWidth = windowWidth - 64;
-  // resizeCanvas(canvasWidth, canvasHeight);
-  // renderRadialChart(maximumData);
-}
+function windowResized() {}
 
 function draw() {}
 
@@ -118,7 +113,7 @@ function renderRadialChart(preppedData) {
     }
 
     const metadata = TOP_BIRD_INFO[closestBirdName];
-    
+
     const theta = map(index, 0, preppedData.length, 0, TAU);
     const radius = map(
       num,
@@ -145,6 +140,121 @@ function renderRadialChart(preppedData) {
 
     pop();
   }
+}
+
+
+function drawFeatherFromPoints(pointsArray, radius) {
+  const lengthDivider = floor(pointsArray.length / 2);
+  const leftHalf = pointsArray.slice(0, lengthDivider);
+  const rightHalf = pointsArray.slice(lengthDivider);
+
+  scale(1, 2);
+
+  for (const { first, second } of leftHalf) {
+    push();
+
+    strokeWeight(getRandomStrokeWeight());
+    stroke(first.strokeColor);
+
+    beginShape();
+    vertex(first.x, first.y);
+    vertex(second.x, second.y);
+    endShape();
+
+    pop();
+  }
+
+  scale(-2, 1);
+
+  for (const { first, second } of rightHalf) {
+    push();
+
+    strokeWeight(getRandomStrokeWeight());
+    stroke(first.strokeColor);
+
+    beginShape();
+    vertex(first.x, first.y);
+    vertex(second.x, second.y);
+    endShape();
+
+    pop();
+  }
+
+  strokeWeight(map(radius, 10, window.width / 2 / 2, 0.5, 1.5));
+  stroke([
+    leftHalf[0].first.strokeColor[0] / 1.25,
+    leftHalf[0].first.strokeColor[1] / 1.25,
+    leftHalf[0].first.strokeColor[2] / 1.25,
+    leftHalf[0].first.strokeColor[3] * 0.95,
+  ]);
+  line(0, -2, 0, radius / 2);
+}
+
+function getRandomStrokeWeight() {
+  const randomNumber = Math.random();
+  const strokeWeight = map(randomNumber, 0, 1, 0.25, 1.5);
+
+  return strokeWeight;
+}
+
+function calculateFeatherPoints(length, colors) {
+  const firstSide = calculateFeatherSidePoints(length, colors);
+  const secondSide = calculateFeatherSidePoints(length, colors);
+
+  return firstSide.concat(secondSide);
+}
+
+function calculateFeatherSidePoints(length, colors = [[0, 0, 0, 255]]) {
+  // Thank you to Jer Thorp for the original version of this!
+
+  const heightScale = 0.5;
+  const featherWidth = length * 0.15;
+  const featherHeight = length * heightScale;
+  const step = floor(map(Math.random(), 0, 1, 3, 5));
+  const end = createVector(0, featherHeight);
+
+  let stack = 0;
+  let stuck = false;
+
+  const featherPoints = [];
+
+  for (let i = 0; i < length; i += step) {
+    let strokeColor;
+    if (colors) {
+      strokeColor = colors[floor(map(i, 0, length, 0, colors.length))];
+    }
+
+    if (!stuck && random(100) < 10) {
+      stuck = true;
+    }
+
+    if (stuck && random(100) < 20) {
+      stuck = !stuck;
+    }
+
+    //three points
+    let aw = sin(map(i, 0, length, 0, PI)) * featherWidth;
+
+    if (!stuck) {
+      stack += step * heightScale + pow(i, 0.2) * 0.75 * heightScale;
+    }
+
+    let p0 = createVector(0, i * heightScale * 0.75);
+    let p1 = createVector(aw, stack);
+    let p2 = p1.lerp(end, map(i, 0, length, 0, 1));
+
+    if (i < length * 0.1) {
+      p2.x *= random(0.8, 1.2);
+      p2.y *= random(0.8, 1.2);
+    }
+
+    featherPoints.push({
+      first: { x: p0.x, y: p0.y, strokeColor },
+      second: { x: p1.x, y: p1.y, strokeColor },
+    });
+  }
+
+  return featherPoints;
 }
 
 // -----------------------------------
@@ -210,118 +320,6 @@ function calculateMaximumFromColumn(col, birdNames) {
     },
     { maximum: -1, maximumIndex: -1, birdName: '' }
   );
-}
-
-function drawFeatherFromPoints(pointsArray, radius) {
-  const lengthDivider = floor(pointsArray.length / 2);
-  const leftHalf = pointsArray.slice(0, lengthDivider);
-  const rightHalf = pointsArray.slice(lengthDivider);
-
-  scale(1, 2);
-
-  for (const { first, second } of leftHalf) {
-    push();
-
-    strokeWeight(getRandomStrokeWeight());
-    stroke(first.strokeColor);
-
-    beginShape();
-    vertex(first.x, first.y);
-    vertex(second.x, second.y);
-    endShape();
-
-    pop();
-  }
-
-  scale(-2, 1);
-
-  for (const { first, second } of rightHalf) {
-    push();
-
-    strokeWeight(getRandomStrokeWeight());
-    stroke(first.strokeColor);
-
-    beginShape();
-    vertex(first.x, first.y);
-    vertex(second.x, second.y);
-    endShape();
-
-    pop();
-  }
-
-  strokeWeight(map(radius, 10, window.width / 2 / 2, 0.5, 1.5));
-  stroke([
-    leftHalf[0].first.strokeColor[0] / 1.25,
-    leftHalf[0].first.strokeColor[1] / 1.25,
-    leftHalf[0].first.strokeColor[2] / 1.25,
-    leftHalf[0].first.strokeColor[3] * 0.95,
-  ]);
-  line(0, -2, 0, radius / 2);
-}
-
-function getRandomStrokeWeight() {
-  const randomNumber = Math.random();
-  const strokeWeight = map(randomNumber, 0, 1, 0.25, 1.5);
-
-  return strokeWeight;
-}
-
-function calculateFeatherPoints(length, colors) {
-  const firstSide = calculateFeatherSidePoints(length, colors);
-  const secondSide = calculateFeatherSidePoints(length, colors);
-
-  return firstSide.concat(secondSide);
-}
-
-function calculateFeatherSidePoints(_length, _colors = [[0, 0, 0, 255]]) {
-  const heightScale = 0.5;
-  const featherWidth = _length * 0.15;
-  const featherHeight = _length * heightScale;
-  const step = floor(map(Math.random(), 0, 1, 3, 5));
-  const end = createVector(0, featherHeight);
-
-  let stack = 0;
-  let stuck = false;
-
-  const featherPoints = [];
-
-  for (let i = 0; i < _length; i += step) {
-    let strokeColor;
-    if (_colors) {
-      strokeColor = _colors[floor(map(i, 0, _length, 0, _colors.length))];
-    }
-
-    if (!stuck && random(100) < 10) {
-      stuck = true;
-    }
-
-    if (stuck && random(100) < 20) {
-      stuck = !stuck;
-    }
-
-    //three points
-    let aw = sin(map(i, 0, _length, 0, PI)) * featherWidth;
-
-    if (!stuck) {
-      stack += step * heightScale + pow(i, 0.2) * 0.75 * heightScale;
-    }
-
-    let p0 = createVector(0, i * heightScale * 0.75);
-    let p1 = createVector(aw, stack);
-    let p2 = p1.lerp(end, map(i, 0, _length, 0, 1));
-
-    if (i < _length * 0.1) {
-      p2.x *= random(0.8, 1.2);
-      p2.y *= random(0.8, 1.2);
-    }
-
-    featherPoints.push({
-      first: { x: p0.x, y: p0.y, strokeColor },
-      second: { x: p1.x, y: p1.y, strokeColor },
-    });
-  }
-
-  return featherPoints;
 }
 
 ////////// Not my functions
