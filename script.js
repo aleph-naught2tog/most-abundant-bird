@@ -1,50 +1,7 @@
-const TOP_BIRD_INFO = {
-  'American Crow': {
-    imageUrl:
-      'https://cdn.glitch.global/00f42083-b668-494f-ace0-e024365392d8/american_crow.jpg?v=1744300414058',
-    palettePoints: { start: [1534, 1296], end: [2079, 491] },
-    image: null,
-    palette: null,
-  },
-  'American Robin': {
-    imageUrl:
-      'https://cdn.glitch.global/00f42083-b668-494f-ace0-e024365392d8/american_robin.jpg?v=1744300413633',
-    palettePoints: { start: [712, 812], end: [1059, 280] },
-    image: null,
-    palette: null,
-  },
-  'Black-capped Chickadee': {
-    imageUrl:
-      'https://cdn.glitch.global/00f42083-b668-494f-ace0-e024365392d8/black_capped_chickadee.jpeg?v=1744300413387',
-    palettePoints: { start: [471, 422], end: [528, 137] },
-    image: null,
-    palette: null,
-  },
-  'American Goldfinch': {
-    imageUrl:
-      'https://cdn.glitch.global/00f42083-b668-494f-ace0-e024365392d8/american_goldfinch.jpg?v=1744300413049',
-    palettePoints: { start: [734, 469], end: [920, 437] },
-    image: null,
-    palette: null,
-  },
-  'Blue Jay': {
-    imageUrl:
-      'https://cdn.glitch.global/00f42083-b668-494f-ace0-e024365392d8/blue_jay.jpeg?v=1744300412701',
-    palettePoints: { start: [536, 475], end: [958, 628] },
-    image: null,
-    palette: null,
-  },
-  'Canada Goose': {
-    imageUrl:
-      'https://cdn.glitch.global/00f42083-b668-494f-ace0-e024365392d8/canada_goose.jpg?v=1744300382453',
-    palettePoints: { start: [838, 654], end: [1016, 31] },
-    image: null,
-    palette: null,
-  },
-};
-
 let hoveredBirdName = null;
 let maximumData;
+
+const cachedPoints = [];
 
 // -----------------------------------
 // ------- Lifecycle functions -------
@@ -135,13 +92,19 @@ function renderRadialChart(preppedData) {
     translate(0, (chartDiameter * donutHole) / 2);
 
     const points = calculateFeatherPoints(radius, metadata.palette);
+    // if (cachedPoints.length < preppedData.length) {
+    //   cachedPoints.push(points)
+    // }
 
+    // if (cachedPoints.length === preppedData.length) {
+
+    // } else {
     drawFeatherFromPoints(points, radius);
+    // }
 
     pop();
   }
 }
-
 
 function drawFeatherFromPoints(pointsArray, radius) {
   const lengthDivider = floor(pointsArray.length / 2);
@@ -180,6 +143,8 @@ function drawFeatherFromPoints(pointsArray, radius) {
     pop();
   }
 
+  console.debug({ radius });
+
   strokeWeight(map(radius, 10, window.width / 2 / 2, 0.5, 1.5));
   stroke([
     leftHalf[0].first.strokeColor[0] / 1.25,
@@ -204,13 +169,26 @@ function calculateFeatherPoints(length, colors) {
   return firstSide.concat(secondSide);
 }
 
-function calculateFeatherSidePoints(length, colors = [[0, 0, 0, 255]]) {
-  // Thank you to Jer Thorp for the original version of this!
-
+const getFeatherConfig = (length) => {
   const heightScale = 0.5;
   const featherWidth = length * 0.15;
   const featherHeight = length * heightScale;
   const step = floor(map(Math.random(), 0, 1, 3, 5));
+
+  return {
+    heightScale,
+    featherWidth,
+    featherHeight,
+    step,
+  };
+};
+
+function calculateFeatherSidePoints(length, colors) {
+  // Thank you to Jer Thorp for the original version of this!
+
+  const { heightScale, featherHeight, featherWidth, step } =
+    getFeatherConfig(length);
+
   const end = createVector(0, featherHeight);
 
   let stack = 0;
@@ -224,7 +202,7 @@ function calculateFeatherSidePoints(length, colors = [[0, 0, 0, 255]]) {
       strokeColor = colors[floor(map(i, 0, length, 0, colors.length))];
     }
 
-    if (!stuck && random(100) < 10) {
+    if (!stuck && random(100) < 30) {
       stuck = true;
     }
 
@@ -232,16 +210,18 @@ function calculateFeatherSidePoints(length, colors = [[0, 0, 0, 255]]) {
       stuck = !stuck;
     }
 
-    //three points
-    let aw = sin(map(i, 0, length, 0, PI)) * featherWidth;
+    // this tweaks the fullness of the feather / also a... twist
+    const angle = map(i, 0, length, 0, PI);
+    const aw = sin(angle) * featherWidth;
 
     if (!stuck) {
       stack += step * heightScale + pow(i, 0.2) * 0.75 * heightScale;
     }
 
-    let p0 = createVector(0, i * heightScale * 0.75);
-    let p1 = createVector(aw, stack);
-    let p2 = p1.lerp(end, map(i, 0, length, 0, 1));
+    //three points
+    const p0 = createVector(0, i * heightScale * 0.75);
+    const p1 = createVector(aw, stack);
+    const p2 = p1.lerp(end, map(i, 0, length, 0, 1));
 
     if (i < length * 0.1) {
       p2.x *= random(0.8, 1.2);
@@ -333,3 +313,8 @@ function createPalette(_img, _num, _start, _end) {
   }
   return _pal;
 }
+
+// what does a feather have?
+// radius
+// points
+// a rotation
