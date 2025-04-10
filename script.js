@@ -4,8 +4,6 @@
 // graph that (start with bar, then radial)
 // stretch: bird name on hover
 
-let maximumData;
-
 const TOP_BIRD_INFO = {
   'American Crow': {
     imageUrl: './images/american_crow.jpg',
@@ -48,16 +46,13 @@ const TOP_BIRD_INFO = {
 
 let hoveredBirdName = null;
 
-let blueJayImage;
-
 // -----------------------------------
 // ------- Lifecycle functions -------
 // -----------------------------------
 
 function preload() {
   loadTable('./data/wi_histogram.tsv', 'tsv', (data) => {
-    maximumData = toMaximumInfoColumns(data, 2);
-    console.debug({ maximumData })
+    loadedTableData = data
   });
 
   for (const birdName in TOP_BIRD_INFO) {
@@ -74,6 +69,14 @@ function setup() {
   const canvas = createCanvas(canvasWidth, canvasHeight);
   canvas.parent('canvas_container');
 
+  const maximumData = toMaximumInfoColumns(loadedTableData, 2);
+
+  // 2, 24, index 6 -- ... slightly off
+  // 3, 16, index 4 -- inline
+  // 4, 12, index 4 -- spaced between
+  // 6, 8,  index 0 -- inline
+  // 8, 6, .index 1? -- spaced between
+  // 12, 4, index 0 -- spaced between
   renderRadialChart(maximumData);
 }
 
@@ -85,8 +88,7 @@ function windowResized() {
 }
 
 function draw() {
-  // renderBarChart();
-  // renderRadialChart();
+
 }
 
 // -----------------------------------
@@ -99,7 +101,7 @@ function renderRadialChart(preppedData) {
 
   background('lemonchiffon');
 
-  const donutHole = 0.1;
+  const donutHole = 0.2;
   const chartDiameter = window.width / 2;
   textAlign(CENTER);
 
@@ -115,7 +117,6 @@ function renderRadialChart(preppedData) {
   }
 
   for (let index = 0; index < preppedData.length; index++) {
-    console.debug(preppedData[index])
     const num = preppedData[index].maximum;
     const closestBirdName = Object.keys(TOP_BIRD_INFO).find((key) =>
       preppedData[index].birdName.toLowerCase().startsWith(key.toLowerCase())
@@ -136,7 +137,7 @@ function renderRadialChart(preppedData) {
       chartDiameter / 2
     );
 
-    console.debug(closestBirdName, { index, radius })
+    console.debug({index, theta, radius})
 
     push();
 
@@ -145,67 +146,16 @@ function renderRadialChart(preppedData) {
     // go back a quarter circle
     rotate(theta - PI / 2);
 
+    push()
+    line(20, 20, 50, 50)
+    pop()
+
     // this bumps the feathers to outside of the inner implicit circle
     translate(0, (chartDiameter * donutHole) / 2);
 
-    // console.debug({ metadata })
+    console.debug({ radius, palette: metadata.palette })
+
     drawFeather(radius, metadata.palette);
-    pop();
-  }
-}
-
-function renderBarChart() {
-  background('lemonchiffon');
-
-  const maxWidth = width / maximumData.length;
-  const gap = 2;
-  const barWidth = maxWidth - gap;
-  textAlign(CENTER);
-
-  const rectData = [];
-
-  // translate(50,50)
-  // const absoluteMaximum = max(maximumData.map(m => m.maximum))
-
-  for (let index = 0; index < maximumData.length; index += 1) {
-    const { maximum, birdName } = maximumData[index];
-
-    const xStart = maxWidth * index;
-    const barHeight = -1 * map(maximum, 0, 1, 0, height);
-
-    let tooltipText = '';
-
-    if (mouseX > xStart && mouseX < xStart + barWidth) {
-      if (mouseY < height && mouseY > barHeight) {
-        hoveredBirdName = birdName;
-        tooltipText = birdName;
-      }
-    }
-
-    if (mouseX > width || mouseY > height || mouseY < 0 || mouseX < 0) {
-      // reset view state
-      tooltipText = '';
-      hoveredBirdName = null;
-    }
-
-    text(tooltipText, width / 2, height / 6);
-
-    rectData.push({ xStart, height, barWidth, barHeight, birdName });
-  }
-
-  for (const { xStart, height, barWidth, barHeight, birdName } of rectData) {
-    push();
-
-    if (birdName === hoveredBirdName) {
-      fill('orange');
-    } else {
-      fill('plum');
-    }
-
-    // translate(xStart, 0)
-
-    rect(xStart, height, barWidth, barHeight);
-    // drawFeather(barHeight * -1 / 2);
 
     pop();
   }
@@ -231,8 +181,8 @@ function parseToColumns(tableData, chunkSize) {
 
   const columnarData = [];
 
-  for (let columnIndex = 0; columnIndex < columnCount - 1; columnIndex += 1) {
-    let currentColumns = [];
+  for (let columnIndex = 0; columnIndex < columnCount; columnIndex += 1) {
+    const currentColumns = [];
     let monthlyTotal = 0;
 
     for (let rowIndex = 0; rowIndex < rowCount; rowIndex += 1) {
@@ -251,10 +201,13 @@ function parseToColumns(tableData, chunkSize) {
       }
     }
 
-    columnarData.push(currentColumns);
+    if (currentColumns.length > 0) {
+      columnarData.push(currentColumns);
+    }
   }
 
-  // TODO: this shouldn't be necessary but it's fine for now
+  console.debug({ columnarData })
+
   return columnarData.filter((arr) => arr.length);
 }
 
@@ -324,8 +277,6 @@ function drawFeatherSide(_length, _colors) {
       p2.x *= random(0.8, 1.2);
       p2.y *= random(0.8, 1.2);
     }
-
-    noFill();
 
     beginShape();
     vertex(p0.x, p0.y);
