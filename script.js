@@ -212,7 +212,7 @@ function calculateMaximumFromColumn(col, birdNames) {
   );
 }
 
-function drawFeatherFromPoints(pointsArray) {
+function drawFeatherFromPoints(pointsArray, radius) {
   const lengthDivider = floor(pointsArray.length / 2);
   const leftHalf = pointsArray.slice(0, lengthDivider);
   const rightHalf = pointsArray.slice(lengthDivider);
@@ -221,6 +221,8 @@ function drawFeatherFromPoints(pointsArray) {
 
   for (const { first, second } of leftHalf) {
     push();
+
+    strokeWeight(getRandomStrokeWeight());
     stroke(first.strokeColor);
 
     beginShape();
@@ -235,6 +237,8 @@ function drawFeatherFromPoints(pointsArray) {
 
   for (const { first, second } of rightHalf) {
     push();
+
+    strokeWeight(getRandomStrokeWeight());
     stroke(first.strokeColor);
 
     beginShape();
@@ -244,6 +248,22 @@ function drawFeatherFromPoints(pointsArray) {
 
     pop();
   }
+
+  strokeWeight(map(radius, 10, window.width / 2 / 2, 0.5, 1.5));
+  stroke([
+    leftHalf[0].first.strokeColor[0] / 1.25,
+    leftHalf[0].first.strokeColor[1] / 1.25,
+    leftHalf[0].first.strokeColor[2] / 1.25,
+    leftHalf[0].first.strokeColor[3] * 0.95,
+  ]);
+  line(0, -2, 0, radius / 2);
+}
+
+function getRandomStrokeWeight() {
+  const randomNumber = Math.random();
+  const strokeWeight = map(randomNumber, 0, 1, 0.25, 1.5);
+
+  return strokeWeight;
 }
 
 function calculateFeatherPoints(length, colors) {
