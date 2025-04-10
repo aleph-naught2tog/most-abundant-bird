@@ -273,12 +273,12 @@ function calculateFeatherPoints(length, colors) {
   return firstSide.concat(secondSide);
 }
 
-function calculateFeatherSidePoints(_length, _colors) {
-  let hf = 0.5;
-  let w = _length * 0.15;
-  let h = _length * hf;
-  let step = 5;
-  let end = createVector(0, h);
+function calculateFeatherSidePoints(_length, _colors = [[0, 0, 0, 255]]) {
+  const heightScale = 0.5;
+  const featherWidth = _length * 0.15;
+  const featherHeight = _length * heightScale;
+  const step = floor(map(Math.random(), 0, 1, 3, 5));
+  const end = createVector(0, featherHeight);
 
   let stack = 0;
   let stuck = false;
@@ -300,13 +300,13 @@ function calculateFeatherSidePoints(_length, _colors) {
     }
 
     //three points
-    let aw = sin(map(i, 0, _length, 0, PI)) * w;
+    let aw = sin(map(i, 0, _length, 0, PI)) * featherWidth;
 
     if (!stuck) {
-      stack += step * hf + pow(i, 0.2) * 0.75 * hf;
+      stack += step * heightScale + pow(i, 0.2) * 0.75 * heightScale;
     }
 
-    let p0 = createVector(0, i * hf * 0.75);
+    let p0 = createVector(0, i * heightScale * 0.75);
     let p1 = createVector(aw, stack);
     let p2 = p1.lerp(end, map(i, 0, _length, 0, 1));
 
