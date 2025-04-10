@@ -28,7 +28,7 @@ const TOP_BIRD_INFO = {
   'American Goldfinch': {
     imageUrl: './images/american_goldfinch.jpg',
     // palettePoints: { start: [1088, 564], end: [793, 443] },
-    palettePoints: { start: [734,469], end: [920,437] },
+    palettePoints: { start: [734, 469], end: [920, 437] },
     image: null,
     palette: null,
   },
@@ -56,7 +56,8 @@ let blueJayImage;
 
 function preload() {
   loadTable('./data/wi_histogram.tsv', 'tsv', (data) => {
-    maximumData = toMaximumInfoColumns(data);
+    maximumData = toMaximumInfoColumns(data, 2);
+    console.debug({ maximumData })
   });
 
   for (const birdName in TOP_BIRD_INFO) {
@@ -73,7 +74,7 @@ function setup() {
   const canvas = createCanvas(canvasWidth, canvasHeight);
   canvas.parent('canvas_container');
 
-  renderRadialChart();
+  renderRadialChart(maximumData);
 }
 
 function windowResized() {
@@ -92,13 +93,13 @@ function draw() {
 // ---------- Render functions ---------
 // -----------------------------------
 
-function renderRadialChart() {
-  const absoluteMaximum = max(maximumData.map((m) => m.maximum));
-  const absoluteMinimum = min(maximumData.map((m) => m.maximum));
+function renderRadialChart(preppedData) {
+  const absoluteMaximum = max(preppedData.map((m) => m.maximum));
+  const absoluteMinimum = min(preppedData.map((m) => m.maximum));
 
   background('lemonchiffon');
 
-  const donutHole = 0.2;
+  const donutHole = 0.1;
   const chartDiameter = window.width / 2;
   textAlign(CENTER);
 
@@ -113,30 +114,32 @@ function renderRadialChart() {
     );
   }
 
-  for (let index = 0; index < maximumData.length; index++) {
-    const num = maximumData[index].maximum;
+  for (let index = 0; index < preppedData.length; index++) {
+    console.debug(preppedData[index])
+    const num = preppedData[index].maximum;
     const closestBirdName = Object.keys(TOP_BIRD_INFO).find((key) =>
-      maximumData[index].birdName.toLowerCase().startsWith(key.toLowerCase())
+      preppedData[index].birdName.toLowerCase().startsWith(key.toLowerCase())
     );
 
     if (!closestBirdName) {
-      throw new Error(`Unexpected bird name: ${maximumData[index].birdName}`);
+      throw new Error(`Unexpected bird name: ${preppedData[index].birdName}`);
     }
 
     const metadata = TOP_BIRD_INFO[closestBirdName];
 
-    const theta = map(index, 0, 48, 0, TAU);
-    const radius = map(num, 0, 1, 0, chartDiameter / 2);
+    const theta = map(index, 0, preppedData.length, 0, TAU);
+    const radius = map(
+      num,
+      absoluteMinimum,
+      absoluteMaximum,
+      0,
+      chartDiameter / 2
+    );
+
+    console.debug(closestBirdName, { index, radius })
 
     push();
-    // going from 0 to absoluteMaximum is much tamer
-    // but who wants that
-    const strokeColor = color(
-      map(num, absoluteMinimum, absoluteMaximum, 0, 360),
-      100,
-      100
-    );
-    stroke(strokeColor);
+
     translate(chartDiameter / 2, chartDiameter / 2);
 
     // go back a quarter circle
@@ -212,8 +215,8 @@ function renderBarChart() {
 // ---------- Data functions ---------
 // -----------------------------------
 
-function toMaximumInfoColumns(tableData) {
-  const [birdNames, ...columns] = parseToColumns(tableData);
+function toMaximumInfoColumns(tableData, chunkSize) {
+  const [birdNames, ...columns] = parseToColumns(tableData, chunkSize);
 
   const maxInfo = columns.map((col) =>
     calculateMaximumFromColumn(col, birdNames)
@@ -222,7 +225,7 @@ function toMaximumInfoColumns(tableData) {
   return maxInfo;
 }
 
-function parseToColumns(tableData) {
+function parseToColumns(tableData, chunkSize) {
   const columnCount = tableData.getColumnCount();
   const rowCount = tableData.getRowCount();
 
@@ -230,13 +233,19 @@ function parseToColumns(tableData) {
 
   for (let columnIndex = 0; columnIndex < columnCount - 1; columnIndex += 1) {
     let currentColumns = [];
+    let monthlyTotal = 0;
 
     for (let rowIndex = 0; rowIndex < rowCount; rowIndex += 1) {
       let datum = tableData.get(rowIndex, columnIndex);
 
       if (columnIndex > 0) {
         const datumAsFloat = parseFloat(datum, 10);
-        currentColumns.push(datumAsFloat);
+        monthlyTotal += datumAsFloat;
+
+        if (columnIndex % chunkSize === 0) {
+          currentColumns.push(monthlyTotal);
+          monthlyTotal = 0;
+        }
       } else {
         currentColumns.push(datum);
       }
@@ -245,7 +254,8 @@ function parseToColumns(tableData) {
     columnarData.push(currentColumns);
   }
 
-  return columnarData;
+  // TODO: this shouldn't be necessary but it's fine for now
+  return columnarData.filter((arr) => arr.length);
 }
 
 function calculateMaximumFromColumn(col, birdNames) {
@@ -265,7 +275,7 @@ function calculateMaximumFromColumn(col, birdNames) {
   );
 }
 
-//////////
+////////// Not my functions
 
 function drawFeather(_length, _colors) {
   push();
