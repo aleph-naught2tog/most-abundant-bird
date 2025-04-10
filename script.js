@@ -86,7 +86,8 @@ function renderRadialChart(preppedData) {
 
     // QUESTION: why did I have to do this instead of theta - PI/2 to get a
     // normal "clock" alignment?
-    rotate(theta - PI);
+    const rotationAngle = theta - PI;
+    rotate(rotationAngle);
 
     // this bumps the feathers to outside of the inner implicit circle
     translate(0, (chartDiameter * donutHole) / 2);
@@ -189,12 +190,11 @@ function calculateFeatherSidePoints(length, colors) {
   const { heightScale, featherHeight, featherWidth, step } =
     getFeatherConfig(length);
 
-  const end = createVector(0, featherHeight);
-
   let stack = 0;
   let stuck = false;
 
-  const featherPoints = [];
+  const feather = new Feather({});
+  console.debug({ feather });
 
   for (let i = 0; i < length; i += step) {
     let strokeColor;
@@ -221,20 +221,16 @@ function calculateFeatherSidePoints(length, colors) {
     //three points
     const p0 = createVector(0, i * heightScale * 0.75);
     const p1 = createVector(aw, stack);
-    const p2 = p1.lerp(end, map(i, 0, length, 0, 1));
 
-    if (i < length * 0.1) {
-      p2.x *= random(0.8, 1.2);
-      p2.y *= random(0.8, 1.2);
-    }
-
-    featherPoints.push({
-      first: { x: p0.x, y: p0.y, strokeColor },
-      second: { x: p1.x, y: p1.y, strokeColor },
-    });
+    // featherBarbs.push({
+    //   first: { x: p0.x, y: p0.y, strokeColor },
+    //   second: { x: p1.x, y: p1.y, strokeColor },
+    // });
+    // start, end, color, thickness
+    feather.barbs.push(new Barb({ start: {x: p0.x, y: p0.y, }, end: {x: p1.x, y: p1.y}, }));
   }
 
-  return featherPoints;
+  return feather.barbs;
 }
 
 // -----------------------------------
@@ -315,6 +311,47 @@ function createPalette(_img, _num, _start, _end) {
 }
 
 // what does a feather have?
-// radius
 // points
 // a rotation
+// colors
+// length
+// a linear core
+// BARBS
+
+// what do barbs have?
+// start point, end point
+// a color
+// a stroke weight
+class Barb {
+  start = { x: -1, y: -1 };
+  end = { x: -1, y: -1 };
+  color = [];
+  thickness = -1;
+
+  constructor(options) {
+    if (options) {
+      const { start, end, color, thickness } = options;
+      this.start = start;
+      this.end = end;
+      this.color = color;
+      this.thickness = thickness;
+    }
+  }
+}
+
+class Feather {
+  barbs = [];
+  angle = -1;
+  colors = [[]];
+  length = -1;
+
+  constructor(options) {
+    if (options) {
+      const { barbs, angle, colors, length } = options;
+      this.barbs = barbs ?? [];
+      this.angle = angle ?? -1;
+      this.colors = colors ?? [[]];
+      this.length = length ?? -1;
+    }
+  }
+}
