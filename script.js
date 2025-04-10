@@ -45,6 +45,7 @@ const TOP_BIRD_INFO = {
 };
 
 let hoveredBirdName = null;
+let maximumData;
 
 // -----------------------------------
 // ------- Lifecycle functions -------
@@ -69,7 +70,7 @@ function setup() {
   const canvas = createCanvas(canvasWidth, canvasHeight);
   canvas.parent('canvas_container');
 
-  const maximumData = toMaximumInfoColumns(loadedTableData, 2);
+  maximumData = toMaximumInfoColumns(loadedTableData, 2);
 
   // 2, 24, index 6 -- ... slightly off
   // 3, 16, index 4 -- inline
@@ -85,6 +86,8 @@ function windowResized() {
   const canvasWidth = windowWidth - 64;
 
   resizeCanvas(canvasWidth, canvasHeight);
+
+  renderRadialChart(maximumData);
 }
 
 function draw() {
