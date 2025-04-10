@@ -1,42 +1,42 @@
 const TOP_BIRD_INFO = {
-  "American Crow": {
+  'American Crow': {
     imageUrl:
-      "https://cdn.glitch.global/00f42083-b668-494f-ace0-e024365392d8/american_crow.jpg?v=1744300414058",
+      'https://cdn.glitch.global/00f42083-b668-494f-ace0-e024365392d8/american_crow.jpg?v=1744300414058',
     palettePoints: { start: [1534, 1296], end: [2079, 491] },
     image: null,
     palette: null,
   },
-  "American Robin": {
+  'American Robin': {
     imageUrl:
-      "https://cdn.glitch.global/00f42083-b668-494f-ace0-e024365392d8/american_robin.jpg?v=1744300413633",
+      'https://cdn.glitch.global/00f42083-b668-494f-ace0-e024365392d8/american_robin.jpg?v=1744300413633',
     palettePoints: { start: [712, 812], end: [1059, 280] },
     image: null,
     palette: null,
   },
-  "Black-capped Chickadee": {
+  'Black-capped Chickadee': {
     imageUrl:
-      "https://cdn.glitch.global/00f42083-b668-494f-ace0-e024365392d8/black_capped_chickadee.jpeg?v=1744300413387",
+      'https://cdn.glitch.global/00f42083-b668-494f-ace0-e024365392d8/black_capped_chickadee.jpeg?v=1744300413387',
     palettePoints: { start: [471, 422], end: [528, 137] },
     image: null,
     palette: null,
   },
-  "American Goldfinch": {
+  'American Goldfinch': {
     imageUrl:
-      "https://cdn.glitch.global/00f42083-b668-494f-ace0-e024365392d8/american_goldfinch.jpg?v=1744300413049",
+      'https://cdn.glitch.global/00f42083-b668-494f-ace0-e024365392d8/american_goldfinch.jpg?v=1744300413049',
     palettePoints: { start: [734, 469], end: [920, 437] },
     image: null,
     palette: null,
   },
-  "Blue Jay": {
+  'Blue Jay': {
     imageUrl:
-      "https://cdn.glitch.global/00f42083-b668-494f-ace0-e024365392d8/blue_jay.jpeg?v=1744300412701",
+      'https://cdn.glitch.global/00f42083-b668-494f-ace0-e024365392d8/blue_jay.jpeg?v=1744300412701',
     palettePoints: { start: [536, 475], end: [958, 628] },
     image: null,
     palette: null,
   },
-  "Canada Goose": {
+  'Canada Goose': {
     imageUrl:
-      "https://cdn.glitch.global/00f42083-b668-494f-ace0-e024365392d8/canada_goose.jpg?v=1744300382453",
+      'https://cdn.glitch.global/00f42083-b668-494f-ace0-e024365392d8/canada_goose.jpg?v=1744300382453',
     palettePoints: { start: [838, 654], end: [1016, 31] },
     image: null,
     palette: null,
@@ -45,14 +45,13 @@ const TOP_BIRD_INFO = {
 
 let hoveredBirdName = null;
 let maximumData;
-let savedFeatherPoints = [];
 
 // -----------------------------------
 // ------- Lifecycle functions -------
 // -----------------------------------
 
 function preload() {
-  loadTable("./data/wi_histogram.tsv", "tsv", (data) => {
+  loadTable('./data/wi_histogram.tsv', 'tsv', (data) => {
     loadedTableData = data;
   });
 
@@ -68,7 +67,7 @@ function setup() {
   const canvasWidth = windowWidth - 64;
 
   const canvas = createCanvas(canvasWidth, canvasHeight);
-  canvas.parent("canvas_container");
+  canvas.parent('canvas_container');
 
   maximumData = toMaximumInfoColumns(loadedTableData, 2);
 
@@ -227,7 +226,7 @@ function calculateMaximumFromColumn(col, birdNames) {
         return { maximum, maximumIndex, birdName };
       }
     },
-    { maximum: -1, maximumIndex: -1, birdName: "" }
+    { maximum: -1, maximumIndex: -1, birdName: '' }
   );
 }
 
