@@ -89,40 +89,42 @@ function renderRadialChart(preppedData) {
     const rotationAngle = theta - PI;
     rotate(rotationAngle);
 
+    const feather = new Feather({
+      angle: theta,
+      colors: metadata.palette,
+      length: radius,
+    });
+
     // this bumps the feathers to outside of the inner implicit circle
     translate(0, (chartDiameter * donutHole) / 2);
 
-    const points = calculateFeatherPoints(radius, metadata.palette);
-    // if (cachedPoints.length < preppedData.length) {
-    //   cachedPoints.push(points)
-    // }
+    const points = calculateFeatherPoints(feather, radius, metadata.palette);
+    console.debug({ points })
 
-    // if (cachedPoints.length === preppedData.length) {
-
-    // } else {
-    drawFeatherFromPoints(points, radius);
-    // }
+    drawFeatherFromPoints(feather, radius);
 
     pop();
   }
 }
 
-function drawFeatherFromPoints(pointsArray, radius) {
-  const lengthDivider = floor(pointsArray.length / 2);
-  const leftHalf = pointsArray.slice(0, lengthDivider);
-  const rightHalf = pointsArray.slice(lengthDivider);
+function drawFeatherFromPoints(feather, radius) {
+  const lengthDivider = floor(feather.barbs.length / 2);
+
+  // TODO: put this on feather
+  const leftBarbs = feather.barbs.slice(0, lengthDivider);
+  const rightBarbs = feather.barbs.slice(lengthDivider);
 
   scale(1, 2);
 
-  for (const { first, second } of leftHalf) {
+  for (const { start, end, color, thickness } of leftBarbs) {
     push();
 
-    strokeWeight(getRandomStrokeWeight());
-    stroke(first.strokeColor);
+    strokeWeight(thickness);
+    stroke(color);
 
     beginShape();
-    vertex(first.x, first.y);
-    vertex(second.x, second.y);
+    vertex(start.x, start.y);
+    vertex(end.x, end.y);
     endShape();
 
     pop();
@@ -130,28 +132,26 @@ function drawFeatherFromPoints(pointsArray, radius) {
 
   scale(-2, 1);
 
-  for (const { first, second } of rightHalf) {
+  for (const { start, end, color, thickness } of rightBarbs) {
     push();
 
-    strokeWeight(getRandomStrokeWeight());
-    stroke(first.strokeColor);
+    strokeWeight(thickness);
+    stroke(color);
 
     beginShape();
-    vertex(first.x, first.y);
-    vertex(second.x, second.y);
+    vertex(start.x, start.y);
+    vertex(end.x, end.y);
     endShape();
 
     pop();
   }
 
-  console.debug({ radius });
-
   strokeWeight(map(radius, 10, window.width / 2 / 2, 0.5, 1.5));
   stroke([
-    leftHalf[0].first.strokeColor[0] / 1.25,
-    leftHalf[0].first.strokeColor[1] / 1.25,
-    leftHalf[0].first.strokeColor[2] / 1.25,
-    leftHalf[0].first.strokeColor[3] * 0.95,
+    leftBarbs[0].color[0] / 1.25,
+    leftBarbs[0].color[1] / 1.25,
+    leftBarbs[0].color[2] / 1.25,
+    leftBarbs[0].color[3] * 0.95,
   ]);
   line(0, -2, 0, radius / 2);
 }
@@ -163,9 +163,9 @@ function getRandomStrokeWeight() {
   return strokeWeight;
 }
 
-function calculateFeatherPoints(length, colors) {
-  const firstSide = calculateFeatherSidePoints(length, colors);
-  const secondSide = calculateFeatherSidePoints(length, colors);
+function calculateFeatherPoints(feather, length, colors) {
+  const firstSide = calculateFeatherSidePoints(feather, length, colors);
+  const secondSide = calculateFeatherSidePoints(feather, length, colors);
 
   return firstSide.concat(secondSide);
 }
@@ -184,23 +184,25 @@ const getFeatherConfig = (length) => {
   };
 };
 
-function calculateFeatherSidePoints(length, colors) {
+function calculateFeatherSidePoints(feather, length, colors) {
+  console.debug({ colors })
   // Thank you to Jer Thorp for the original version of this!
 
-  const { heightScale, featherHeight, featherWidth, step } =
+  console.debug({ feather, length })
+  const { heightScale, featherWidth, featherHeight, step } =
     getFeatherConfig(length);
+  let end = createVector(0, featherHeight);
 
   let stack = 0;
   let stuck = false;
 
-  const feather = new Feather({});
-  console.debug({ feather });
-
   for (let i = 0; i < length; i += step) {
+    console.debug({ i })
     let strokeColor;
     if (colors) {
       strokeColor = colors[floor(map(i, 0, length, 0, colors.length))];
     }
+    console.debug({ strokeColor })
 
     if (!stuck && random(100) < 30) {
       stuck = true;
@@ -221,14 +223,27 @@ function calculateFeatherSidePoints(length, colors) {
     //three points
     const p0 = createVector(0, i * heightScale * 0.75);
     const p1 = createVector(aw, stack);
+    const p2 = p1.lerp(end, map(i, 0, length, 0, 1));
 
-    // featherBarbs.push({
-    //   first: { x: p0.x, y: p0.y, strokeColor },
-    //   second: { x: p1.x, y: p1.y, strokeColor },
-    // });
-    // start, end, color, thickness
-    feather.barbs.push(new Barb({ start: {x: p0.x, y: p0.y, }, end: {x: p1.x, y: p1.y}, }));
+    if (i < length * 0.1) {
+      p2.x *= random(0.8, 1.2);
+      p2.y *= random(0.8, 1.2);
+    }
+    console.debug({ i })
+
+    const barb = new Barb({
+      start: { x: p0.x, y: p0.y },
+      end: { x: p1.x, y: p1.y },
+      color: strokeColor,
+      thickness: getRandomStrokeWeight(),
+    });
+
+    console.debug({ feather, barb })
+
+    feather.barbs.push(barb);
   }
+
+  console.debug({ feather });
 
   return feather.barbs;
 }
