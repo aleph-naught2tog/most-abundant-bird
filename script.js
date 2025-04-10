@@ -1,7 +1,8 @@
 let hoveredBirdName = null;
 let maximumData;
 
-const cachedPoints = [];
+const donutHole = 0.2;
+let cachedFeathers;
 
 // -----------------------------------
 // ------- Lifecycle functions -------
@@ -27,27 +28,29 @@ function setup() {
   canvas.parent('canvas_container');
 
   maximumData = toMaximumInfoColumns(loadedTableData, 2);
+  initPalettes();
 
-  renderRadialChart(maximumData);
+  cachedFeathers = createFeathers(maximumData);
+
+  background('plum');
+
+  const chartDiameter = window.width / 2;
+  renderFeathers(chartDiameter);
 }
 
-function windowResized() {}
+function draw() {
+  background('plum');
 
-function draw() {}
+  const chartDiameter = window.width / 2;
+  console.debug({ chartDiameter })
+  renderFeathers(chartDiameter);
+}
 
 // -----------------------------------
 // ---------- Render functions ---------
 // -----------------------------------
 
-function renderRadialChart(preppedData) {
-  const absoluteMaximum = max(preppedData.map((m) => m.maximum));
-  const absoluteMinimum = min(preppedData.map((m) => m.maximum));
-
-  background('plum');
-
-  const donutHole = 0.2;
-  const chartDiameter = window.width / 2;
-
+function initPalettes() {
   for (const birdName in TOP_BIRD_INFO) {
     const metadata = TOP_BIRD_INFO[birdName];
 
@@ -58,6 +61,32 @@ function renderRadialChart(preppedData) {
       metadata.palettePoints.end
     );
   }
+}
+
+function renderFeathers(chartDiameter) {
+  for (const feather of cachedFeathers) {
+    push();
+
+    translate(chartDiameter / 2, chartDiameter / 2);
+
+    rotate(feather.angle);
+
+    // this bumps the feathers to outside of the inner implicit circle
+    translate(0, (chartDiameter * donutHole) / 2);
+
+    feather.draw();
+
+    pop();
+  }
+}
+
+function createFeathers(preppedData) {
+  const absoluteMaximum = max(preppedData.map((m) => m.maximum));
+  const absoluteMinimum = min(preppedData.map((m) => m.maximum));
+
+  const feathers = [];
+
+  const chartDiameter = window.width / 2;
 
   for (let index = 0; index < preppedData.length; index++) {
     const num = preppedData[index].maximum;
@@ -80,80 +109,24 @@ function renderRadialChart(preppedData) {
       chartDiameter / 2
     );
 
-    push();
-
-    translate(chartDiameter / 2, chartDiameter / 2);
-
     // QUESTION: why did I have to do this instead of theta - PI/2 to get a
     // normal "clock" alignment?
     const rotationAngle = theta - PI;
-    rotate(rotationAngle);
 
     const feather = new Feather({
-      angle: theta,
+      angle: rotationAngle,
       colors: metadata.palette,
       length: radius,
     });
 
-    // this bumps the feathers to outside of the inner implicit circle
-    translate(0, (chartDiameter * donutHole) / 2);
+    // FIXME: why are we doing this twice
+    feather.createBarbs(metadata.palette);
+    feather.createBarbs(metadata.palette);
 
-    const points = calculateFeatherPoints(feather, radius, metadata.palette);
-    console.debug({ points })
-
-    drawFeatherFromPoints(feather, radius);
-
-    pop();
-  }
-}
-
-function drawFeatherFromPoints(feather, radius) {
-  const lengthDivider = floor(feather.barbs.length / 2);
-
-  // TODO: put this on feather
-  const leftBarbs = feather.barbs.slice(0, lengthDivider);
-  const rightBarbs = feather.barbs.slice(lengthDivider);
-
-  scale(1, 2);
-
-  for (const { start, end, color, thickness } of leftBarbs) {
-    push();
-
-    strokeWeight(thickness);
-    stroke(color);
-
-    beginShape();
-    vertex(start.x, start.y);
-    vertex(end.x, end.y);
-    endShape();
-
-    pop();
+    feathers.push(feather);
   }
 
-  scale(-2, 1);
-
-  for (const { start, end, color, thickness } of rightBarbs) {
-    push();
-
-    strokeWeight(thickness);
-    stroke(color);
-
-    beginShape();
-    vertex(start.x, start.y);
-    vertex(end.x, end.y);
-    endShape();
-
-    pop();
-  }
-
-  strokeWeight(map(radius, 10, window.width / 2 / 2, 0.5, 1.5));
-  stroke([
-    leftBarbs[0].color[0] / 1.25,
-    leftBarbs[0].color[1] / 1.25,
-    leftBarbs[0].color[2] / 1.25,
-    leftBarbs[0].color[3] * 0.95,
-  ]);
-  line(0, -2, 0, radius / 2);
+  return feathers;
 }
 
 function getRandomStrokeWeight() {
@@ -161,13 +134,6 @@ function getRandomStrokeWeight() {
   const strokeWeight = map(randomNumber, 0, 1, 0.25, 1.5);
 
   return strokeWeight;
-}
-
-function calculateFeatherPoints(feather, length, colors) {
-  const firstSide = calculateFeatherSidePoints(feather, length, colors);
-  const secondSide = calculateFeatherSidePoints(feather, length, colors);
-
-  return firstSide.concat(secondSide);
 }
 
 const getFeatherConfig = (length) => {
@@ -184,69 +150,6 @@ const getFeatherConfig = (length) => {
   };
 };
 
-function calculateFeatherSidePoints(feather, length, colors) {
-  console.debug({ colors })
-  // Thank you to Jer Thorp for the original version of this!
-
-  console.debug({ feather, length })
-  const { heightScale, featherWidth, featherHeight, step } =
-    getFeatherConfig(length);
-  let end = createVector(0, featherHeight);
-
-  let stack = 0;
-  let stuck = false;
-
-  for (let i = 0; i < length; i += step) {
-    console.debug({ i })
-    let strokeColor;
-    if (colors) {
-      strokeColor = colors[floor(map(i, 0, length, 0, colors.length))];
-    }
-    console.debug({ strokeColor })
-
-    if (!stuck && random(100) < 30) {
-      stuck = true;
-    }
-
-    if (stuck && random(100) < 20) {
-      stuck = !stuck;
-    }
-
-    // this tweaks the fullness of the feather / also a... twist
-    const angle = map(i, 0, length, 0, PI);
-    const aw = sin(angle) * featherWidth;
-
-    if (!stuck) {
-      stack += step * heightScale + pow(i, 0.2) * 0.75 * heightScale;
-    }
-
-    //three points
-    const p0 = createVector(0, i * heightScale * 0.75);
-    const p1 = createVector(aw, stack);
-    const p2 = p1.lerp(end, map(i, 0, length, 0, 1));
-
-    if (i < length * 0.1) {
-      p2.x *= random(0.8, 1.2);
-      p2.y *= random(0.8, 1.2);
-    }
-    console.debug({ i })
-
-    const barb = new Barb({
-      start: { x: p0.x, y: p0.y },
-      end: { x: p1.x, y: p1.y },
-      color: strokeColor,
-      thickness: getRandomStrokeWeight(),
-    });
-
-    console.debug({ feather, barb })
-
-    feather.barbs.push(barb);
-  }
-
-  console.debug({ feather });
-
-  return feather.barbs;
-}
 
 // -----------------------------------
 // ---------- Data functions ---------
@@ -325,18 +228,6 @@ function createPalette(_img, _num, _start, _end) {
   return _pal;
 }
 
-// what does a feather have?
-// points
-// a rotation
-// colors
-// length
-// a linear core
-// BARBS
-
-// what do barbs have?
-// start point, end point
-// a color
-// a stroke weight
 class Barb {
   start = { x: -1, y: -1 };
   end = { x: -1, y: -1 };
@@ -351,6 +242,20 @@ class Barb {
       this.color = color;
       this.thickness = thickness;
     }
+  }
+
+  draw() {
+    push();
+
+    strokeWeight(this.thickness);
+    stroke(this.color);
+
+    beginShape();
+    vertex(this.start.x, this.start.y);
+    vertex(this.end.x, this.end.y);
+    endShape();
+
+    pop();
   }
 }
 
@@ -368,5 +273,97 @@ class Feather {
       this.colors = colors ?? [[]];
       this.length = length ?? -1;
     }
+  }
+
+  draw() {
+    const lengthDivider = floor(this.barbs.length / 2);
+
+    const leftBarbs = this.barbs.slice(0, lengthDivider);
+    const rightBarbs = this.barbs.slice(lengthDivider);
+
+    scale(1, 2);
+
+    for (const barb of leftBarbs) {
+      barb.draw();
+    }
+
+    scale(-2, 1);
+
+    for (const barb of rightBarbs) {
+      barb.draw();
+    }
+  }
+
+  drawRachis() {
+    const exemplarBarb = this.barbs[0];
+
+    strokeWeight(map(this.length, 10, window.width / 2 / 2, 0.5, 1.5));
+    stroke([
+      exemplarBarb.color[0] / 1.25,
+      exemplarBarb.color[1] / 1.25,
+      exemplarBarb.color[2] / 1.25,
+      exemplarBarb.color[3] * 0.95,
+    ]);
+
+    line(0, -2, 0, this.length / 2);
+  }
+
+  getColorAtIndex(i) {
+    return this.colors[floor(map(i, 0, this.length, 0, this.colors.length))];
+  }
+
+  createBarbs() {
+    const points = generatePoints(this.length);
+
+    for (const { p0, p2, index } of points) {
+      const barb = new Barb({
+        start: { x: p0.x, y: p0.y },
+        end: { x: p2.x, y: p2.y },
+        color: this.getColorAtIndex(index),
+        thickness: getRandomStrokeWeight(),
+      });
+
+      this.barbs.push(barb);
+    }
+  }
+}
+
+function* generatePoints(length) {
+  const { heightScale, featherWidth, featherHeight, step } =
+    getFeatherConfig(length);
+
+  let end = createVector(0, featherHeight);
+
+  let stack = 0;
+  let stuck = false;
+
+  for (let index = 0; index < length; index += step) {
+    if (!stuck && random(100) < 30) {
+      stuck = true;
+    }
+
+    if (stuck && random(100) < 20) {
+      stuck = !stuck;
+    }
+
+    // this tweaks the fullness of the feather / also a... twist
+    const angle = map(index, 0, length, 0, PI);
+    const aw = sin(angle) * featherWidth;
+
+    if (!stuck) {
+      stack += step * heightScale + pow(index, 0.2) * 0.75 * heightScale;
+    }
+
+    //three points
+    const p0 = createVector(0, index * heightScale * 0.75);
+    const p1 = createVector(aw, stack);
+    const p2 = p1.lerp(end, map(index, 0, length, 0, 1));
+
+    if (index < this.length * 0.1) {
+      p2.x *= random(0.8, 1.2);
+      p2.y *= random(0.8, 1.2);
+    }
+
+    yield { p0, p2, index };
   }
 }
