@@ -66,12 +66,6 @@ function setup() {
 
   maximumData = toMaximumInfoColumns(loadedTableData, 2);
 
-  // 2, 24, index 6 -- ... slightly off
-  // 3, 16, index 4 -- inline
-  // 4, 12, index 4 -- spaced between
-  // 6, 8,  index 0 -- inline
-  // 8, 6, .index 1? -- spaced between
-  // 12, 4, index 0 -- spaced between
   renderRadialChart(maximumData);
 }
 
@@ -128,8 +122,8 @@ function renderRadialChart(preppedData) {
     const theta = map(index, 0, preppedData.length, 0, TAU);
     const radius = map(
       num,
-      0,
-      // absoluteMinimum, // This looks better, but gives us a 0 at the lowest
+      // 0,
+      absoluteMinimum, // This looks better, but gives us a 0 at the lowest
       absoluteMaximum,
       0,
       chartDiameter / 2
@@ -146,10 +140,10 @@ function renderRadialChart(preppedData) {
     // this bumps the feathers to outside of the inner implicit circle
     translate(0, (chartDiameter * donutHole) / 2);
 
-    // drawFeather(radius, metadata.palette);
-    const featherPoints = calculateFeatherPoints(radius, metadata.palette);
+    drawFeather(radius, metadata.palette);
+    // const featherPoints = calculateFeatherPoints(radius, metadata.palette);
     // console.debug({ featherPoints })
-    drawFeatherFromPoints(featherPoints);
+    // drawFeatherFromPoints(featherPoints);
 
     pop();
   }
