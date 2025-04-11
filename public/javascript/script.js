@@ -1,7 +1,9 @@
+const BACKGROUND = 'lemonchiffon';
+const DONUT_HOLE = 0.2;
+
 let hoveredBirdName = null;
 let maximumData;
 
-const donutHole = 0.2;
 let cachedFeathers;
 
 // -----------------------------------
@@ -9,7 +11,7 @@ let cachedFeathers;
 // -----------------------------------
 
 function preload() {
-  loadTable('./data/wi_histogram.tsv', 'tsv', (data) => {
+  loadTable('/data/wi_histogram.tsv', 'tsv', (data) => {
     loadedTableData = data;
   });
 
@@ -32,17 +34,17 @@ function setup() {
 
   cachedFeathers = createFeathers(maximumData);
 
-  background('plum');
+  background('lemonchiffon');
 
   const chartDiameter = window.width / 2;
   renderFeathers(chartDiameter);
 }
 
 function draw() {
-  background('plum');
+  background('lemonchiffon');
 
   const chartDiameter = window.width / 2;
-  console.debug({ chartDiameter })
+
   renderFeathers(chartDiameter);
 }
 
@@ -72,7 +74,7 @@ function renderFeathers(chartDiameter) {
     rotate(feather.angle);
 
     // this bumps the feathers to outside of the inner implicit circle
-    translate(0, (chartDiameter * donutHole) / 2);
+    translate(0, (chartDiameter * DONUT_HOLE) / 2);
 
     feather.draw();
 
@@ -103,14 +105,13 @@ function createFeathers(preppedData) {
     const theta = map(index, 0, preppedData.length, 0, TAU);
     const radius = map(
       num,
-      absoluteMinimum, // This looks better, but gives us a 0 at the lowest
+      absoluteMinimum,
       absoluteMaximum,
-      10,
+      10, // we start here so that even no feathers have a small indicator
       chartDiameter / 2
     );
 
-    // QUESTION: why did I have to do this instead of theta - PI/2 to get a
-    // normal "clock" alignment?
+    // we rotate back by PI because the feathers start at 0º
     const rotationAngle = theta - PI;
 
     const feather = new Feather({
@@ -136,11 +137,11 @@ function getRandomStrokeWeight() {
   return strokeWeight;
 }
 
-const getFeatherConfig = (length) => {
+function getFeatherConfig (length) {
   const heightScale = 0.5;
   const featherWidth = length * 0.15;
   const featherHeight = length * heightScale;
-  const step = floor(map(Math.random(), 0, 1, 3, 5));
+  const step = floor(map(Math.random(), 0, 1, 3, 5, true));
 
   return {
     heightScale,
@@ -149,7 +150,6 @@ const getFeatherConfig = (length) => {
     step,
   };
 };
-
 
 // -----------------------------------
 // ---------- Data functions ---------
@@ -218,154 +218,15 @@ function calculateMaximumFromColumn(col, birdNames) {
 
 ////////// Not my functions
 
-function createPalette(_img, _num, _start, _end) {
-  let _pal = [];
-  for (let i = 0; i < _num; i++) {
-    let x = map(i, 0, _num, _start[0], _end[0]);
-    let y = map(i, 0, _num, _start[1], _end[1]);
-    _pal.push(_img.get(floor(x), floor(y)));
-  }
-  return _pal;
-}
+function createPalette(image, num, start, end) {
+  let palette = [];
 
-// Classes
+  for (let i = 0; i < num; i++) {
+    let x = map(i, 0, num, start[0], end[0]);
+    let y = map(i, 0, num, start[1], end[1]);
 
-class Barb {
-  start = { x: -1, y: -1 };
-  end = { x: -1, y: -1 };
-  color = [];
-  thickness = -1;
-
-  constructor(options) {
-    if (options) {
-      const { start, end, color, thickness } = options;
-      this.start = start;
-      this.end = end;
-      this.color = color;
-      this.thickness = thickness;
-    }
+    palette.push(image.get(floor(x), floor(y)));
   }
 
-  draw() {
-    push();
-
-    strokeWeight(this.thickness);
-    stroke(this.color);
-
-    beginShape();
-    vertex(this.start.x, this.start.y);
-    vertex(this.end.x, this.end.y);
-    endShape();
-
-    pop();
-  }
-}
-
-class Feather {
-  barbs = [];
-  angle = -1;
-  colors = [[]];
-  length = -1;
-
-  constructor(options) {
-    if (options) {
-      const { barbs, angle, colors, length } = options;
-      this.barbs = barbs ?? [];
-      this.angle = angle ?? -1;
-      this.colors = colors ?? [[]];
-      this.length = length ?? -1;
-    }
-  }
-
-  draw() {
-    const lengthDivider = floor(this.barbs.length / 2);
-
-    const leftBarbs = this.barbs.slice(0, lengthDivider);
-    const rightBarbs = this.barbs.slice(lengthDivider);
-
-    scale(1, 2);
-
-    for (const barb of leftBarbs) {
-      barb.draw();
-    }
-
-    scale(-2, 1);
-
-    for (const barb of rightBarbs) {
-      barb.draw();
-    }
-  }
-
-  drawRachis() {
-    const exemplarBarb = this.barbs[0];
-
-    strokeWeight(map(this.length, 10, window.width / 2 / 2, 0.5, 1.5));
-    stroke([
-      exemplarBarb.color[0] / 1.25,
-      exemplarBarb.color[1] / 1.25,
-      exemplarBarb.color[2] / 1.25,
-      exemplarBarb.color[3] * 0.95,
-    ]);
-
-    line(0, -2, 0, this.length / 2);
-  }
-
-  getColorAtIndex(i) {
-    return this.colors[floor(map(i, 0, this.length, 0, this.colors.length))];
-  }
-
-  createBarbs() {
-    const points = generatePoints(this.length);
-
-    for (const { p0, p2, index } of points) {
-      const barb = new Barb({
-        start: { x: p0.x, y: p0.y },
-        end: { x: p2.x, y: p2.y },
-        color: this.getColorAtIndex(index),
-        thickness: getRandomStrokeWeight(),
-      });
-
-      this.barbs.push(barb);
-    }
-  }
-}
-
-function* generatePoints(length) {
-  const { heightScale, featherWidth, featherHeight, step } =
-    getFeatherConfig(length);
-
-  let end = createVector(0, featherHeight);
-
-  let stack = 0;
-  let stuck = false;
-
-  for (let index = 0; index < length; index += step) {
-    if (!stuck && random(100) < 30) {
-      stuck = true;
-    }
-
-    if (stuck && random(100) < 20) {
-      stuck = !stuck;
-    }
-
-    // this tweaks the fullness of the feather / also a... twist
-    const angle = map(index, 0, length, 0, PI);
-    const aw = sin(angle) * featherWidth;
-
-    if (!stuck) {
-      stack += step * heightScale + pow(index, 0.2) * 0.75 * heightScale;
-    }
-
-    //three points
-    const p0 = createVector(0, index * heightScale * 0.75);
-    const p1 = createVector(aw, stack);
-    const p2 = p1.lerp(end, map(index, 0, length, 0, 1));
-
-    if (index < this.length * 0.1) {
-      p2.x *= random(0.8, 1.2);
-      p2.y *= random(0.8, 1.2);
-    }
-
-    yield { p0, p2, index };
-  }
+  return palette;
 }
