@@ -17,6 +17,8 @@ const getChartDiameter = () => windowWidth / 2;
 // ------- Lifecycle functions -------
 // -----------------------------------
 
+// TODO: highlight chunk of circle -> pop out those feathers, dim other feathers
+
 function preload() {
   loadTable('/data/wi_histogram.tsv', 'tsv', (data) => {
     loadedTableData = data;
@@ -39,15 +41,25 @@ function setup() {
   const canvas = createCanvas(canvasWidth, canvasHeight);
   canvas.parent('canvas_container');
 
+  background(BACKGROUND);
+
   maximumData = toMaximumInfoColumns(loadedTableData, CHUNK_SIZE);
   initPalettes();
 
   cachedFeathers = createFeathers(TOP_BIRD_INFO, maximumData);
+  const maxLength =  max(cachedFeathers.map(f => f.length))
 
-  background(BACKGROUND);
+
+  const chartDiameter = getChartDiameter()
+  // push()
+  // translate(chartDiameter / 2, chartDiameter / 3)
+  // noFill()
+  // circle(0, 0, DONUT_HOLE * maxLength * 2 - 20)
+  // pop()
+
 
   // window.width is a p5 thing
-  const chartDiameter = getChartDiameter();
+  // const chartDiameter = getChartDiameter();
   drawFeathers(chartDiameter);
 }
 

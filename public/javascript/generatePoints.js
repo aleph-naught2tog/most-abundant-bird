@@ -1,3 +1,5 @@
+// TODO: pull a lot of these things out into constants
+
 function* generatePoints(length) {
   const { heightScale, featherWidth, featherHeight, step } =
     getFeatherConfig(length);
