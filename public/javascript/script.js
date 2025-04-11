@@ -11,7 +11,7 @@ let cachedFeathers;
 // windowHeight will exist by the time this is called
 const getCanvasHeight = () => windowHeight - 128;
 const getCanvasWidth = () => windowWidth - 64;
-const getChartDiameter = () => window.width / 2;
+const getChartDiameter = () => windowWidth / 2;
 
 // -----------------------------------
 // ------- Lifecycle functions -------
@@ -78,7 +78,7 @@ function drawFeathers(chartDiameter) {
   for (const feather of cachedFeathers) {
     push();
 
-    translate(chartDiameter / 2, chartDiameter / 2);
+    translate(chartDiameter / 2, chartDiameter / 3);
 
     rotate(feather.angle);
 
