@@ -228,6 +228,8 @@ function createPalette(_img, _num, _start, _end) {
   return _pal;
 }
 
+// Classes
+
 class Barb {
   start = { x: -1, y: -1 };
   end = { x: -1, y: -1 };
