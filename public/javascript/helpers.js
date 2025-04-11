@@ -31,6 +31,7 @@ function getFeatherConfig(length) {
   const featherWidth = length * 0.15;
   const featherHeight = length * heightScale;
   const step = floor(map(Math.random(), 0, 1, 3, 5, true));
+  // const step = 2;
 
   return {
     heightScale,

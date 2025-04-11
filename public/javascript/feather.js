@@ -1,3 +1,5 @@
+const ALPHA = 0.9;
+
 class Feather {
   // these are mostly for clarity
   barbs = [];
@@ -50,13 +52,18 @@ class Feather {
   }
 
   createBarbs() {
-    const points = generatePoints(this.length);
+    const pointCount = this.length;
+    const points = generatePoints(pointCount);
 
     for (const { p0, p2, index } of points) {
+      const currentColor = getColorAtIndex(index, this.length, this.colors);
+      const [r, g, b, _alpha] = currentColor;
+
+      const scaledAlpha = map(ALPHA, 0, 1, 0, 255);
       const barb = new Barb({
         start: { x: p0.x, y: p0.y },
         end: { x: p2.x, y: p2.y },
-        color: getColorAtIndex(index, this.length, this.colors),
+        color: [r, g, b, scaledAlpha],
         thickness: getRandomStrokeWeight(),
       });
 

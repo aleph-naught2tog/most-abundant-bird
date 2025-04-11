@@ -16,4 +16,6 @@
   * problem: CDN
     * if we skip the CDN, we could probably do a little preload magic
       * this requires a server file
+* sliders etc for the various parameters
+* make this usable for other things dynamically -- upload a file, see the max birds, upload your bird photos + pixel points
 

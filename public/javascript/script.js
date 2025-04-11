@@ -8,6 +8,9 @@ let maximumData;
 
 let cachedFeathers;
 
+// end point of feather -- draw from there and do bird name
+// pop the feather
+
 // windowHeight will exist by the time this is called
 const getCanvasHeight = () => windowHeight - 128;
 const getCanvasWidth = () => windowWidth - 64;
@@ -59,7 +62,6 @@ function setup() {
 
 
   // window.width is a p5 thing
-  // const chartDiameter = getChartDiameter();
   drawFeathers(chartDiameter);
 }
 
@@ -144,8 +146,8 @@ function createFeathers(birdInfo, preppedData) {
     });
 
     // QUESTION: why are we doing this twice
-    feather.createBarbs(metadata.palette);
-    feather.createBarbs(metadata.palette);
+    feather.createBarbs();
+    feather.createBarbs();
 
     feathers.push(feather);
   }
