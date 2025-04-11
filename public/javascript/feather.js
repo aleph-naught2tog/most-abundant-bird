@@ -48,7 +48,13 @@ class Feather {
 
     stroke([red, green, blue, alpha]);
 
-    line(0, -2, 0, this.length / 2);
+
+    noFill()
+    line(0, this.length / 2, 0, this.length / 2 + 20);
+    circle(0, this.length / 2 + 20, this.length / 10)
+
+    // https://study.com/skill/learn/determining-if-a-point-lies-inside-outside-or-on-a-circle-given-the-center-point-a-radius-explanation.html
+    // if mouse within circle, show bird name + value, brighten feather
   }
 
   createBarbs() {
