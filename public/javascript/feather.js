@@ -1,17 +1,16 @@
 class Feather {
+  // these are mostly for clarity
   barbs = [];
   angle = -1;
   colors = [[]];
   length = -1;
 
   constructor(options) {
-    if (options) {
-      const { barbs, angle, colors, length } = options;
-      this.barbs = barbs ?? [];
-      this.angle = angle ?? -1;
-      this.colors = colors ?? [[]];
-      this.length = length ?? -1;
-    }
+    const { barbs, angle, colors, length } = options;
+    this.barbs = barbs ?? [];
+    this.angle = angle;
+    this.colors = colors;
+    this.length = length;
   }
 
   draw() {
@@ -31,24 +30,23 @@ class Feather {
     for (const barb of rightBarbs) {
       barb.draw();
     }
+
+    this._drawRachis();
   }
 
-  drawRachis() {
+  _drawRachis() {
     const exemplarBarb = this.barbs[0];
 
-    strokeWeight(map(this.length, 10, window.width / 2 / 2, 0.5, 1.5));
-    stroke([
-      exemplarBarb.color[0] / 1.25,
-      exemplarBarb.color[1] / 1.25,
-      exemplarBarb.color[2] / 1.25,
-      exemplarBarb.color[3] * 0.95,
-    ]);
+    strokeWeight(map(this.length, 10, window.width / 4, 0.5, 1));
+
+    const red = exemplarBarb.color[0] / 1.25;
+    const green = exemplarBarb.color[1] / 1.25;
+    const blue = exemplarBarb.color[2] / 1.25;
+    const alpha = exemplarBarb.color[3] * 0.95;
+
+    stroke([red, green, blue, alpha]);
 
     line(0, -2, 0, this.length / 2);
-  }
-
-  getColorAtIndex(i) {
-    return this.colors[floor(map(i, 0, this.length, 0, this.colors.length))];
   }
 
   createBarbs() {
@@ -58,7 +56,7 @@ class Feather {
       const barb = new Barb({
         start: { x: p0.x, y: p0.y },
         end: { x: p2.x, y: p2.y },
-        color: this.getColorAtIndex(index),
+        color: getColorAtIndex(index, this.length, this.colors),
         thickness: getRandomStrokeWeight(),
       });
 

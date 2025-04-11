@@ -1,17 +1,16 @@
 class Barb {
+  // these are mostly for clarity
   start = { x: -1, y: -1 };
   end = { x: -1, y: -1 };
   color = [];
   thickness = -1;
 
   constructor(options) {
-    if (options) {
-      const { start, end, color, thickness } = options;
-      this.start = start;
-      this.end = end;
-      this.color = color;
-      this.thickness = thickness;
-    }
+    const { start, end, color, thickness } = options;
+    this.start = start;
+    this.end = end;
+    this.color = color;
+    this.thickness = thickness;
   }
 
   draw() {

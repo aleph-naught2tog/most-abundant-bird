@@ -21,7 +21,9 @@ function* generatePoints(length) {
     const aw = sin(angle) * featherWidth;
 
     if (!stuck) {
-      stack += step * heightScale + pow(index, 0.2) * 0.75 * heightScale;
+      const stackStep =
+        step * heightScale + pow(index, 0.2) * 0.75 * heightScale;
+      stack += stackStep;
     }
 
     //three points
