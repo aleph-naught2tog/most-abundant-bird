@@ -39,7 +39,9 @@ const getCanvasHeight = () => 800;
 const getCanvasWidth = () => 800;
 const getMaximumChartDiameter = () => getCanvasWidth();
 
-const GRID_COUNT= getCanvasHeight() / 100;
+const GRID_COUNT = getCanvasHeight() / 100;
+
+let FAKE_MOUSE_POINT = { x: 410, y: 130 };
 
 // -----------------------------------
 // ------- Lifecycle functions -------
@@ -69,17 +71,26 @@ function setup() {
 
   background(BACKGROUND);
 
-  drawGrid(GRID_COUNT)
+  drawGrid(GRID_COUNT);
 
   maximumData = toMaximumInfoColumns(loadedTableData, CHUNK_SIZE);
   initPalettes();
 
   const transCoords = TranslationCoordinates.createCoordinates();
   cachedFeathers = createFeathers(TOP_BIRD_INFO, maximumData, transCoords);
-  cachedFeathers = [cachedFeathers[0]]
+  // doing this so we can focus on 1
+  cachedFeathers = [cachedFeathers[0]];
 
   const chartDiameter = getMaximumChartDiameter();
   drawFeathers(chartDiameter);
+
+  alert('honk')
+
+  push()
+  stroke('magenta')
+  strokeWeight(4)
+  point(FAKE_MOUSE_POINT.x, FAKE_MOUSE_POINT.y);
+  pop()
 }
 
 function draw() {
@@ -112,7 +123,7 @@ function initPalettes() {
  * @param {TranslationCoordinates} transCoords
  */
 function drawFeathers(chartDiameter) {
-  drawCoordinatePoints('red')
+  drawCoordinatePoints('red');
 
   for (const feather of cachedFeathers) {
     push();
@@ -124,15 +135,15 @@ function drawFeathers(chartDiameter) {
 
     // hmmmm, not sure this should be on feather, but does make it easier
     feather.translationCoordinates.addTranslation(translationToCanvasCenter);
-    drawCoordinatePoints('orange')
+    drawCoordinatePoints('orange');
 
     push();
     noFill();
     circle(0, 0, chartDiameter * DONUT_HOLE);
     pop();
 
-    rotate(feather.angle);
-    drawCoordinatePoints('yellow')
+    feather.translationCoordinates.addRotation(PI);
+    drawCoordinatePoints('yellow');
 
     // translates us to the outside of the circle above
     const translationToDonutHoleEdge = {
@@ -140,7 +151,7 @@ function drawFeathers(chartDiameter) {
       y: (chartDiameter * DONUT_HOLE) / 2,
     };
     feather.translationCoordinates.addTranslation(translationToDonutHoleEdge);
-    drawCoordinatePoints('lime')
+    drawCoordinatePoints('lime');
 
     feather.draw();
 

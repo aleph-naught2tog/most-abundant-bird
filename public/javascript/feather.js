@@ -1,7 +1,5 @@
 const ALPHA = 0.9;
 
-const FAKE_MOUSE_POINT = { x: 405, y: 120 };
-
 class Feather {
   // these are mostly for clarity
   barbs = [];
@@ -69,15 +67,21 @@ class Feather {
     /* REMEMBER: isMousePressed won't work if you aren't using `draw`! */
 
     // translate to the tip of the feather
-    const translationToFeatherTip = { x: 100, y: 100 };
+    const translationToFeatherTip = { x: 0, y: this.length };
     this.translationCoordinates.addTranslation(translationToFeatherTip);
-    drawCoordinatePoints('cyan')
+
+    // we're still not in canvas coordinates, but our axes are back to normal now
+    this.translationCoordinates.revertRotation();
+    drawCoordinatePoints('cyan');
 
     const featherCircleCenter = { x: 0, y: 0 };
-    const radius = this.length / 15;
+    const radius = this.length / 10;
 
+    push()
     noFill();
+    stroke('cyan')
     circle(featherCircleCenter.x, featherCircleCenter.y, radius * 2);
+    pop()
 
     // if (mouseIsPressed) {
     // const mousePoint = { x: mouseX, y: mouseY };
@@ -85,6 +89,8 @@ class Feather {
     // using a fake mouse point that should be within the circle so we can test
     // this without a million debugs from `draw`
     const mousePoint = FAKE_MOUSE_POINT;
+
+    console.debug({ currentTranslation: this.translationCoordinates.getCurrentTranslation() })
 
     // This value is what's wrong
     // The X is correct, but the Y is wrong
@@ -106,7 +112,6 @@ class Feather {
       isMouseWithinCircle,
       translation: this.translationCoordinates.getCurrentTranslation(),
     });
-
 
     // }
   }

@@ -97,6 +97,7 @@ function debugDraw() {
 
     pop();
   }
+
   const anotherTranslation = { x: 100, y: 300 };
 
   // END FIRST TRANSLATION ONLY
@@ -109,7 +110,6 @@ function debugDraw() {
   // the translations in both files are equal at this point
   const extraCircleCenterPoint = { x: 100, y: -200 };
   const extraCircleRadius = 100;
-
   push();
   stroke('red');
   circle(
@@ -145,7 +145,6 @@ function debugDraw() {
     )
   ) {
     push();
-
     fill('rebeccapurple');
     textSize(20);
     text(
