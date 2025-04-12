@@ -118,7 +118,7 @@ function translatePoint(pointToMap, translationCoordinates) {
 function drawProbablyGreenCanvasPoint({ x, y }, desiredColor) {
   push();
   strokeWeight(15);
-  const strokeC = desiredColor ?? color(0, 0, 255, 126);
+  const strokeC = desiredColor ?? color(0, 255, 0, 120);
   stroke(strokeC);
 
   point(x, y);
@@ -128,7 +128,7 @@ function drawProbablyGreenCanvasPoint({ x, y }, desiredColor) {
 function drawProbablyBlueCirclePoint({ x, y }, desiredColor) {
   push();
   strokeWeight(25);
-  const strokeC = desiredColor ?? color(0, 255, 0, 126);
+  const strokeC = desiredColor ?? color(0, 0, 255, 60);
   stroke(strokeC);
 
   point(x, y);

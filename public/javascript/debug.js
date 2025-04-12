@@ -7,48 +7,36 @@ const translationCoordinates = {
   y: 0,
 };
 
-/**
- * @param {Point} point
- */
-const addTranslation = ({ x, y }) => {
-  console.debug(getCurrentTranslation())
-  translationCoordinates.x += x;
-  translationCoordinates.y += y;
-  console.debug(getCurrentTranslation())
+class TranslationCoordinates {
+  constructor() {
+    this.x = 0;
+    this.y = 0;
+  }
 
-  _doTranslation();
-};
+  addTranslation({ x, y }) {
+    // We must translate first or we end up translating too far
+    translate(x, y);
 
-/**
- * Sets the translation coordinates back to 0,0 (aka a noop).
- */
-const resetTranslationCoordinates = () => {
-  translationCoordinates.x = 0;
-  translationCoordinates.y = 0;
-};
+    this.x += x;
+    this.y += y;
+  }
 
-/**
- * Sets the translation to the INVERSE of the current translation and applies.
- */
-const invertTranslation = () => {
-  translationCoordinates.x = -1 * translationCoordinates.x;
-  translationCoordinates.y = -1 * translationCoordinates.y;
+  getCurrentTranslation() {
+    return {
+      x: this.x,
+      y: this.y,
+    };
+  }
 
-  _doTranslation();
-};
+  revertTranslation() {
+    const { x, y } = { x: -this.x, y: -this.y };
 
-const resetTranslation = () => {
-  invertTranslation();
-  resetTranslationCoordinates();
-};
+    translate(x, y);
 
-const getCurrentTranslation = () => translationCoordinates.getCurrent();
-
-const _doTranslation = () => {
-  const { x, y } = translationCoordinates;
-
-  translate(x, y);
-};
+    this.x += x;
+    this.y += y;
+  }
+}
 
 // --------
 
@@ -76,10 +64,12 @@ function debugDraw() {
   background(BACKGROUND);
   drawGrid(GRID_COUNT);
 
+  const transCoords = new TranslationCoordinates();
+
   // NO TRANSLATION
-  const coreCircleCenterInCanvasCoords = { x: width / 2, y: height / 2 };
-  const coreCircleCenterInCircleCoords = { x: 0, y: 0 };
-  const coreCircleRadius = 200;
+  let coreCircleCenterInCanvasCoords = { x: width / 2, y: height / 2 };
+  let coreCircleCenterInCircleCoords = { x: 0, y: 0 };
+  let coreCircleRadius = 200;
 
   const outInCanvasCoords = { x: 200, y: 300 };
   const withinInCanvasCoords = { x: 300, y: 500 };
@@ -88,20 +78,23 @@ function debugDraw() {
   drawProbablyGreenCanvasPoint(outInCanvasCoords);
   drawProbablyGreenCanvasPoint(withinInCanvasCoords);
 
-  // FIRST TRANSLATION: center us in the grid
-  addTranslation({
+  const firstTranslation = {
     x: width / 2,
     y: height / 2,
-  });
+  };
+
+  // return;
+  // FIRST TRANSLATION: center us in the grid
+  transCoords.addTranslation(firstTranslation);
 
   const outInCircleCoords = translatePoint(
     outInCanvasCoords,
-    getCurrentTranslation()
+    transCoords.getCurrentTranslation()
   );
 
   const withinInCircleCoords = translatePoint(
     withinInCanvasCoords,
-    getCurrentTranslation()
+    transCoords.getCurrentTranslation()
   );
 
   noFill();
@@ -141,15 +134,15 @@ function debugDraw() {
 
     pop();
   }
+  const anotherTranslation = { x: 100, y: 300 };
 
   // END FIRST TRANSLATION ONLY
 
   // FIRST TRANSLATION + SECOND TRANSLATION
-  // DEBUG: this is where things are falling apart
-  console.debug({ before2nd: getCurrentTranslation() })
-  addTranslation({ x: 100, y: 300 });
-  console.debug({ after2nd: getCurrentTranslation() });
+  transCoords.addTranslation(anotherTranslation);
 
+  // current translation: { x: 500, y: 700 }
+  // the translations in both files are equal at this point
   const extraCircleCenterPoint = { x: 100, y: -200 };
   const extraCircleRadius = 100;
 
@@ -166,7 +159,7 @@ function debugDraw() {
 
   const translated = translatePoint(
     { x: 600, y: 500 },
-    getCurrentTranslation()
+    transCoords.getCurrentTranslation()
   );
 
   drawProbablyBlueCirclePoint(translated, 'magenta');
@@ -175,7 +168,7 @@ function debugDraw() {
 
   const imaginedMousePointInCircleCoords = translatePoint(
     imaginedMousePoint,
-    getCurrentTranslation()
+    transCoords.getCurrentTranslation()
   );
 
   drawProbablyBlueCirclePoint(imaginedMousePointInCircleCoords, 'plum');
@@ -201,10 +194,7 @@ function debugDraw() {
   }
 
   // BACK to canvas coords
-  // resetTranslation();
-  translate(0, 0);
-  translationCoordinates.x = 0;
-  translationCoordinates.y = 0;
+  transCoords.revertTranslation();
 
   drawProbablyGreenCanvasPoint({ x: 100, y: 100 });
 }

@@ -247,6 +247,7 @@ function extraCircleCase() {
     y: coreCircleCenterInCanvasCoords.y,
   };
 
+  console.debug({ translation })
   // to circle coords
   translate(translation.x, translation.y);
 
@@ -298,12 +299,12 @@ function extraCircleCase() {
   };
 
   translate(anotherTranslation.x, anotherTranslation.y);
-  console.debug({ totalTranslation })
 
+  // current translation: { x: 500, y: 700 }
+  // the translations in both files are equal at this point
   const extraCircleCenterPoint = { x: 100, y: -200 };
-  // canvas coords: 600,500
-  // move right 100, down 200 from 100,300
   const extraCircleRadius = 100;
+
   push();
   stroke('red');
   circle(
@@ -312,11 +313,6 @@ function extraCircleCase() {
     extraCircleRadius * 2
   );
   pop();
-
-  // expected:
-  // x: 400 + 100, y: 400 + 300
-  // x: 500, y: 700
-  console.debug({ totalTranslation });
 
   drawProbablyBlueCirclePoint(extraCircleCenterPoint, 'red');
   const translated = translatePoint(
@@ -364,7 +360,7 @@ function extraCircleCase() {
     -translation.y - anotherTranslation.y
   );
 
-  // drawProbablyGreenCanvasPoint({x: 100, y: 100});
+  drawProbablyGreenCanvasPoint({x: 100, y: 100});
 }
 
 function drawFeathersInlineVersion(chartDiameter) {
