@@ -100,7 +100,7 @@ function drawFeathers(chartDiameter) {
 
     rotate(feather.angle);
 
-    // // this bumps the feathers to outside of the inner implicit circle
+    // this bumps the feathers to outside of the inner implicit circle
     // const secondTranslationCoords = {
     //   x: 0,
     //   y: (chartDiameter * DONUT_HOLE) / 2,

@@ -35,7 +35,7 @@ class Feather {
     }
     pop()
 
-    // this._drawRachis();
+    this._drawRachis();
     this._drawAnnotation();
   }
 
@@ -51,15 +51,12 @@ class Feather {
   }
 
   _drawAnnotation() {
-    // this is the NEW circle
-    // we just changed coords, so we're back at 0,0
     const featherCircleCenter = { x: 0, y: 0 };
     const radius = this.length / 15;
 
     noFill()
     circle(featherCircleCenter.x, featherCircleCenter.y, radius * 2);
 
-    // BUG: this isn't working because the translated Y is SUPER SUPER wrong
     const mousePoint = { x: mouseX, y: mouseY };
     const mousePointInCircleTerms = translatePoint(
       mousePoint,
@@ -79,11 +76,7 @@ class Feather {
       });
 
       if (isMouseWithinCircle) {
-        console.error(radius, {
-          mousePoint,
-          mousePointInCircleTerms,
-        })
-        throw new Error("within circle");
+        throw new Error("we did it!");
       }
     }
   }
@@ -95,23 +88,28 @@ class Feather {
     stroke(this._getRachisColor());
 
     const yTranslation = this.length / 2 + 20;
-    const translationToAnnotationCircleCenter = {
-      x: 0,
-      y: yTranslation,
-    };
+    // const translationToAnnotationCircleCenter = {
+    //   x: 0,
+    //   y: yTranslation,
+    // };
 
-    translate(
-      translationToAnnotationCircleCenter.x,
-      translationToAnnotationCircleCenter.y
-    );
+    // translate(
+    //   translationToAnnotationCircleCenter.x,
+    //   translationToAnnotationCircleCenter.y
+    // );
 
-    translationCoordinates = {
-      x: translationCoordinates.x + translationToAnnotationCircleCenter.x,
-      y: translationCoordinates.y + translationToAnnotationCircleCenter.y,
-    };
+    // translationCoordinates = {
+    //   x: translationCoordinates.x + translationToAnnotationCircleCenter.x,
+    //   y: translationCoordinates.y + translationToAnnotationCircleCenter.y,
+    // };
 
     noFill();
     line(0, 0, 0, -yTranslation);
+
+    // translationCoordinates = {
+    //   x: translationCoordinates.x - translationToAnnotationCircleCenter.x,
+    //   y: translationCoordinates.y - translationToAnnotationCircleCenter.y,
+    // }
   }
 
   createBarbs() {
