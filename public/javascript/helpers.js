@@ -112,5 +112,43 @@ function translatePoint(pointToMap, translationCoordinates) {
   return {
     x: pointToMap.x - translationCoordinates.x,
     y: pointToMap.y - translationCoordinates.y,
+  };
+}
+
+function drawProbablyGreenCanvasPoint({ x, y }, desiredColor) {
+  push();
+  strokeWeight(15);
+  const strokeC = desiredColor ?? color(0, 0, 255, 126);
+  stroke(strokeC);
+
+  point(x, y);
+  pop();
+}
+
+function drawProbablyBlueCirclePoint({ x, y }, desiredColor) {
+  push();
+  strokeWeight(25);
+  const strokeC = desiredColor ?? color(0, 255, 0, 126);
+  stroke(strokeC);
+
+  point(x, y);
+  pop();
+}
+
+const vecToPoint = ([x, y]) => ({ x, y });
+
+function drawGrid(gridCount) {
+  push();
+
+  stroke('darkgray');
+  strokeWeight(2);
+
+  for (let x = 0; x <= width; x += width / gridCount) {
+    for (let y = 0; y <= width; y += height / gridCount) {
+      line(x, 0, x, height);
+      line(0, y, height, y);
+    }
   }
+
+  pop();
 }

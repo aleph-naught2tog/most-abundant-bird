@@ -63,12 +63,16 @@ function setup() {
   canvas.parent('canvas_container');
 
   background(BACKGROUND);
-  drawGrid();
+  debugDraw();
 }
 
 function draw() {
+  // debugDraw()
+}
+
+function debugDraw() {
   background(BACKGROUND);
-  drawGrid();
+  drawGrid(GRID_COUNT);
 
   // NO TRANSLATION
   const coreCircleCenterInCanvasCoords = { x: width / 2, y: height / 2 };
@@ -140,7 +144,9 @@ function draw() {
   // END FIRST TRANSLATION ONLY
 
   // FIRST TRANSLATION + SECOND TRANSLATION
+  // DEBUG: this is where things are falling apart
   addTranslation({ x: 100, y: 300 });
+  console.debug(translatePoint({ x: 0, y: 0 }, getCurrentTranslation()));
 
   const extraCircleCenterPoint = { x: 100, y: -200 };
   const extraCircleRadius = 100;
@@ -155,8 +161,7 @@ function draw() {
   pop();
 
   drawProbablyBlueCirclePoint(
-    extraCircleCenterPoint.x,
-    extraCircleCenterPoint.y,
+    extraCircleCenterPoint,
     'red'
   );
 
@@ -165,7 +170,7 @@ function draw() {
     getCurrentTranslation()
   );
 
-  drawProbablyBlueCirclePoint(translated.x, translated.y, 'magenta');
+  drawProbablyBlueCirclePoint(translated, 'magenta');
 
   const imaginedMousePoint = { x: 550, y: 450 };
 
@@ -174,11 +179,7 @@ function draw() {
     getCurrentTranslation()
   );
 
-  drawProbablyBlueCirclePoint(
-    imaginedMousePointInCircleCoords.x,
-    imaginedMousePointInCircleCoords.y,
-    'plum'
-  );
+  drawProbablyBlueCirclePoint(imaginedMousePointInCircleCoords, 'plum');
 
   if (
     isPointInsideCircle(
@@ -201,57 +202,12 @@ function draw() {
   }
 
   // BACK to canvas coords
-  resetTranslation();
+  // resetTranslation();
+  translate(0, 0);
+  translationCoordinates.x = 0;
+  translationCoordinates.y = 0;
 
-  // drawCanvasPoint(100, 100);
+  drawProbablyGreenCanvasPoint({ x: 100, y: 100 });
 }
 
 // ---------
-
-function drawGrid() {
-  push();
-
-  stroke('darkgray');
-  strokeWeight(2);
-
-  for (let x = 0; x <= width; x += width / GRID_COUNT) {
-    for (let y = 0; y <= width; y += height / GRID_COUNT) {
-      line(x, 0, x, height);
-      line(0, y, height, y);
-    }
-  }
-
-  pop();
-}
-
-/**
- * @param {Point} point
- * @param {string|undefined} desiredColor
- */
-function drawProbablyGreenCanvasPoint({ x, y }, desiredColor) {
-  push();
-
-  strokeWeight(15);
-  const strokeC = desiredColor ?? color(0, 0, 255, 126);
-  stroke(strokeC);
-
-  point(x, y);
-
-  pop();
-}
-
-/**
- * @param {Point} point
- * @param {string|undefined} desiredColor
- */
-function drawProbablyBlueCirclePoint({ x, y }, desiredColor) {
-  push();
-
-  strokeWeight(25);
-  const strokeC = desiredColor ?? color(0, 255, 0, 126);
-  stroke(strokeC);
-
-  point(x, y);
-
-  pop();
-}

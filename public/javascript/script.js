@@ -26,6 +26,8 @@ const getCanvasHeight = () => 800;
 const getCanvasWidth = () => 800;
 const getChartDiameter = () => getCanvasWidth();
 
+const GRID_COUNT = 8;
+
 // -----------------------------------
 // ------- Lifecycle functions -------
 // -----------------------------------
@@ -58,16 +60,17 @@ function setup() {
   initPalettes();
 
   cachedFeathers = createFeathers(TOP_BIRD_INFO, maximumData);
-  // const chartDiameter = getChartDiameter();
+  const chartDiameter = getChartDiameter();
   // drawFeathers(chartDiameter);
   // drawGrid();
-  // extraCircleCase();
+  // drawFeathersInlineVersion()
+  extraCircleCase();
 }
 
 function draw() {
-  const chartDiameter = getChartDiameter();
-  background(BACKGROUND);
-  drawFeathersInlineVersion(chartDiameter);
+  // const chartDiameter = getChartDiameter();
+  // background(BACKGROUND);
+  // drawFeathersInlineVersion(chartDiameter);
   // drawFeathers(chartDiameter)
 }
 
@@ -175,41 +178,6 @@ function createFeathers(birdInfo, preppedData) {
   return feathers;
 }
 
-function drawGrid() {
-  push();
-  stroke('darkgray');
-  strokeWeight(2);
-
-  for (let x = 0; x <= width; x += width / 8) {
-    for (let y = 0; y <= width; y += height / 8) {
-      line(x, 0, x, height);
-      line(0, y, height, y);
-    }
-  }
-
-  pop();
-}
-
-function drawProbablyGreenCanvasPoint(x, y, desiredColor) {
-  push();
-  strokeWeight(15);
-  const strokeC = desiredColor ?? color(0, 0, 255, 126);
-  stroke(strokeC);
-
-  point(x, y);
-  pop();
-}
-
-function drawProbablyBlueCirclePoint(x, y, desiredColor) {
-  push();
-  strokeWeight(25);
-  const strokeC = desiredColor ?? color(0, 255, 0, 126);
-  stroke(strokeC);
-
-  point(x, y);
-  pop();
-}
-
 function centeredCase() {
   let circleCenterInCanvasCoords = [width / 2, height / 2];
   let circleCenterInCircleCoords = [0, 0];
@@ -261,48 +229,45 @@ function uncenteredCase() {
 }
 
 function extraCircleCase() {
-  let coreCircleCenterInCanvasCoords = [width / 2, height / 2];
-  let coreCircleCenterInCircleCoords = [0, 0];
+  drawGrid(GRID_COUNT);
+
+  let coreCircleCenterInCanvasCoords = vecToPoint([width / 2, height / 2]);
+  let coreCircleCenterInCircleCoords = vecToPoint([0, 0]);
   let coreCircleRadius = 200;
 
   let translation = {
-    x: coreCircleCenterInCanvasCoords[0],
-    y: coreCircleCenterInCanvasCoords[1],
+    x: coreCircleCenterInCanvasCoords.x,
+    y: coreCircleCenterInCanvasCoords.y,
   };
 
-  const outInCanvasCoords = [200, 300];
-  const outInCircleCoords = translatePoint(
-    { x: outInCanvasCoords[0], y: outInCanvasCoords[1] },
-    translation
-  );
+  const outInCanvasCoords = vecToPoint([200, 300]);
+  const outInCircleCoords = translatePoint(outInCanvasCoords, translation);
 
-  const withinInCanvasCoords = [300, 500];
+  const withinInCanvasCoords = vecToPoint([300, 500]);
   const withinInCircleCoords = translatePoint(
-    {
-      x: withinInCanvasCoords[0],
-      y: withinInCanvasCoords[1],
-    },
+    withinInCanvasCoords,
     translation
   );
 
-  drawProbablyGreenCanvasPoint(...coreCircleCenterInCanvasCoords);
-  drawProbablyGreenCanvasPoint(...outInCanvasCoords);
-  drawProbablyGreenCanvasPoint(...withinInCanvasCoords);
+  drawProbablyGreenCanvasPoint(coreCircleCenterInCanvasCoords);
+  drawProbablyGreenCanvasPoint(outInCanvasCoords);
+  drawProbablyGreenCanvasPoint(withinInCanvasCoords);
 
   // to circle coords
   translate(translation.x, translation.y);
 
   noFill();
-  circle(...coreCircleCenterInCircleCoords, coreCircleRadius * 2);
-  drawProbablyBlueCirclePoint(...coreCircleCenterInCircleCoords);
-  drawProbablyBlueCirclePoint(outInCircleCoords.x, outInCircleCoords.y);
-  drawProbablyBlueCirclePoint(withinInCircleCoords.x, withinInCircleCoords.y);
+  circle(
+    coreCircleCenterInCircleCoords.x,
+    coreCircleCenterInCircleCoords.y,
+    coreCircleRadius * 2
+  );
+  drawProbablyBlueCirclePoint(coreCircleCenterInCircleCoords);
+  drawProbablyBlueCirclePoint(outInCircleCoords);
+  drawProbablyBlueCirclePoint(withinInCircleCoords);
 
   const circles = [
-    {
-      x: coreCircleCenterInCircleCoords[0],
-      y: coreCircleCenterInCircleCoords[1],
-    },
+    coreCircleCenterInCircleCoords,
     outInCircleCoords,
     withinInCircleCoords,
   ];
@@ -314,10 +279,7 @@ function extraCircleCase() {
     if (
       isPointInsideCircle(
         { x, y },
-        {
-          x: coreCircleCenterInCircleCoords[0],
-          y: coreCircleCenterInCircleCoords[1],
-        },
+        coreCircleCenterInCircleCoords,
         coreCircleRadius
       )
     ) {
@@ -329,8 +291,15 @@ function extraCircleCase() {
   }
 
   let anotherTranslation = { x: 100, y: 300 };
+
+  let totalTranslation = {
+    x: translation.x + anotherTranslation.x,
+    y: translation.y + anotherTranslation.y,
+  };
+
   translate(anotherTranslation.x, anotherTranslation.y);
   // 0,0 is now at 100,300
+  console.debug(translatePoint({ x: 0, y: 0 }, totalTranslation));
 
   const extraCircleCenterPoint = { x: 100, y: -200 };
   // canvas coords: 600,500
@@ -345,24 +314,22 @@ function extraCircleCase() {
   );
   pop();
 
-  let totalTranslation = {
-    x: translation.x + anotherTranslation.x,
-    y: translation.y + anotherTranslation.y,
-  };
-
   // expected:
   // x: 400 + 100, y: 400 + 300
   // x: 500, y: 700
   console.debug({ totalTranslation });
 
-  drawProbablyBlueCirclePoint(extraCircleCenterPoint.x, extraCircleCenterPoint.y, 'red');
+  drawProbablyBlueCirclePoint(
+    extraCircleCenterPoint,
+    'red'
+  );
   const translated = translatePoint(
     { x: 600, y: 500 },
     { x: totalTranslation.x, y: totalTranslation.y }
   );
   console.debug({ translated });
 
-  drawProbablyBlueCirclePoint(translated.x, translated.y, 'magenta');
+  drawProbablyBlueCirclePoint(translated, 'magenta');
   console.debug({ translated });
 
   const imaginedMousePoint = { x: 550, y: 450 };
@@ -373,8 +340,7 @@ function extraCircleCase() {
   );
 
   drawProbablyBlueCirclePoint(
-    imaginedMousePointInCircleCoords.x,
-    imaginedMousePointInCircleCoords.y,
+    imaginedMousePointInCircleCoords,
     'plum'
   );
 
@@ -405,18 +371,18 @@ function extraCircleCase() {
     -translation.y - anotherTranslation.y
   );
 
-  drawProbablyGreenCanvasPoint(100, 100);
+  // drawProbablyGreenCanvasPoint({x: 100, y: 100});
 }
 
 function drawFeathersInlineVersion(chartDiameter) {
-  push()
-  noFill()
+  push();
+  noFill();
   circle(
     getCanvasWidth() / 2,
     getCanvasHeight() / 2,
     chartDiameter * DONUT_HOLE
   );
-  pop()
+  pop();
 
   for (const feather of cachedFeathers) {
     push();
@@ -505,11 +471,11 @@ function drawFeathersInlineVersion(chartDiameter) {
       y: translationCoordinates.y + translationToAnnotationCircleCenter.y,
     };
 
-    push()
-    strokeWeight(5)
-    stroke('magenta')
-    point(0, 0)
-    pop()
+    push();
+    strokeWeight(5);
+    stroke('magenta');
+    point(0, 0);
+    pop();
 
     noFill();
     line(0, 0, 0, -yTranslation);
@@ -546,7 +512,7 @@ function drawFeathersInlineVersion(chartDiameter) {
 
     // reset the translation coordinates
     // if we weren't storing them, push/pop would take care of it, but we use these later
-    translate(0,0)
+    translate(0, 0);
     translationCoordinates = {
       x: 0,
       y: 0,
