@@ -69,15 +69,9 @@ class Feather {
     /* REMEMBER: isMousePressed won't work if you aren't using `draw`! */
 
     // translate to the tip of the feather
-    const translationToFeatherTip = { x: 0, y: this.length };
+    const translationToFeatherTip = { x: 100, y: 100 };
     this.translationCoordinates.addTranslation(translationToFeatherTip);
-
-    // gut check: yes, our current 0,0 is in the center of the annotation circle
-    push();
-    stroke('orange');
-    strokeWeight(4);
-    point(0, 0);
-    pop();
+    drawCoordinatePoints('cyan')
 
     const featherCircleCenter = { x: 0, y: 0 };
     const radius = this.length / 15;

@@ -39,6 +39,8 @@ const getCanvasHeight = () => 800;
 const getCanvasWidth = () => 800;
 const getMaximumChartDiameter = () => getCanvasWidth();
 
+const GRID_COUNT= getCanvasHeight() / 100;
+
 // -----------------------------------
 // ------- Lifecycle functions -------
 // -----------------------------------
@@ -67,11 +69,14 @@ function setup() {
 
   background(BACKGROUND);
 
+  drawGrid(GRID_COUNT)
+
   maximumData = toMaximumInfoColumns(loadedTableData, CHUNK_SIZE);
   initPalettes();
 
   const transCoords = TranslationCoordinates.createCoordinates();
   cachedFeathers = createFeathers(TOP_BIRD_INFO, maximumData, transCoords);
+  cachedFeathers = [cachedFeathers[0]]
 
   const chartDiameter = getMaximumChartDiameter();
   drawFeathers(chartDiameter);
@@ -107,6 +112,8 @@ function initPalettes() {
  * @param {TranslationCoordinates} transCoords
  */
 function drawFeathers(chartDiameter) {
+  drawCoordinatePoints('red')
+
   for (const feather of cachedFeathers) {
     push();
 
@@ -117,6 +124,7 @@ function drawFeathers(chartDiameter) {
 
     // hmmmm, not sure this should be on feather, but does make it easier
     feather.translationCoordinates.addTranslation(translationToCanvasCenter);
+    drawCoordinatePoints('orange')
 
     push();
     noFill();
@@ -124,6 +132,7 @@ function drawFeathers(chartDiameter) {
     pop();
 
     rotate(feather.angle);
+    drawCoordinatePoints('yellow')
 
     // translates us to the outside of the circle above
     const translationToDonutHoleEdge = {
@@ -131,6 +140,7 @@ function drawFeathers(chartDiameter) {
       y: (chartDiameter * DONUT_HOLE) / 2,
     };
     feather.translationCoordinates.addTranslation(translationToDonutHoleEdge);
+    drawCoordinatePoints('lime')
 
     feather.draw();
 

@@ -156,3 +156,18 @@ function drawGrid(gridCount) {
 
   pop();
 }
+
+function drawCoordinatePoints(strokeColor) {
+  push()
+
+  stroke(strokeColor)
+  strokeWeight(5)
+
+  text('x=0,y=0', 0, 0)
+  text('x=1,y=0', 100, 0)
+  text('x=0,y=1', 0, 100)
+  text('x=-1,y=0', -100, 0)
+  text('x=0,y=-1', 0, -100)
+
+  pop()
+}
