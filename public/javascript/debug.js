@@ -11,8 +11,10 @@ const translationCoordinates = {
  * @param {Point} point
  */
 const addTranslation = ({ x, y }) => {
+  console.debug(getCurrentTranslation())
   translationCoordinates.x += x;
   translationCoordinates.y += y;
+  console.debug(getCurrentTranslation())
 
   _doTranslation();
 };
@@ -40,7 +42,7 @@ const resetTranslation = () => {
   resetTranslationCoordinates();
 };
 
-const getCurrentTranslation = () => translationCoordinates;
+const getCurrentTranslation = () => translationCoordinates.getCurrent();
 
 const _doTranslation = () => {
   const { x, y } = translationCoordinates;
@@ -80,7 +82,6 @@ function debugDraw() {
   const coreCircleRadius = 200;
 
   const outInCanvasCoords = { x: 200, y: 300 };
-
   const withinInCanvasCoords = { x: 300, y: 500 };
 
   drawProbablyGreenCanvasPoint(coreCircleCenterInCanvasCoords);
@@ -145,8 +146,9 @@ function debugDraw() {
 
   // FIRST TRANSLATION + SECOND TRANSLATION
   // DEBUG: this is where things are falling apart
+  console.debug({ before2nd: getCurrentTranslation() })
   addTranslation({ x: 100, y: 300 });
-  console.debug(translatePoint({ x: 0, y: 0 }, getCurrentTranslation()));
+  console.debug({ after2nd: getCurrentTranslation() });
 
   const extraCircleCenterPoint = { x: 100, y: -200 };
   const extraCircleRadius = 100;
@@ -160,10 +162,7 @@ function debugDraw() {
   );
   pop();
 
-  drawProbablyBlueCirclePoint(
-    extraCircleCenterPoint,
-    'red'
-  );
+  drawProbablyBlueCirclePoint(extraCircleCenterPoint, 'red');
 
   const translated = translatePoint(
     { x: 600, y: 500 },

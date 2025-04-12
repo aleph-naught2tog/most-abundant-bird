@@ -231,30 +231,30 @@ function uncenteredCase() {
 function extraCircleCase() {
   drawGrid(GRID_COUNT);
 
-  let coreCircleCenterInCanvasCoords = vecToPoint([width / 2, height / 2]);
-  let coreCircleCenterInCircleCoords = vecToPoint([0, 0]);
+  let coreCircleCenterInCanvasCoords = { x: width / 2, y: height / 2 };
+  let coreCircleCenterInCircleCoords = { x: 0, y: 0 };
   let coreCircleRadius = 200;
+
+  const outInCanvasCoords = { x: 200, y: 300 };
+  const withinInCanvasCoords = { x: 300, y: 500 };
+
+  drawProbablyGreenCanvasPoint(coreCircleCenterInCanvasCoords);
+  drawProbablyGreenCanvasPoint(outInCanvasCoords);
+  drawProbablyGreenCanvasPoint(withinInCanvasCoords);
 
   let translation = {
     x: coreCircleCenterInCanvasCoords.x,
     y: coreCircleCenterInCanvasCoords.y,
   };
 
-  const outInCanvasCoords = vecToPoint([200, 300]);
-  const outInCircleCoords = translatePoint(outInCanvasCoords, translation);
+  // to circle coords
+  translate(translation.x, translation.y);
 
-  const withinInCanvasCoords = vecToPoint([300, 500]);
+  const outInCircleCoords = translatePoint(outInCanvasCoords, translation);
   const withinInCircleCoords = translatePoint(
     withinInCanvasCoords,
     translation
   );
-
-  drawProbablyGreenCanvasPoint(coreCircleCenterInCanvasCoords);
-  drawProbablyGreenCanvasPoint(outInCanvasCoords);
-  drawProbablyGreenCanvasPoint(withinInCanvasCoords);
-
-  // to circle coords
-  translate(translation.x, translation.y);
 
   noFill();
   circle(
@@ -298,8 +298,7 @@ function extraCircleCase() {
   };
 
   translate(anotherTranslation.x, anotherTranslation.y);
-  // 0,0 is now at 100,300
-  console.debug(translatePoint({ x: 0, y: 0 }, totalTranslation));
+  console.debug({ totalTranslation })
 
   const extraCircleCenterPoint = { x: 100, y: -200 };
   // canvas coords: 600,500
@@ -319,10 +318,7 @@ function extraCircleCase() {
   // x: 500, y: 700
   console.debug({ totalTranslation });
 
-  drawProbablyBlueCirclePoint(
-    extraCircleCenterPoint,
-    'red'
-  );
+  drawProbablyBlueCirclePoint(extraCircleCenterPoint, 'red');
   const translated = translatePoint(
     { x: 600, y: 500 },
     { x: totalTranslation.x, y: totalTranslation.y }
@@ -339,10 +335,7 @@ function extraCircleCase() {
     totalTranslation
   );
 
-  drawProbablyBlueCirclePoint(
-    imaginedMousePointInCircleCoords,
-    'plum'
-  );
+  drawProbablyBlueCirclePoint(imaginedMousePointInCircleCoords, 'plum');
 
   if (
     isPointInsideCircle(
