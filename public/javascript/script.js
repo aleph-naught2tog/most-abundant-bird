@@ -8,6 +8,7 @@
   * a fake mouse point is being used so we don't need the `draw` loop; it IS
     within the smallest circle at the top of the feather
   * the `isPointWithinCircle`, `translatePoint`, and `TranslationCoordinates` all work as intended in the `debug.html` file
+  *  we're only rendering 2 feathers intentionally (so we can hardcode a fake mouse point we know is within bounds)
 
   The thing that is broken is that when we click with the mouse (this is
   currently a hardcoded fake mouse click within the top circle), the x
@@ -20,7 +21,7 @@ const BACKGROUND = 'lemonchiffon';
 const DONUT_HOLE = 0.2;
 
 // upper limit is half the length of
-const CHUNK_SIZE = 2;
+const CHUNK_SIZE = 24;
 const COLOR_COUNT = 50;
 
 let hoveredBirdName = null;
