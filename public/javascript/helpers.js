@@ -1,3 +1,7 @@
+/**
+ * @typedef {{x: number, y: number}} Point
+ */
+
 function createPalette(image, num, start, end) {
   // h/t to Jer Thorp for this!
 

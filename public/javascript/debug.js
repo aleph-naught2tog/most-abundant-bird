@@ -1,42 +1,3 @@
-/**
- * @typedef {{x: number, y: number}} Point
- */
-
-const translationCoordinates = {
-  x: 0,
-  y: 0,
-};
-
-class TranslationCoordinates {
-  constructor() {
-    this.x = 0;
-    this.y = 0;
-  }
-
-  addTranslation({ x, y }) {
-    // We must translate first or we end up translating too far
-    translate(x, y);
-
-    this.x += x;
-    this.y += y;
-  }
-
-  getCurrentTranslation() {
-    return {
-      x: this.x,
-      y: this.y,
-    };
-  }
-
-  revertTranslation() {
-    const { x, y } = { x: -this.x, y: -this.y };
-
-    translate(x, y);
-
-    this.x += x;
-    this.y += y;
-  }
-}
 
 // --------
 
@@ -65,7 +26,7 @@ function debugDraw() {
   background(BACKGROUND);
   drawGrid(GRID_COUNT);
 
-  const transCoords = new TranslationCoordinates();
+  const transCoords = TranslationCoordinates.createCoordinates();
 
   // NO TRANSLATION
   let coreCircleCenterInCanvasCoords = { x: width / 2, y: height / 2 };
@@ -105,7 +66,6 @@ function debugDraw() {
     coreCircleCenterInCircleCoords.y,
     coreCircleRadius * 2
   );
-
 
   drawProbablyBlueCirclePoint(coreCircleCenterInCircleCoords);
   drawProbablyBlueCirclePoint(outInCircleCoords);

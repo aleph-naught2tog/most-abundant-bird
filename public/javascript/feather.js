@@ -1,5 +1,7 @@
 const ALPHA = 0.9;
 
+const FAKE_MOUSE_POINT = { x: 405, y: 120 };
+
 class Feather {
   // these are mostly for clarity
   barbs = [];
@@ -7,12 +9,23 @@ class Feather {
   colors = [[]];
   length = -1;
 
+  /**
+   * @param {Object} options
+   * @param {Array<Barb>} options.barbs
+   * @param {number} options.angle in radians
+   * @param {number} options.length
+   * @param {TranslationCoordinates} options.translationCoordinates
+   */
   constructor(options) {
-    const { barbs, angle, colors, length } = options;
-    this.barbs = barbs ?? [];
+    const { barbs, angle, colors, length, translationCoordinates } = options;
+    // this is awkward but types!
+    const defaultBarbs = /** @type {Array<Barb>} */ ([]);
+
+    this.barbs = barbs ?? defaultBarbs;
     this.angle = angle;
     this.colors = colors;
     this.length = length;
+    this.translationCoordinates = translationCoordinates;
   }
 
   draw() {
@@ -21,7 +34,7 @@ class Feather {
     const leftBarbs = this.barbs.slice(0, lengthDivider);
     const rightBarbs = this.barbs.slice(lengthDivider);
 
-    push()
+    push();
     scale(1, 2);
 
     for (const barb of leftBarbs) {
@@ -33,9 +46,10 @@ class Feather {
     for (const barb of rightBarbs) {
       barb.draw();
     }
-    pop()
+    pop();
 
     this._drawRachis();
+
     this._drawAnnotation();
   }
 
@@ -51,16 +65,37 @@ class Feather {
   }
 
   _drawAnnotation() {
+    /* REMEMBER: isMousePressed won't work if you aren't using `draw`! */
+
+    // translate to the tip of the feather
+    const translationToFeatherTip = { x: 0, y: this.length };
+    this.translationCoordinates.addTranslation(translationToFeatherTip);
+
+    // gut check: yes, our current 0,0 is in the center of the annotation circle
+    push();
+    stroke('orange');
+    strokeWeight(4);
+    point(0, 0);
+    pop();
+
     const featherCircleCenter = { x: 0, y: 0 };
     const radius = this.length / 15;
 
-    noFill()
+    noFill();
     circle(featherCircleCenter.x, featherCircleCenter.y, radius * 2);
 
-    const mousePoint = { x: mouseX, y: mouseY };
+    // if (mouseIsPressed) {
+    // const mousePoint = { x: mouseX, y: mouseY };
+
+    // using a fake mouse point that should be within the circle so we can test
+    // this without a million debugs from `draw`
+    const mousePoint = FAKE_MOUSE_POINT;
+
+    // This value is what's wrong
+    // The X is correct, but the Y is wrong
     const mousePointInCircleTerms = translatePoint(
       mousePoint,
-      translationCoordinates
+      this.translationCoordinates.getCurrentTranslation()
     );
 
     const isMouseWithinCircle = isPointInsideCircle(
@@ -69,47 +104,26 @@ class Feather {
       radius
     );
 
-    if (mouseIsPressed) {
-      console.debug(radius, {
-        mousePoint,
-        mousePointInCircleTerms,
-      });
+    console.debug(radius, {
+      mousePoint,
+      mousePointInCircleTerms,
+      isMouseWithinCircle,
+      translation: this.translationCoordinates.getCurrentTranslation(),
+    });
 
-      if (isMouseWithinCircle) {
-        throw new Error("we did it!");
-      }
-    }
+
+    // }
   }
 
   _drawRachis() {
     const sw = map(this.length, 10, window.width / 4, 0.5, 1);
     strokeWeight(sw);
-
     stroke(this._getRachisColor());
 
-    const yTranslation = this.length / 2 + 20;
-    // const translationToAnnotationCircleCenter = {
-    //   x: 0,
-    //   y: yTranslation,
-    // };
+    const rachisLength = this.length / 2;
 
-    // translate(
-    //   translationToAnnotationCircleCenter.x,
-    //   translationToAnnotationCircleCenter.y
-    // );
-
-    // translationCoordinates = {
-    //   x: translationCoordinates.x + translationToAnnotationCircleCenter.x,
-    //   y: translationCoordinates.y + translationToAnnotationCircleCenter.y,
-    // };
-
-    noFill();
-    line(0, 0, 0, -yTranslation);
-
-    // translationCoordinates = {
-    //   x: translationCoordinates.x - translationToAnnotationCircleCenter.x,
-    //   y: translationCoordinates.y - translationToAnnotationCircleCenter.y,
-    // }
+    // draw a line from the outer circle to halfway up the feather
+    line(0, 0, 0, rachisLength);
   }
 
   createBarbs() {
