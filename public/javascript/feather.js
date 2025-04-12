@@ -64,6 +64,7 @@ class Feather {
     return [red, green, blue, alpha];
   }
 
+  // THIS is the failure spot
   _drawAnnotation() {
     /* REMEMBER: isMousePressed won't work if you aren't using `draw`! */
 
@@ -93,6 +94,7 @@ class Feather {
 
     // This value is what's wrong
     // The X is correct, but the Y is wrong
+    // it SHOULD be a small X and a small Y
     const mousePointInCircleTerms = translatePoint(
       mousePoint,
       this.translationCoordinates.getCurrentTranslation()

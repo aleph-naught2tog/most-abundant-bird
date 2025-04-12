@@ -1,3 +1,21 @@
+/*
+  Debug notes:
+  * pages
+    * debug.html uses the basic translation and point translation/checking code,
+      and works as intended
+    * index.html is the actual bird code, and is broken
+  * we're calling the script once in `setup`
+  * a fake mouse point is being used so we don't need the `draw` loop; it IS
+    within the smallest circle at the top of the feather
+  * the `isPointWithinCircle`, `translatePoint`, and `TranslationCoordinates` all work as intended in the `debug.html` file
+
+  The thing that is broken is that when we click with the mouse (this is
+  currently a hardcoded fake mouse click within the top circle), the x
+  coordinate translates correctly, but the y coordinate is super off.
+
+  Specifically, the issue appears to be in Feather#_drawAnnotation.
+*/
+
 const BACKGROUND = 'lemonchiffon';
 const DONUT_HOLE = 0.2;
 
