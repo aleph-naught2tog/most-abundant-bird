@@ -61,6 +61,7 @@ function draw() {
 }
 
 function debugDraw() {
+  push()
   background(BACKGROUND);
   drawGrid(GRID_COUNT);
 
@@ -86,6 +87,7 @@ function debugDraw() {
   // return;
   // FIRST TRANSLATION: center us in the grid
   transCoords.addTranslation(firstTranslation);
+  drawOrigin()
 
   const outInCircleCoords = translatePoint(
     outInCanvasCoords,
@@ -103,6 +105,7 @@ function debugDraw() {
     coreCircleCenterInCircleCoords.y,
     coreCircleRadius * 2
   );
+
 
   drawProbablyBlueCirclePoint(coreCircleCenterInCircleCoords);
   drawProbablyBlueCirclePoint(outInCircleCoords);
@@ -140,6 +143,7 @@ function debugDraw() {
 
   // FIRST TRANSLATION + SECOND TRANSLATION
   transCoords.addTranslation(anotherTranslation);
+  drawOrigin()
 
   // current translation: { x: 500, y: 700 }
   // the translations in both files are equal at this point
@@ -194,9 +198,16 @@ function debugDraw() {
   }
 
   // BACK to canvas coords
-  transCoords.revertTranslation();
+  pop()
 
   drawProbablyGreenCanvasPoint({ x: 100, y: 100 });
 }
 
 // ---------
+function drawOrigin(text) {
+  push()
+  stroke('black')
+  fill('orange')
+  circle(0, 0, 4)
+  pop()
+}
