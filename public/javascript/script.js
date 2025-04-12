@@ -20,7 +20,7 @@ const BACKGROUND = 'lemonchiffon';
 const DONUT_HOLE = 0.2;
 
 // upper limit is half the length of
-const CHUNK_SIZE = 24;
+const CHUNK_SIZE = 2;
 const COLOR_COUNT = 50;
 
 let hoveredBirdName = null;
@@ -134,8 +134,6 @@ function drawFeathers(chartDiameter) {
     feather.draw();
 
     pop();
-
-    feather.translationCoordinates.revertTranslation();
   }
 }
 
