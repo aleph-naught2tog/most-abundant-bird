@@ -58,8 +58,8 @@ function setup() {
   initPalettes();
 
   cachedFeathers = createFeathers(TOP_BIRD_INFO, maximumData);
-  const chartDiameter = getChartDiameter();
-  drawFeathers(chartDiameter);
+  // const chartDiameter = getChartDiameter();
+  // drawFeathers(chartDiameter);
   // drawGrid();
   // extraCircleCase();
 }
@@ -67,7 +67,8 @@ function setup() {
 function draw() {
   const chartDiameter = getChartDiameter();
   background(BACKGROUND);
-  drawFeathers(chartDiameter);
+  drawFeathersInlineVersion(chartDiameter);
+  // drawFeathers(chartDiameter)
 }
 
 // -----------------------------------
@@ -405,4 +406,152 @@ function extraCircleCase() {
   );
 
   drawCanvasPoint(100, 100);
+}
+
+function drawFeathersInlineVersion(chartDiameter) {
+  push()
+  noFill()
+  circle(
+    getCanvasWidth() / 2,
+    getCanvasHeight() / 2,
+    chartDiameter * DONUT_HOLE
+  );
+  pop()
+
+  for (const feather of cachedFeathers) {
+    push();
+
+    const firstTranslation = { x: chartDiameter / 2, y: chartDiameter / 2 };
+    translate(firstTranslation.x, firstTranslation.y);
+    translationCoordinates = {
+      x: translationCoordinates.x + firstTranslation.x,
+      y: translationCoordinates.y + firstTranslation.y,
+    };
+
+    rotate(feather.angle);
+
+    // this bumps the feathers to outside of the inner implicit circle
+    // This seems to be what messes things up.
+    const secondTranslationCoords = {
+      x: 0,
+      y: (chartDiameter * DONUT_HOLE) / 2,
+    };
+    translate(secondTranslationCoords.x, secondTranslationCoords.y);
+    translationCoordinates = {
+      x: translationCoordinates.x + secondTranslationCoords.x,
+      y: translationCoordinates.y + secondTranslationCoords.y,
+    };
+
+    const lengthDivider = floor(feather.barbs.length / 2);
+
+    const leftBarbs = feather.barbs.slice(0, lengthDivider);
+    const rightBarbs = feather.barbs.slice(lengthDivider);
+
+    push();
+    scale(1, 2);
+
+    for (const barb of leftBarbs) {
+      // --- barb.draw()
+      push();
+
+      strokeWeight(barb.thickness);
+      stroke(barb.color);
+
+      beginShape();
+      vertex(barb.start.x, barb.start.y);
+      vertex(barb.end.x, barb.end.y);
+      endShape();
+
+      pop();
+    }
+
+    scale(-2, 1);
+
+    for (const barb of rightBarbs) {
+      // ---- barb.draw()
+      push();
+
+      strokeWeight(barb.thickness);
+      stroke(barb.color);
+
+      beginShape();
+      vertex(barb.start.x, barb.start.y);
+      vertex(barb.end.x, barb.end.y);
+      endShape();
+
+      pop();
+    }
+    pop();
+
+    // --- feather._drawRachis();
+    const sw = map(feather.length, 10, window.width / 4, 0.5, 1);
+    strokeWeight(sw);
+
+    stroke(feather._getRachisColor());
+
+    const yTranslation = feather.length;
+    const translationToAnnotationCircleCenter = {
+      x: 0,
+      y: yTranslation,
+    };
+
+    translate(
+      translationToAnnotationCircleCenter.x,
+      translationToAnnotationCircleCenter.y
+    );
+
+    translationCoordinates = {
+      x: translationCoordinates.x + translationToAnnotationCircleCenter.x,
+      y: translationCoordinates.y + translationToAnnotationCircleCenter.y,
+    };
+
+    push()
+    strokeWeight(5)
+    stroke('magenta')
+    point(0, 0)
+    pop()
+
+    noFill();
+    line(0, 0, 0, -yTranslation);
+
+    // --- feather._drawAnnotation();
+    const featherCircleCenter = { x: 0, y: 0 };
+    const radius = feather.length / 15;
+
+    noFill();
+    circle(featherCircleCenter.x, featherCircleCenter.y, radius * 2);
+
+    const mousePoint = { x: mouseX, y: mouseY };
+    const mousePointInCircleTerms = translatePoint(
+      mousePoint,
+      translationCoordinates
+    );
+
+    const isMouseWithinCircle = isPointInsideCircle(
+      mousePointInCircleTerms,
+      featherCircleCenter,
+      radius
+    );
+
+    if (mouseIsPressed) {
+      console.debug(radius, {
+        mousePoint,
+        mousePointInCircleTerms,
+      });
+
+      if (isMouseWithinCircle) {
+        throw new Error('we did it!');
+      }
+    }
+
+    // reset the translation coordinates
+    // if we weren't storing them, push/pop would take care of it, but we use these later
+    translate(0,0)
+    translationCoordinates = {
+      x: 0,
+      y: 0,
+    };
+
+    pop();
+  }
 }
