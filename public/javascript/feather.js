@@ -48,13 +48,53 @@ class Feather {
 
     stroke([red, green, blue, alpha]);
 
+    const featherCircleCenter = { x: 0, y: this.length / 2 + 20 };
 
-    noFill()
+    push();
+    strokeWeight(3);
+    stroke('lime');
+    point(featherCircleCenter.x, featherCircleCenter.y);
+    pop();
+
+    const radius = this.length / 10;
+
+    noFill();
     line(0, this.length / 2, 0, this.length / 2 + 20);
-    circle(0, this.length / 2 + 20, this.length / 10)
 
-    // https://study.com/skill/learn/determining-if-a-point-lies-inside-outside-or-on-a-circle-given-the-center-point-a-radius-explanation.html
-    // if mouse within circle, show bird name + value, brighten feather
+    circle(featherCircleCenter.x, featherCircleCenter.y, radius);
+
+    // BUG: this isn't working because the mouseX, mouseY are in absolute coordinates
+    const mousePoint = { x: mouseX, y: mouseY };
+    const mousePointInCircleTerms = translatePoint(mousePoint, {
+      x: translationCoordinates.x, // + center.x,
+      y: translationCoordinates.y, // + center.y,
+    });
+
+    const featherCircleCenterInCanvasTerms = translatePoint(featherCircleCenter, {
+      x: translationCoordinates.x,
+      y: translationCoordinates.y,
+    });
+
+    const isMouseWithinCircle = isPointInsideCircle(
+      mousePointInCircleTerms,
+      featherCircleCenter,
+      radius
+    );
+
+    if (mouseIsPressed) {
+      console.debug(
+        radius,
+        {
+          mousePoint,
+          mousePointInCircleTerms,
+        },
+        { featherCircleCenter, featherCircleCenterInCanvasTerms }
+      );
+
+      if (isMouseWithinCircle) {
+        throw new Error();
+      }
+    }
   }
 
   createBarbs() {

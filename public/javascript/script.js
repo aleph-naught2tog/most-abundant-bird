@@ -1,26 +1,39 @@
-const BACKGROUND = 'lemonchiffon';
+// const BACKGROUND = 'lemonchiffon';
+const BACKGROUND = 'lightgray';
 const DONUT_HOLE = 0.2;
-const CHUNK_SIZE = 2;
+
+// upper limit is half the length
+const CHUNK_SIZE = 24;
 const COLOR_COUNT = 50;
 
 let hoveredBirdName = null;
-let maximumData;
 
+let maximumData;
 let cachedFeathers;
+let loadedTableData;
+let translationCoordinates;
+
+// TODO: center at center
+// TODO: is mouse within canvas
 
 // end point of feather -- draw from there and do bird name
 // pop the feather
 
 // windowHeight will exist by the time this is called
-const getCanvasHeight = () => windowHeight - 128;
-const getCanvasWidth = () => windowWidth - 64;
-const getChartDiameter = () => windowWidth / 2;
+// const getCanvasHeight = () => windowWidth / 2;
+const getCanvasHeight = () => 800;
+// const getCanvasWidth = () => windowWidth / 2;
+const getCanvasWidth = () => 800;
+const getChartDiameter = () => getCanvasWidth();
+
+// canvas is 0,0 in the top left corner
+// canvas.{0,0} === center.{}
+const translateToCenter = () =>
+  translate(getCanvasHeight() / 2, getCanvasWidth() / 2);
 
 // -----------------------------------
 // ------- Lifecycle functions -------
 // -----------------------------------
-
-// TODO: highlight chunk of circle -> pop out those feathers, dim other feathers
 
 function preload() {
   loadTable('/data/wi_histogram.tsv', 'tsv', (data) => {
@@ -46,23 +59,16 @@ function setup() {
 
   background(BACKGROUND);
 
-  maximumData = toMaximumInfoColumns(loadedTableData, CHUNK_SIZE);
-  initPalettes();
+  // maximumData = toMaximumInfoColumns(loadedTableData, CHUNK_SIZE);
+  // initPalettes();
 
-  cachedFeathers = createFeathers(TOP_BIRD_INFO, maximumData);
-  const maxLength =  max(cachedFeathers.map(f => f.length))
+  // cachedFeathers = createFeathers(TOP_BIRD_INFO, maximumData);
 
+  drawGrid();
 
-  const chartDiameter = getChartDiameter()
-  // push()
-  // translate(chartDiameter / 2, chartDiameter / 3)
-  // noFill()
-  // circle(0, 0, DONUT_HOLE * maxLength * 2 - 20)
-  // pop()
-
-
-  // window.width is a p5 thing
-  drawFeathers(chartDiameter);
+  // centeredCase();
+  // uncenteredCase();
+  extraCircleCase();
 }
 
 function draw() {
@@ -91,13 +97,28 @@ function initPalettes() {
 function drawFeathers(chartDiameter) {
   for (const feather of cachedFeathers) {
     push();
+    firstTranslation = { x: chartDiameter / 2, y: chartDiameter / 2 };
+    translate(firstTranslation.x, firstTranslation.y);
+    translationCoordinates = firstTranslation;
 
-    translate(chartDiameter / 2, chartDiameter / 3);
+    push();
+    strokeWeight(10);
+    point(0, 0);
+    pop();
 
     rotate(feather.angle);
 
-    // this bumps the feathers to outside of the inner implicit circle
-    translate(0, (chartDiameter * DONUT_HOLE) / 2);
+    // // this bumps the feathers to outside of the inner implicit circle
+    // secondTranslationCoords = {
+    //   x: translationCoordinates.x,
+    //   y: (chartDiameter * DONUT_HOLE) / 2,
+    // };
+
+    // translate(0, (chartDiameter * DONUT_HOLE) / 2);
+    // translationCoordinates = {
+    //   x: firstTranslation.x + secondTranslationCoords.x,
+    //   y: firstTranslation.y + secondTranslationCoords.y,
+    // };
 
     feather.draw();
 
@@ -153,4 +174,213 @@ function createFeathers(birdInfo, preppedData) {
   }
 
   return feathers;
+}
+
+function drawGrid() {
+  push();
+  stroke('darkgray');
+  strokeWeight(2);
+
+  for (let x = 0; x <= width; x += width / 8) {
+    for (let y = 0; y <= width; y += height / 8) {
+      line(x, 0, x, height);
+      line(0, y, height, y);
+    }
+  }
+
+  pop();
+}
+
+function drawCanvasPoint(x, y, desiredColor) {
+  push();
+  strokeWeight(15);
+  const strokeC = desiredColor ?? color(0, 0, 255, 126);
+  stroke(strokeC);
+
+  point(x, y);
+  pop();
+}
+
+function drawCirclePoint(x, y, desiredColor) {
+  push();
+  strokeWeight(25);
+  const strokeC = desiredColor ?? color(0, 255, 0, 126);
+  stroke(strokeC);
+
+  point(x, y);
+  pop();
+}
+
+function centeredCase() {
+  let circleCenterInCanvasCoords = [width / 2, height / 2];
+  let circleCenterInCircleCoords = [0, 0];
+
+  let translation = { x: width / 2, y: height / 2 };
+  const outInCanvasCoords = [200, 300];
+  const outInCircleCoords = translatePoint(
+    { x: outInCanvasCoords[0], y: outInCanvasCoords[1] },
+    translation
+  );
+
+  drawCanvasPoint(...circleCenterInCanvasCoords);
+  drawCanvasPoint(...outInCanvasCoords);
+
+  translate(translation.x, translation.y);
+
+  drawCirclePoint(...circleCenterInCircleCoords);
+  drawCirclePoint(outInCircleCoords.x, outInCircleCoords.y);
+
+  translate(-translation.x, -translation.y);
+}
+
+function uncenteredCase() {
+  let circleCenterInCanvasCoords = [width / 2, height / 4];
+  let circleCenterInCircleCoords = [0, 0];
+
+  let translation = {
+    x: circleCenterInCanvasCoords[0],
+    y: circleCenterInCanvasCoords[1],
+  };
+
+  const outInCanvasCoords = [200, 300];
+  const outInCircleCoords = translatePoint(
+    { x: outInCanvasCoords[0], y: outInCanvasCoords[1] },
+    translation
+  );
+
+  drawCanvasPoint(...circleCenterInCanvasCoords);
+  drawCanvasPoint(...outInCanvasCoords);
+
+  // to circle coords
+  translate(translation.x, translation.y);
+
+  drawCirclePoint(...circleCenterInCircleCoords);
+  drawCirclePoint(outInCircleCoords.x, outInCircleCoords.y);
+
+  // BACK to canvas coords
+  translate(-translation.x, -translation.y);
+}
+
+function extraCircleCase() {
+  let coreCircleCenterInCanvasCoords = [width / 2, height / 2];
+  let coreCircleCenterInCircleCoords = [0, 0];
+  let coreCircleRadius = 200;
+
+  let translation = {
+    x: coreCircleCenterInCanvasCoords[0],
+    y: coreCircleCenterInCanvasCoords[1],
+  };
+
+  const outInCanvasCoords = [200, 300];
+  const outInCircleCoords = translatePoint(
+    { x: outInCanvasCoords[0], y: outInCanvasCoords[1] },
+    translation
+  );
+
+  const withinInCanvasCoords = [300, 500];
+  const withinInCircleCoords = translatePoint(
+    {
+      x: withinInCanvasCoords[0],
+      y: withinInCanvasCoords[1],
+    },
+    translation
+  );
+
+  drawCanvasPoint(...coreCircleCenterInCanvasCoords);
+  drawCanvasPoint(...outInCanvasCoords);
+  drawCanvasPoint(...withinInCanvasCoords);
+
+  // to circle coords
+  translate(translation.x, translation.y);
+
+  noFill();
+  circle(...coreCircleCenterInCircleCoords, coreCircleRadius * 2);
+  drawCirclePoint(...coreCircleCenterInCircleCoords);
+  drawCirclePoint(outInCircleCoords.x, outInCircleCoords.y);
+  drawCirclePoint(withinInCircleCoords.x, withinInCircleCoords.y);
+
+  const circles = [
+    {
+      x: coreCircleCenterInCircleCoords[0],
+      y: coreCircleCenterInCircleCoords[1],
+    },
+    outInCircleCoords,
+    withinInCircleCoords,
+  ];
+
+  for (const { x, y } of circles) {
+    push();
+    textSize(20);
+    fill('black');
+    if (
+      isPointInsideCircle(
+        { x, y },
+        {
+          x: coreCircleCenterInCircleCoords[0],
+          y: coreCircleCenterInCircleCoords[1],
+        },
+        coreCircleRadius
+      )
+    ) {
+      text('in', x, y);
+    } else {
+      text('out', x, y);
+    }
+    pop();
+  }
+
+  let anotherTranslation = { x: 100, y: 300 };
+  translate(anotherTranslation.x, anotherTranslation.y);
+  // 0,0 is now at 100,300
+
+  const extraCircleCenterPoint = { x: 100, y: -200 };
+  // canvas coords: 600,500
+  // move right 100, down 200 from 100,300
+  const extraCircleRadius = 100;
+  push();
+  stroke('red');
+  circle(extraCircleCenterPoint.x, extraCircleCenterPoint.y, extraCircleRadius * 2);
+  pop();
+
+  let totalTranslation = {
+    x: translation.x + anotherTranslation.x,
+    y: translation.y + anotherTranslation.y,
+  };
+
+  // expected:
+  // x: 400 + 100, y: 400 + 300
+  // x: 500, y: 700
+  console.debug({ totalTranslation })
+
+  drawCirclePoint(extraCircleCenterPoint.x, extraCircleCenterPoint.y, 'red');
+  const translated = translatePoint(
+    {x: 600, y: 500},
+    {x: totalTranslation.x, y: totalTranslation.y},
+  );
+  console.debug({translated})
+
+  drawCirclePoint(translated.x, translated.y, 'magenta');
+  console.debug({ translated });
+
+  const imaginedMousePoint = {x: 550, y: 450};
+  // console.debug(isPointInsideCircle(translated, extraCirclePoint, extraCircleRadius)) // true thank goodness
+  const imaginedMousePointInCircleCoords = translatePoint(imaginedMousePoint, totalTranslation);
+  drawCirclePoint(imaginedMousePointInCircleCoords.x, imaginedMousePointInCircleCoords.y, 'plum')
+  if (isPointInsideCircle(imaginedMousePointInCircleCoords, extraCircleCenterPoint, extraCircleRadius)) {
+    push()
+    console.log('boop')
+    fill('RebeccaPurple')
+    textSize(20)
+    text('I\'M IN', imaginedMousePoint.x, imaginedMousePoint.y)
+    pop()
+  }
+
+  // BACK to canvas coords
+  // we have to fold in ALL translations here
+  translate(
+    -translation.x - anotherTranslation.x,
+    -translation.y - anotherTranslation.y
+  );
+
+  drawCanvasPoint(100, 100);
 }

@@ -19,6 +19,10 @@ function getColorAtIndex(index, value, colors) {
   return colors[colorIndex];
 }
 
+/**
+ *
+ * @returns {number} the random stroke weight
+ */
 function getRandomStrokeWeight() {
   const randomNumber = Math.random();
   const strokeWeight = map(randomNumber, 0, 1, 0.25, 1.5);
@@ -30,6 +34,7 @@ function getRandomStrokeWeight() {
  * Creates an object of useful information for generating a feather.
  *
  * @param {number} length
+ *
  * @returns {{
  *  heightScale: number,
  *  featherWidth: number,
@@ -79,8 +84,8 @@ function getFeatherConfig(length) {
   `r`, then we are outside the circle; if it's less than `r`, we are within the
   circle.
 
- * @param {Point} point the point we're checking
- * @param {Point} circleCenter the center of the circle
+ * @param {{x: number, y: number}} point the point we're checking
+ * @param {{x: number, y: number}} circleCenter the center of the circle
  * @param {number} circleRadius the radius of the circle
  *
  * @returns {boolean} whether the point is within the circle
@@ -94,4 +99,17 @@ function isPointInsideCircle(point, circleCenter, circleRadius) {
   const distanceToPointFromCenter = sqrt(xDistance ** 2 + yDistance ** 2);
 
   return distanceToPointFromCenter < circleRadius;
+}
+
+/**
+ *
+ * @param {{x: number, y: number}} point
+ *
+ * @returns {{x: number, y: number}} the point in relation to the canvas
+ */
+function translatePoint(pointToMap, translationCoordinates) {
+  return {
+    x: pointToMap.x - translationCoordinates.x,
+    y: pointToMap.y - translationCoordinates.y,
+  }
 }
