@@ -21,6 +21,7 @@ class Feather {
     const leftBarbs = this.barbs.slice(0, lengthDivider);
     const rightBarbs = this.barbs.slice(lengthDivider);
 
+    push()
     scale(1, 2);
 
     for (const barb of leftBarbs) {
@@ -32,48 +33,38 @@ class Feather {
     for (const barb of rightBarbs) {
       barb.draw();
     }
+    pop()
 
-    this._drawRachis();
+    // this._drawRachis();
+    this._drawAnnotation();
   }
 
-  _drawRachis() {
+  _getRachisColor() {
     const exemplarBarb = this.barbs[0];
-
-    strokeWeight(map(this.length, 10, window.width / 4, 0.5, 1));
 
     const red = exemplarBarb.color[0] / 1.25;
     const green = exemplarBarb.color[1] / 1.25;
     const blue = exemplarBarb.color[2] / 1.25;
     const alpha = exemplarBarb.color[3] * 0.95;
 
-    stroke([red, green, blue, alpha]);
+    return [red, green, blue, alpha];
+  }
 
-    const featherCircleCenter = { x: 0, y: this.length / 2 + 20 };
+  _drawAnnotation() {
+    // this is the NEW circle
+    // we just changed coords, so we're back at 0,0
+    const featherCircleCenter = { x: 0, y: 0 };
+    const radius = this.length / 15;
 
-    push();
-    strokeWeight(3);
-    stroke('lime');
-    point(featherCircleCenter.x, featherCircleCenter.y);
-    pop();
+    noFill()
+    circle(featherCircleCenter.x, featherCircleCenter.y, radius * 2);
 
-    const radius = this.length / 10;
-
-    noFill();
-    line(0, this.length / 2, 0, this.length / 2 + 20);
-
-    circle(featherCircleCenter.x, featherCircleCenter.y, radius);
-
-    // BUG: this isn't working because the mouseX, mouseY are in absolute coordinates
+    // BUG: this isn't working because the translated Y is SUPER SUPER wrong
     const mousePoint = { x: mouseX, y: mouseY };
-    const mousePointInCircleTerms = translatePoint(mousePoint, {
-      x: translationCoordinates.x, // + center.x,
-      y: translationCoordinates.y, // + center.y,
-    });
-
-    const featherCircleCenterInCanvasTerms = translatePoint(featherCircleCenter, {
-      x: translationCoordinates.x,
-      y: translationCoordinates.y,
-    });
+    const mousePointInCircleTerms = translatePoint(
+      mousePoint,
+      translationCoordinates
+    );
 
     const isMouseWithinCircle = isPointInsideCircle(
       mousePointInCircleTerms,
@@ -82,19 +73,45 @@ class Feather {
     );
 
     if (mouseIsPressed) {
-      console.debug(
-        radius,
-        {
-          mousePoint,
-          mousePointInCircleTerms,
-        },
-        { featherCircleCenter, featherCircleCenterInCanvasTerms }
-      );
+      console.debug(radius, {
+        mousePoint,
+        mousePointInCircleTerms,
+      });
 
       if (isMouseWithinCircle) {
-        throw new Error();
+        console.error(radius, {
+          mousePoint,
+          mousePointInCircleTerms,
+        })
+        throw new Error("within circle");
       }
     }
+  }
+
+  _drawRachis() {
+    const sw = map(this.length, 10, window.width / 4, 0.5, 1);
+    strokeWeight(sw);
+
+    stroke(this._getRachisColor());
+
+    const yTranslation = this.length / 2 + 20;
+    const translationToAnnotationCircleCenter = {
+      x: 0,
+      y: yTranslation,
+    };
+
+    translate(
+      translationToAnnotationCircleCenter.x,
+      translationToAnnotationCircleCenter.y
+    );
+
+    translationCoordinates = {
+      x: translationCoordinates.x + translationToAnnotationCircleCenter.x,
+      y: translationCoordinates.y + translationToAnnotationCircleCenter.y,
+    };
+
+    noFill();
+    line(0, 0, 0, -yTranslation);
   }
 
   createBarbs() {

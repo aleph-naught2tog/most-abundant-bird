@@ -103,7 +103,8 @@ function isPointInsideCircle(point, circleCenter, circleRadius) {
 
 /**
  *
- * @param {{x: number, y: number}} point
+ * @param {{x: number, y: number}} pointToMap
+ * @param {{x: number, y: number}} translationCoordinates
  *
  * @returns {{x: number, y: number}} the point in relation to the canvas
  */

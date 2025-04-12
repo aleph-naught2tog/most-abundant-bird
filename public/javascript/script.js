@@ -11,7 +11,7 @@ let hoveredBirdName = null;
 let maximumData;
 let cachedFeathers;
 let loadedTableData;
-let translationCoordinates;
+let translationCoordinates = { x: 0, y: 0 };
 
 // TODO: center at center
 // TODO: is mouse within canvas
@@ -25,11 +25,6 @@ const getCanvasHeight = () => 800;
 // const getCanvasWidth = () => windowWidth / 2;
 const getCanvasWidth = () => 800;
 const getChartDiameter = () => getCanvasWidth();
-
-// canvas is 0,0 in the top left corner
-// canvas.{0,0} === center.{}
-const translateToCenter = () =>
-  translate(getCanvasHeight() / 2, getCanvasWidth() / 2);
 
 // -----------------------------------
 // ------- Lifecycle functions -------
@@ -59,22 +54,20 @@ function setup() {
 
   background(BACKGROUND);
 
-  // maximumData = toMaximumInfoColumns(loadedTableData, CHUNK_SIZE);
-  // initPalettes();
+  maximumData = toMaximumInfoColumns(loadedTableData, CHUNK_SIZE);
+  initPalettes();
 
-  // cachedFeathers = createFeathers(TOP_BIRD_INFO, maximumData);
-
-  drawGrid();
-
-  // centeredCase();
-  // uncenteredCase();
-  extraCircleCase();
+  cachedFeathers = createFeathers(TOP_BIRD_INFO, maximumData);
+  const chartDiameter = getChartDiameter();
+  drawFeathers(chartDiameter);
+  // drawGrid();
+  // extraCircleCase();
 }
 
 function draw() {
-  // background(BACKGROUND);
-  // const chartDiameter = getChartDiameter();
-  // drawFeathers(chartDiameter);
+  const chartDiameter = getChartDiameter();
+  background(BACKGROUND);
+  drawFeathers(chartDiameter);
 }
 
 // -----------------------------------
@@ -97,30 +90,35 @@ function initPalettes() {
 function drawFeathers(chartDiameter) {
   for (const feather of cachedFeathers) {
     push();
-    firstTranslation = { x: chartDiameter / 2, y: chartDiameter / 2 };
-    translate(firstTranslation.x, firstTranslation.y);
-    translationCoordinates = firstTranslation;
 
-    push();
-    strokeWeight(10);
-    point(0, 0);
-    pop();
+    const firstTranslation = { x: chartDiameter / 2, y: chartDiameter / 2 };
+    translate(firstTranslation.x, firstTranslation.y);
+    translationCoordinates = {
+      x: translationCoordinates.x + firstTranslation.x,
+      y: translationCoordinates.y + firstTranslation.y,
+    };
 
     rotate(feather.angle);
 
     // // this bumps the feathers to outside of the inner implicit circle
-    // secondTranslationCoords = {
-    //   x: translationCoordinates.x,
+    // const secondTranslationCoords = {
+    //   x: 0,
     //   y: (chartDiameter * DONUT_HOLE) / 2,
     // };
-
-    // translate(0, (chartDiameter * DONUT_HOLE) / 2);
+    // translate(secondTranslationCoords.x, secondTranslationCoords.y)
     // translationCoordinates = {
-    //   x: firstTranslation.x + secondTranslationCoords.x,
-    //   y: firstTranslation.y + secondTranslationCoords.y,
+    //   x: translationCoordinates.x + secondTranslationCoords.x,
+    //   y: translationCoordinates.y + secondTranslationCoords.y,
     // };
 
     feather.draw();
+
+    // reset the translation coordinates
+    // if we weren't storing them, push/pop would take care of it, but we use these later
+    translationCoordinates = {
+      x: 0,
+      y: 0,
+    };
 
     pop();
   }
@@ -339,7 +337,11 @@ function extraCircleCase() {
   const extraCircleRadius = 100;
   push();
   stroke('red');
-  circle(extraCircleCenterPoint.x, extraCircleCenterPoint.y, extraCircleRadius * 2);
+  circle(
+    extraCircleCenterPoint.x,
+    extraCircleCenterPoint.y,
+    extraCircleRadius * 2
+  );
   pop();
 
   let totalTranslation = {
@@ -350,29 +352,49 @@ function extraCircleCase() {
   // expected:
   // x: 400 + 100, y: 400 + 300
   // x: 500, y: 700
-  console.debug({ totalTranslation })
+  console.debug({ totalTranslation });
 
   drawCirclePoint(extraCircleCenterPoint.x, extraCircleCenterPoint.y, 'red');
   const translated = translatePoint(
-    {x: 600, y: 500},
-    {x: totalTranslation.x, y: totalTranslation.y},
+    { x: 600, y: 500 },
+    { x: totalTranslation.x, y: totalTranslation.y }
   );
-  console.debug({translated})
+  console.debug({ translated });
 
   drawCirclePoint(translated.x, translated.y, 'magenta');
   console.debug({ translated });
 
-  const imaginedMousePoint = {x: 550, y: 450};
+  const imaginedMousePoint = { x: 550, y: 450 };
   // console.debug(isPointInsideCircle(translated, extraCirclePoint, extraCircleRadius)) // true thank goodness
-  const imaginedMousePointInCircleCoords = translatePoint(imaginedMousePoint, totalTranslation);
-  drawCirclePoint(imaginedMousePointInCircleCoords.x, imaginedMousePointInCircleCoords.y, 'plum')
-  if (isPointInsideCircle(imaginedMousePointInCircleCoords, extraCircleCenterPoint, extraCircleRadius)) {
-    push()
-    console.log('boop')
-    fill('RebeccaPurple')
-    textSize(20)
-    text('I\'M IN', imaginedMousePoint.x, imaginedMousePoint.y)
-    pop()
+  const imaginedMousePointInCircleCoords = translatePoint(
+    imaginedMousePoint,
+    totalTranslation
+  );
+
+  drawCirclePoint(
+    imaginedMousePointInCircleCoords.x,
+    imaginedMousePointInCircleCoords.y,
+    'plum'
+  );
+
+  if (
+    isPointInsideCircle(
+      imaginedMousePointInCircleCoords,
+      extraCircleCenterPoint,
+      extraCircleRadius
+    )
+  ) {
+    push();
+
+    fill('rebeccapurple');
+    textSize(20);
+    text(
+      "I'M IN",
+      imaginedMousePointInCircleCoords.x,
+      imaginedMousePointInCircleCoords.y
+    );
+
+    pop();
   }
 
   // BACK to canvas coords
