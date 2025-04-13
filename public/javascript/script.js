@@ -25,12 +25,14 @@ let loadedTableData = null;
 const getCanvasHeight = () => {
   return windowHeight - 32;
 };
+
 const getCanvasWidth = () => {
   return getCanvasHeight() * ASPECT_RATIO;
 };
+
 const getMaximumChartRadius = () => {
   const baseWidth = (getCanvasHeight() / 2) * (1 - DONUT_HOLE);
-  return baseWidth + (ANNOTATION_RADIUS - ANNOTATION_LINE_LENGTH);
+  return baseWidth + (ANNOTATION_RADIUS - ANNOTATION_LINE_LENGTH) + 100;
 };
 
 const getTranslationToCircleCenter = () => ({
@@ -79,11 +81,14 @@ function setup() {
 function draw() {
   const maximumChartRadius = getMaximumChartRadius();
   background(BACKGROUND_COLOR);
-  drawFeathers(maximumChartRadius * 2);
+
   drawMonths();
+  drawFeathers(maximumChartRadius * 2);
 }
 
-function mouseMoved() {}
+function mouseMoved() {
+  highlightBasedOnSlice();
+}
 
 // -----------------------------------
 // ---------- Render functions ---------
@@ -108,12 +113,14 @@ function initPalettes() {
 function drawFeathers(chartDiameter) {
   internalCircleDiameter = chartDiameter * DONUT_HOLE;
 
+  /** @type {Feather|null} */
+  let highlightedFeather = null;
+
   for (const feather of cachedFeathers) {
     push();
 
     const translationToCanvasCenter = getTranslationToCircleCenter();
 
-    // hmmmm, not sure this should be on feather, but does make it easier
     translate(translationToCanvasCenter.x, translationToCanvasCenter.y);
 
     push();
@@ -125,16 +132,50 @@ function drawFeathers(chartDiameter) {
     rotate(feather.angle);
 
     // translates us to the outside of the circle above
+    const offset = feather.highlighted ? 10 : 0;
     const translationToDonutHoleEdge = {
       x: 0,
-      y: internalCircleDiameter / 2 + OFFSET_FROM_INTERNAL_CIRCLE,
+      y: internalCircleDiameter / 2 + OFFSET_FROM_INTERNAL_CIRCLE + offset,
     };
 
     translate(translationToDonutHoleEdge.x, translationToDonutHoleEdge.y);
 
+    if (feather.highlighted) {
+      highlightedFeather = feather;
+      pop();
+      continue;
+    }
+
     feather.draw();
 
+    translate(-translationToCanvasCenter.x, -translationToCanvasCenter.y);
+    rotate(-feather.angle);
+
     pop();
+  }
+
+  if (highlightedFeather) {
+    const featherOrigin = highlightedFeather.originInCanvasCoords;
+
+    if (!featherOrigin) {
+      return;
+    }
+
+    translate(
+      getTranslationToCircleCenter().x,
+      getTranslationToCircleCenter().y
+    );
+    rotate(highlightedFeather.angle);
+
+    drawCoordinatePoints('magenta');
+
+    highlightedFeather.draw();
+
+    rotate(-highlightedFeather.angle);
+    translate(
+      -getTranslationToCircleCenter().x,
+      -getTranslationToCircleCenter().y
+    );
   }
 }
 
