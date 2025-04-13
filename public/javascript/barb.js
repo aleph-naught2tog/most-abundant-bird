@@ -13,11 +13,21 @@ class Barb {
     this.thickness = thickness;
   }
 
-  draw() {
+  draw(isHighlighted = false) {
     push();
 
+    let strokeColor = this.color;
     strokeWeight(this.thickness);
-    stroke(this.color);
+
+    if (isHighlighted) {
+      scale(1.1, 1.1)
+      const [r,g,b,_a] = this.color;
+      strokeColor = [r * 2, g * 2, b * 2, 255]
+    }
+
+    console.debug({ before: this.color, after: strokeColor })
+
+    stroke(strokeColor);
 
     beginShape();
     vertex(this.start.x, this.start.y);

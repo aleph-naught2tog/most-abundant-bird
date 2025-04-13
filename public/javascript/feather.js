@@ -37,6 +37,14 @@ class Feather {
   }
 
   draw() {
+    this._drawRachis();
+
+    this._drawBarbs();
+
+    this._drawAnnotation();
+  }
+
+  _drawBarbs(isHighlighted = false) {
     const lengthDivider = floor(this.barbs.length / 2);
 
     const leftBarbs = this.barbs.slice(0, lengthDivider);
@@ -46,20 +54,16 @@ class Feather {
     scale(1, 2);
 
     for (const barb of leftBarbs) {
-      barb.draw();
+      barb.draw(isHighlighted);
     }
 
     scale(-2, 1);
 
     for (const barb of rightBarbs) {
-      barb.draw();
+      barb.draw(isHighlighted);
     }
 
     pop();
-
-    this._drawRachis();
-
-    this._drawAnnotation();
   }
 
   _getRachisColor() {
@@ -76,21 +80,31 @@ class Feather {
   _drawAnnotation() {
     /* REMEMBER: isMousePressed won't work if you aren't using `draw`! */
 
-    // translate to the tip of the feather
-    const translationToFeatherTip = { x: 0, y: this.length };
-    translate(translationToFeatherTip.x, translationToFeatherTip.y);
+    const radius = 10;
 
-    const featherCircleCenter = { x: 0, y: 0 };
-    const radius = this.length / 10;
+    const anchorLength = 15;
+    const offsetFromFeatherTip = 5;
+
+    const featherCircleCenter = {
+      x: 0,
+      y: anchorLength + offsetFromFeatherTip * 2 + this.length,
+    };
+
+    translate(featherCircleCenter.x, featherCircleCenter.y);
 
     push();
     noFill();
-    stroke('cyan');
-    circle(featherCircleCenter.x, featherCircleCenter.y, radius * 2);
+    stroke('black');
+    circle(0, 0, radius * 2);
+    line(
+      featherCircleCenter.x,
+      -offsetFromFeatherTip * 2,
+      featherCircleCenter.x,
+      -anchorLength
+    );
     pop();
 
     // this puts us with the text facing upwards for EVERY feather
-    rotate(TAU - this.angle);
 
     const mousePoint = { x: mouseX, y: mouseY };
 
@@ -103,7 +117,26 @@ class Feather {
     );
 
     if (isMouseWithinCircle) {
+      rotate(TAU - this.angle);
       text(`${this.label}`, 20, -20);
+      rotate(this.angle - TAU);
+
+      push();
+      noFill();
+      stroke('cyan');
+      strokeWeight(3);
+      circle(0, 0, radius * 2);
+      line(
+        featherCircleCenter.x,
+        -offsetFromFeatherTip * 2,
+        featherCircleCenter.x,
+        -anchorLength
+      );
+      pop();
+
+      translate(-featherCircleCenter.x, -featherCircleCenter.y)
+
+      this._drawBarbs(true);
     }
   }
 
