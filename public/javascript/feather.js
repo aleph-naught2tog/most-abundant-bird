@@ -81,6 +81,7 @@ class Feather {
   }
 
   _drawAnnotation() {
+    push()
     /* REMEMBER: isMousePressed won't work if you aren't using `draw`! */
 
     const radius = 10;
@@ -151,9 +152,12 @@ class Feather {
 
       translate(-featherCircleCenter.x, -featherCircleCenter.y);
     }
+
+    pop()
   }
 
   _drawRachis() {
+    push()
     const sw = map(this.length, 10, window.width / 4, 0.5, 1);
     strokeWeight(sw);
     stroke(this._getRachisColor());
@@ -162,6 +166,7 @@ class Feather {
 
     // draw a line from the outer circle to halfway up the feather
     line(0, 0, 0, rachisLength);
+    pop()
   }
 
   createBarbs() {

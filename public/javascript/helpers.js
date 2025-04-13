@@ -35,33 +35,6 @@ function getRandomStrokeWeight() {
 }
 
 /**
- * Creates an object of useful information for generating a feather.
- *
- * @param {number} length
- *
- * @returns {{
- *  heightScale: number,
- *  featherWidth: number,
- *  featherHeight: number,
- *  step: number
- * }} a config of information about a feather
- */
-function getFeatherConfig(length) {
-  const heightScale = 0.5;
-  const featherWidth = length * 0.15;
-  const featherHeight = length * heightScale;
-  // const step = floor(map(Math.random(), 0, 1, 3, 5, true));
-  const step = 2;
-
-  return {
-    heightScale,
-    featherWidth,
-    featherHeight,
-    step,
-  };
-}
-
-/**
  * @param {{x: number, y: number}} point the point we're checking
  * @param {{x: number, y: number}} circleCenter the center of the circle
  * @param {number} circleRadius the radius of the circle
