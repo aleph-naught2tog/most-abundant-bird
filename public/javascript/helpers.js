@@ -62,32 +62,6 @@ function getFeatherConfig(length) {
 }
 
 /**
- * The equation for a circle at (0,0) with radius `r` is:
-  ```
-  x**2 + y**2 === r**2
-  ```
-
-  The equation for a circle centered at `(centerX, centerY)` with radius `r` is:
-  ```
-  (x - centerX)**2 + (y - centerY)**2 === r**2
-  ```
-
-  We can also figure out the radius given a point on the line and the circle
-  center by imagining a right triangle with two sides, one of the absolute value
-  of `x` and one of the absolute value of `y`. That makes the radius the
-  hypotenuse.
-
-  In that case, by the Pythagorean theorem, we know we can find `r` by:
-  ```
-  sqrt( (x - centerX)**2 + (y - centerY)**2 ) === r
-  ```
-
-  If we have a point, we can make a line from that point to the center, since
-  two points define a line. We can find the length of the line using the left
-  half of the previous equation, and compare it to `r`. If it is greater than
-  `r`, then we are outside the circle; if it's less than `r`, we are within the
-  circle.
-
  * @param {{x: number, y: number}} point the point we're checking
  * @param {{x: number, y: number}} circleCenter the center of the circle
  * @param {number} circleRadius the radius of the circle
@@ -95,28 +69,14 @@ function getFeatherConfig(length) {
  * @returns {boolean} whether the point is within the circle
  */
 function isPointInsideCircle(point, circleCenter, circleRadius) {
-  const { x: pointX, y: pointY } = point;
-  const { x: centerX, y: centerY } = circleCenter;
-
-  const xDistance = pointX - centerX;
-  const yDistance = pointY - centerY;
-  const distanceToPointFromCenter = sqrt(xDistance ** 2 + yDistance ** 2);
+  const distanceToPointFromCenter = dist(
+    point.x,
+    point.y,
+    circleCenter.x,
+    circleCenter.y
+  );
 
   return distanceToPointFromCenter < circleRadius;
-}
-
-/**
- *
- * @param {{x: number, y: number}} pointToMap
- * @param {{x: number, y: number}} translationCoordinates
- *
- * @returns {{x: number, y: number}} the point in relation to the canvas
- */
-function translatePoint(pointToMap, translationCoordinates) {
-  return {
-    x: pointToMap.x - translationCoordinates.x,
-    y: pointToMap.y - translationCoordinates.y,
-  };
 }
 
 function drawProbablyGreenCanvasPoint({ x, y }, desiredColor) {
@@ -158,16 +118,44 @@ function drawGrid(gridCount) {
 }
 
 function drawCoordinatePoints(strokeColor) {
-  push()
+  push();
 
-  stroke(strokeColor)
-  strokeWeight(5)
+  stroke(strokeColor);
+  strokeWeight(5);
 
-  text('x=0,y=0', 0, 0)
-  text('x=1,y=0', 100, 0)
-  text('x=0,y=1', 0, 100)
-  text('x=-1,y=0', -100, 0)
-  text('x=0,y=-1', 0, -100)
+  text('x=0,y=0', 0, 0);
+  text('x=1,y=0', 100, 0);
+  text('x=0,y=1', 0, 100);
+  text('x=-1,y=0', -100, 0);
+  text('x=0,y=-1', 0, -100);
 
-  pop()
+  pop();
+}
+
+function getCurrentOriginInCanvasCoords() {
+  // https://stackoverflow.com/a/72160964
+  // a c e
+  // b d f
+  // 0 0 1
+  // x_new = a x + c y + e
+  // y_new = b x + d y + f
+  // origin - current point - is then at:
+  // x = a.0 + c.0 + e = e
+  // y = b.0 + c.0 + f = f
+  let matrix = drawingContext.getTransform();
+
+  let x_0 = matrix['e'];
+  let y_0 = matrix['f'];
+
+  let x_1 = matrix['a'] + matrix['e'];
+  let y_1 = matrix['b'] + matrix['f'];
+  // However, the context has media coordinates, not p5. taking
+  // the distance between points lets use determine the
+  // scale assuming x and y scaling is the same.
+  let media_per_unit = dist(x_0, y_0, x_1, y_1);
+
+  let p5_current_x = x_0 / media_per_unit;
+  let p5_current_y = y_0 / media_per_unit;
+
+  return { x: p5_current_x, y: p5_current_y };
 }

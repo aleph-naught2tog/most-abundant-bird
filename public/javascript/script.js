@@ -23,6 +23,7 @@ const DONUT_HOLE = 0.2;
 // upper limit is half the length of
 const CHUNK_SIZE = 24;
 const COLOR_COUNT = 50;
+const GRAPH_ROTATION = Math.PI;
 
 let hoveredBirdName = null;
 
@@ -76,29 +77,20 @@ function setup() {
   maximumData = toMaximumInfoColumns(loadedTableData, CHUNK_SIZE);
   initPalettes();
 
-  const transCoords = TranslationCoordinates.createCoordinates();
-  cachedFeathers = createFeathers(TOP_BIRD_INFO, maximumData, transCoords);
+  cachedFeathers = createFeathers(TOP_BIRD_INFO, maximumData);
   // doing this so we can focus on 1
   cachedFeathers = [cachedFeathers[0]];
 
   const chartDiameter = getMaximumChartDiameter();
   drawFeathers(chartDiameter);
-
-  alert('honk')
-
-  push()
-  stroke('magenta')
-  strokeWeight(4)
-  point(FAKE_MOUSE_POINT.x, FAKE_MOUSE_POINT.y);
-  pop()
 }
 
 function draw() {
-  // background(BACKGROUND);
-  // // this is a singleton, so fine to call over and over
-  // const transCoords = TranslationCoordinates.createCoordinates();
-  // const chartDiameter = getChartDiameter();
-  // drawFeathers(chartDiameter)
+  background(BACKGROUND);
+
+  drawGrid(GRID_COUNT);
+  const chartDiameter = getMaximumChartDiameter();
+  drawFeathers(chartDiameter);
 }
 
 // -----------------------------------
@@ -134,7 +126,7 @@ function drawFeathers(chartDiameter) {
     };
 
     // hmmmm, not sure this should be on feather, but does make it easier
-    feather.translationCoordinates.addTranslation(translationToCanvasCenter);
+    translate(translationToCanvasCenter.x, translationToCanvasCenter.y);
     drawCoordinatePoints('orange');
 
     push();
@@ -142,7 +134,7 @@ function drawFeathers(chartDiameter) {
     circle(0, 0, chartDiameter * DONUT_HOLE);
     pop();
 
-    feather.translationCoordinates.addRotation(PI);
+    rotate(GRAPH_ROTATION);
     drawCoordinatePoints('yellow');
 
     // translates us to the outside of the circle above
@@ -150,7 +142,7 @@ function drawFeathers(chartDiameter) {
       x: 0,
       y: (chartDiameter * DONUT_HOLE) / 2,
     };
-    feather.translationCoordinates.addTranslation(translationToDonutHoleEdge);
+    translate(translationToDonutHoleEdge.x, translationToDonutHoleEdge.y);
     drawCoordinatePoints('lime');
 
     feather.draw();
@@ -159,7 +151,7 @@ function drawFeathers(chartDiameter) {
   }
 }
 
-function createFeathers(birdInfo, preppedData, transCoords) {
+function createFeathers(birdInfo, preppedData) {
   const absoluteMaximum = max(preppedData.map((m) => m.maximum));
   const absoluteMinimum = min(preppedData.map((m) => m.maximum));
 
@@ -197,7 +189,6 @@ function createFeathers(birdInfo, preppedData, transCoords) {
       angle: rotationAngle,
       colors: metadata.palette,
       length: radius,
-      translationCoordinates: transCoords,
     });
 
     // QUESTION: why are we doing this twice

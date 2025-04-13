@@ -12,7 +12,6 @@ class Feather {
    * @param {Array<Barb>} options.barbs
    * @param {number} options.angle in radians
    * @param {number} options.length
-   * @param {TranslationCoordinates} options.translationCoordinates
    */
   constructor(options) {
     const { barbs, angle, colors, length, translationCoordinates } = options;
@@ -23,7 +22,6 @@ class Feather {
     this.angle = angle;
     this.colors = colors;
     this.length = length;
-    this.translationCoordinates = translationCoordinates;
   }
 
   draw() {
@@ -68,52 +66,60 @@ class Feather {
 
     // translate to the tip of the feather
     const translationToFeatherTip = { x: 0, y: this.length };
-    this.translationCoordinates.addTranslation(translationToFeatherTip);
+    translate(translationToFeatherTip.x, translationToFeatherTip.y);
+
+    // https://stackoverflow.com/a/72160964
+    // a c e
+    // b d f
+    // 0 0 1
+    // x_new = a x + c y + e
+    // y_new = b x + d y + f
+    // origin - current point - is then at:
+    // x = a.0 + c.0 + e = e
+    // y = b.0 + d.0 + f = f
+    let matrix = drawingContext.getTransform();
+    let x_0 = matrix['e'];
+    let y_0 = matrix['f'];
+    let x_1 = matrix['a'] + matrix['e'];
+    let y_1 = matrix['b'] + matrix['f'];
+
+    // However, the context has media coordinates, not p5. taking
+    // the distance between points lets use determine the
+    // scale assuming x and y scaling is the same.
+    let media_per_unit = dist(x_0, y_0, x_1, y_1);
+    // p5_current_x, p5_current_y is the p5 coords of our origin
+    let p5_current_x = x_0 / media_per_unit;
+    let p5_current_y = y_0 / media_per_unit;
 
     // we're still not in canvas coordinates, but our axes are back to normal now
-    this.translationCoordinates.revertRotation();
     drawCoordinatePoints('cyan');
 
     const featherCircleCenter = { x: 0, y: 0 };
     const radius = this.length / 10;
 
-    push()
+    push();
     noFill();
-    stroke('cyan')
+    stroke('cyan');
     circle(featherCircleCenter.x, featherCircleCenter.y, radius * 2);
-    pop()
+    pop();
 
-    // if (mouseIsPressed) {
-    // const mousePoint = { x: mouseX, y: mouseY };
+    rotate(-GRAPH_ROTATION);
 
-    // using a fake mouse point that should be within the circle so we can test
-    // this without a million debugs from `draw`
-    const mousePoint = FAKE_MOUSE_POINT;
+    if (mouseIsPressed) {
+      const mousePoint = { x: mouseX, y: mouseY };
 
-    console.debug({ currentTranslation: this.translationCoordinates.getCurrentTranslation() })
+      const originInCanvasCoords = getCurrentOriginInCanvasCoords();
 
-    // This value is what's wrong
-    // The X is correct, but the Y is wrong
-    // it SHOULD be a small X and a small Y
-    const mousePointInCircleTerms = translatePoint(
-      mousePoint,
-      this.translationCoordinates.getCurrentTranslation()
-    );
+      const isMouseWithinCircle = isPointInsideCircle(
+        mousePoint,
+        originInCanvasCoords,
+        radius
+      );
 
-    const isMouseWithinCircle = isPointInsideCircle(
-      mousePointInCircleTerms,
-      featherCircleCenter,
-      radius
-    );
-
-    console.debug(radius, {
-      mousePoint,
-      mousePointInCircleTerms,
-      isMouseWithinCircle,
-      translation: this.translationCoordinates.getCurrentTranslation(),
-    });
-
-    // }
+      if (isMouseWithinCircle) {
+        text('hello world', 20, 20);
+      }
+    }
   }
 
   _drawRachis() {
