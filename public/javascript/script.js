@@ -1,4 +1,4 @@
-const ASPECT_RATIO = 7/5;
+const ASPECT_RATIO = 7 / 5;
 const BACKGROUND_COLOR = 'lemonchiffon';
 
 const DONUT_HOLE = 0.2;
@@ -33,7 +33,7 @@ const getMaximumChartRadius = () => {
   return baseWidth + (ANNOTATION_RADIUS - ANNOTATION_LINE_LENGTH);
 };
 
-const getTranslationToCanvasCenter = () => ({
+const getTranslationToCircleCenter = () => ({
   x: width / 2,
   y: height / 2,
 });
@@ -77,12 +77,11 @@ function draw() {
   background(BACKGROUND_COLOR);
 
   const maximumChartRadius = getMaximumChartRadius();
+  drawMonths();
   drawFeathers(maximumChartRadius * 2);
 }
 
-function mouseMoved() {
-
-}
+function mouseMoved() {}
 
 // -----------------------------------
 // ---------- Render functions ---------
@@ -110,7 +109,7 @@ function drawFeathers(chartDiameter) {
   for (const feather of cachedFeathers) {
     push();
 
-    const translationToCanvasCenter = getTranslationToCanvasCenter();
+    const translationToCanvasCenter = getTranslationToCircleCenter();
 
     // hmmmm, not sure this should be on feather, but does make it easier
     translate(translationToCanvasCenter.x, translationToCanvasCenter.y);
@@ -126,7 +125,7 @@ function drawFeathers(chartDiameter) {
     // translates us to the outside of the circle above
     const translationToDonutHoleEdge = {
       x: 0,
-      y: (internalCircleDiameter / 2) + OFFSET_FROM_INTERNAL_CIRCLE,
+      y: internalCircleDiameter / 2 + OFFSET_FROM_INTERNAL_CIRCLE,
     };
 
     translate(translationToDonutHoleEdge.x, translationToDonutHoleEdge.y);
@@ -191,3 +190,50 @@ function createFeathers(birdInfo, preppedData) {
 
   return feathers;
 }
+
+function drawMonths() {
+  const numberOfMonths = 12;
+  const circleCenter = getTranslationToCircleCenter();
+
+  for (let monthIndex = 1; monthIndex <= numberOfMonths; monthIndex += 1) {
+    push();
+
+    const theta = map(monthIndex, 0, numberOfMonths, 0, TAU) - PI / 2
+
+    const date = new Date(1990, monthIndex, 10);  // 2009-11-10
+    const month = date.toLocaleString('default', { month: 'short' }).slice(0,1);
+
+    strokeWeight(2);
+    text(
+      month,
+      circleCenter.x + cos(theta) * (internalCircleDiameter / 2),
+      circleCenter.y + sin(theta) * (internalCircleDiameter / 2),
+    );
+
+    pop();
+  }
+}
+
+/*
+  const numberOfMonths = 12;
+  const circleCenter = getTranslationToCircleCenter();
+  translate(circleCenter.x, circleCenter.y)
+  const angleVariation = TAU / 12;
+
+  for (let index = 1; index <= numberOfMonths; index += 1) {
+    push()
+
+    const angle = index * angleVariation;
+    rotate(angle);
+
+    strokeWeight(4)
+    stroke('magenta')
+    text(index.toString(), 0,0)
+
+    rotate(-angle);
+
+    pop()
+  }
+
+  translate(-circleCenter.x, -circleCenter.y)
+*/

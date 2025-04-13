@@ -6,11 +6,11 @@ function highlightBasedOnSlice() {
 
   const isMouseWithinBigFeatherCircle = isPointInsideCircle(
     mousePoint,
-    getTranslationToCanvasCenter(),
+    getTranslationToCircleCenter(),
     getMaximumChartRadius() + EXTRA_DIAMETER / 2
   );
 
-  const trans = getTranslationToCanvasCenter();
+  const trans = getTranslationToCircleCenter();
   translate(trans.x, trans.y);
   // Get the mouse's coordinates relative to the origin.
   const x = mouseX - trans.x;
