@@ -1,4 +1,4 @@
-const ASPECT_RATIO = 7 / 5;
+const ASPECT_RATIO = 6 / 4;
 const BACKGROUND_COLOR = 'lemonchiffon';
 
 const DONUT_HOLE = 0.2;
@@ -34,8 +34,8 @@ const getMaximumChartRadius = () => {
 };
 
 const getTranslationToCircleCenter = () => ({
-  x: width / 2,
-  y: height / 2,
+  x: width / 4,
+  y: height / 3.5,
 });
 
 // -----------------------------------
@@ -65,20 +65,22 @@ function setup() {
   const canvas = createCanvas(canvasWidth, canvasHeight);
   canvas.parent('canvas_container');
 
-  background(BACKGROUND_COLOR);
-
   maximumData = toMaximumInfoColumns(loadedTableData, CHUNK_SIZE);
   initPalettes();
 
   cachedFeathers = createFeathers(BIRD_INFO, maximumData);
+
+  // const maximumChartRadius = getMaximumChartRadius();
+  // background(BACKGROUND_COLOR);
+  // drawFeathers(maximumChartRadius * 2);
+  // drawMonths();
 }
 
 function draw() {
-  background(BACKGROUND_COLOR);
-
   const maximumChartRadius = getMaximumChartRadius();
-  drawMonths();
+  background(BACKGROUND_COLOR);
   drawFeathers(maximumChartRadius * 2);
+  drawMonths();
 }
 
 function mouseMoved() {}
@@ -198,42 +200,21 @@ function drawMonths() {
   for (let monthIndex = 1; monthIndex <= numberOfMonths; monthIndex += 1) {
     push();
 
-    const theta = map(monthIndex, 0, numberOfMonths, 0, TAU) - PI / 2
+    const theta = map(monthIndex, 0, numberOfMonths, 0, TAU) - PI / 2;
 
-    const date = new Date(1990, monthIndex, 10);  // 2009-11-10
-    const month = date.toLocaleString('default', { month: 'short' }).slice(0,1);
+    const date = new Date(1990, monthIndex, 10); // 2009-11-10
+    const month = date
+      .toLocaleString('default', { month: 'long' })
+      .slice(0, 1);
 
     strokeWeight(2);
+    textAlign(CENTER, CENTER);
     text(
       month,
-      circleCenter.x + cos(theta) * (internalCircleDiameter / 2),
-      circleCenter.y + sin(theta) * (internalCircleDiameter / 2),
+      circleCenter.x + cos(theta) * (internalCircleDiameter / 2) * 0.85, // * dir.x),
+      circleCenter.y + sin(theta) * (internalCircleDiameter / 2) * 0.85 + 2 // + (10 * dir.y)
     );
 
     pop();
   }
 }
-
-/*
-  const numberOfMonths = 12;
-  const circleCenter = getTranslationToCircleCenter();
-  translate(circleCenter.x, circleCenter.y)
-  const angleVariation = TAU / 12;
-
-  for (let index = 1; index <= numberOfMonths; index += 1) {
-    push()
-
-    const angle = index * angleVariation;
-    rotate(angle);
-
-    strokeWeight(4)
-    stroke('magenta')
-    text(index.toString(), 0,0)
-
-    rotate(-angle);
-
-    pop()
-  }
-
-  translate(-circleCenter.x, -circleCenter.y)
-*/
