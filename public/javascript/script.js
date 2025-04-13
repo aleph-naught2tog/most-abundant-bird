@@ -156,26 +156,30 @@ function drawFeathers(chartDiameter) {
 
   if (highlightedFeather) {
     const featherOrigin = highlightedFeather.originInCanvasCoords;
+    console.debug({ featherOrigin })
 
     if (!featherOrigin) {
       return;
     }
 
-    translate(
-      getTranslationToCircleCenter().x,
-      getTranslationToCircleCenter().y
-    );
-    rotate(highlightedFeather.angle);
+    const theta = highlightedFeather.angle + PI / 2;
+    const circleCenter = getTranslationToCircleCenter();
+
+    x = circleCenter.x + cos(theta) * (internalCircleDiameter / 2), // * dir.x),
+      y = circleCenter.y + sin(theta) * (internalCircleDiameter / 2) + 2 // + (10 * dir.y)
+
+    // const x = circleCenter.x;
+    // const y = circleCenter.y;
+//
+    translate(x, y);
+    rotate(theta - PI / 2)
 
     drawCoordinatePoints('magenta');
 
     highlightedFeather.draw();
 
-    rotate(-highlightedFeather.angle);
-    translate(
-      -getTranslationToCircleCenter().x,
-      -getTranslationToCircleCenter().y
-    );
+    rotate(-theta - PI / 2);
+    translate(-x, -y);
   }
 }
 
