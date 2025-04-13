@@ -22,7 +22,7 @@ let loadedTableData = null;
 const getCanvasHeight = () => 700;
 // const getCanvasWidth = () => windowWidth / 2;
 const getCanvasWidth = () => 800;
-const getMaximumChartDiameter = () => getCanvasWidth();
+const getMaximumChartRadius = () => getCanvasWidth() / 2;
 const getTranslationToCanvasCenter = () => ({
   x: width / 2,
   y: height / 2,
@@ -66,8 +66,8 @@ function setup() {
 function draw() {
   background(BACKGROUND_COLOR);
 
-  const chartDiameter = getMaximumChartDiameter();
-  drawFeathers(chartDiameter);
+  const maximumChartRadius = getMaximumChartRadius();
+  drawFeathers(maximumChartRadius);
 
   doMouseMove();
 }
@@ -143,15 +143,9 @@ function doMouseMove() {
   const y = mouseY - trans.y;
 
   // Calculate the angle between the mouse and the origin. we need to rotate
-  // back by PI/2 because of how the unit circle differs from cartestian
+  // by PI/2 because of how the unit circle differs from cartesian
   // coordinates doing the + TAU % TAU skips the discontinuities in atan2
   const angle = (atan2(y, x) + TAU + PI / 2) % TAU;
-
-  // Rotate.
-  // rotate(a);
-
-  // Draw the shape.
-  // line(0, 0, 60, 0); // positive x
 
   const hoveredFeatherIndex =
     floor(map(angle, 0, TAU, 0, cachedFeathers.length, true));
@@ -159,19 +153,14 @@ function doMouseMove() {
 
   const feather = cachedFeathers[hoveredFeatherIndex];
 
-  // this needs to be constrained to within a reasonable bound
-  // also, this needs to be conditional
-  feather.highlighted = true;
+  if (isMouseWithinBigFeatherCircle) {
 
-  // const originInCanvasCoords = getCurrentOriginInCanvasCoords();
-
-  // const isMouseWithinCircle = isPointInsideCircle(
-  //   mousePoint,
-  //   originInCanvasCoords,
-  //   radius
-  // );
-
-  // this.highlighted = isMouseWithinCircle;
+    // this needs to be constrained to within a reasonable bound
+    // also, this needs to be conditional
+    feather.highlighted = true;
+  } else {
+    feather.highlighted = false;
+  }
 }
 
 function createFeathers(birdInfo, preppedData) {
@@ -180,7 +169,7 @@ function createFeathers(birdInfo, preppedData) {
 
   const feathers = [];
 
-  const chartDiameter = window.width / 2;
+  const maximumChartRadius = getMaximumChartRadius();
 
   for (let index = 0; index < preppedData.length; index++) {
     const num = preppedData[index].maximum;
@@ -202,7 +191,7 @@ function createFeathers(birdInfo, preppedData) {
       absoluteMinimum,
       absoluteMaximum,
       10, // we start here so that even no feathers have a small indicator
-      chartDiameter / 2,
+      maximumChartRadius * (1 - DONUT_HOLE) - ANNOTATION_RADIUS - ANCHOR_LENGTH,
       true
     );
 

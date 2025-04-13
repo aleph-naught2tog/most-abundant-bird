@@ -1,6 +1,11 @@
 const ALPHA = 0.8;
 const SCALE_FACTOR = 1.05;
 
+const ANNOTATION_RADIUS = 10;
+const ANCHOR_LENGTH = 30;
+// this must be less than the anchorLength
+const OFFSET_FROM_FEATHER_TIP = 10;
+
 class Feather {
   // these are mostly for clarity
   barbs = [];
@@ -80,39 +85,38 @@ class Feather {
     return [red, green, blue, alpha];
   }
 
+  _getAnnotationCenter() {
+    return {
+      x: 0,
+      y: this.length + ANCHOR_LENGTH + OFFSET_FROM_FEATHER_TIP,
+    };
+  }
+
+
   _drawAnnotation() {
     push()
     /* REMEMBER: isMousePressed won't work if you aren't using `draw`! */
 
-    const radius = 10;
-
-    const anchorLength = 30;
-    // this must be less than the anchorLength
-    const offsetFromFeatherTip = 10;
-
-    const featherCircleCenter = {
-      x: 0,
-      y: this.length + anchorLength + offsetFromFeatherTip,
-    };
+    const featherCircleCenter = this._getAnnotationCenter();
 
     translate(featherCircleCenter.x, featherCircleCenter.y);
 
     push();
     noFill();
     stroke('black');
-    circle(0, 0, radius * 2);
+    circle(0, 0, ANNOTATION_RADIUS * 2);
     push();
     strokeWeight(4);
 
     const xStart = featherCircleCenter.x;
 
-    // backs us to the radius + how long the anchor should be;
+    // backs us to the ANNOTATION_RADIUS + how long the anchor should be;
     // offsetFromFeatherTip bumps us off the feather tip (we ADD it here instead
     // of subtract because we are on the -Y axis, so this moves us back up)
-    const yStart = -1 * (radius + anchorLength) + offsetFromFeatherTip;
+    const yStart = -1 * (ANNOTATION_RADIUS + ANCHOR_LENGTH) + OFFSET_FROM_FEATHER_TIP;
 
     // lands us at the bottom point of the circle
-    const yEnd = -1 * radius;
+    const yEnd = -1 * ANNOTATION_RADIUS;
 
     pop();
     line(xStart, yStart, xStart, yEnd);
@@ -127,7 +131,7 @@ class Feather {
       noFill();
       stroke('cyan');
       strokeWeight(3);
-      circle(0, 0, radius * 2);
+      circle(0, 0, ANNOTATION_RADIUS * 2);
       line(
         xStart,
         yStart,
