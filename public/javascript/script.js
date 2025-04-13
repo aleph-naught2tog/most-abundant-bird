@@ -1,10 +1,14 @@
 const BACKGROUND_COLOR = 'lemonchiffon';
+
 const DONUT_HOLE = 0.2;
+const EXTRA_DIAMETER = 100;
 
 // upper limit is half the length of
+const TOTAL_COUNT = 48;
 const CHUNK_SIZE = 2;
 const COLOR_COUNT = 50;
 const GRAPH_ROTATION = Math.PI;
+const ANGLE_SLICED_WIDTH = (Math.PI * 2) / (TOTAL_COUNT / CHUNK_SIZE);
 
 let internalCircleDiameter = -1;
 
@@ -22,7 +26,11 @@ let loadedTableData = null;
 const getCanvasHeight = () => 700;
 // const getCanvasWidth = () => windowWidth / 2;
 const getCanvasWidth = () => 800;
-const getMaximumChartRadius = () => getCanvasWidth() / 2;
+const getMaximumChartRadius = () => {
+  const baseWidth = (getCanvasWidth() / 2) * (1 - DONUT_HOLE);
+  return baseWidth + (ANNOTATION_RADIUS - ANNOTATION_LINE_LENGTH);
+};
+
 const getTranslationToCanvasCenter = () => ({
   x: width / 2,
   y: height / 2,
@@ -67,9 +75,13 @@ function draw() {
   background(BACKGROUND_COLOR);
 
   const maximumChartRadius = getMaximumChartRadius();
-  drawFeathers(maximumChartRadius);
+  drawFeathers(maximumChartRadius * 2);
 
   doMouseMove();
+}
+
+function mouseMoved() {
+  // doMouseMove();
 }
 
 // -----------------------------------
@@ -106,6 +118,7 @@ function drawFeathers(chartDiameter) {
     push();
     noFill();
     circle(0, 0, internalCircleDiameter);
+    circle(0, 0, getMaximumChartRadius() * 2 + EXTRA_DIAMETER);
     pop();
 
     rotate(feather.angle);
@@ -126,6 +139,7 @@ function drawFeathers(chartDiameter) {
 }
 
 function doMouseMove() {
+  cachedFeathers.forEach((f) => (f.highlighted = false));
   const mousePoint = { x: mouseX, y: mouseY };
 
   drawOrigin();
@@ -133,7 +147,7 @@ function doMouseMove() {
   const isMouseWithinBigFeatherCircle = isPointInsideCircle(
     mousePoint,
     getTranslationToCanvasCenter(),
-    internalCircleDiameter / 2
+    getMaximumChartRadius()
   );
 
   const trans = getTranslationToCanvasCenter();
@@ -145,18 +159,44 @@ function doMouseMove() {
   // Calculate the angle between the mouse and the origin. we need to rotate
   // by PI/2 because of how the unit circle differs from cartesian
   // coordinates doing the + TAU % TAU skips the discontinuities in atan2
-  const angle = (atan2(y, x) + TAU + PI / 2) % TAU;
+  const angleOfMouse = (atan2(y, x) + TAU + PI / 2) % TAU;
 
-  const hoveredFeatherIndex =
-    floor(map(angle, 0, TAU, 0, cachedFeathers.length, true));
+  const hoveredFeatherIndex = map(
+    angleOfMouse,
+    0,
+    TAU,
+    0,
+    cachedFeathers.length,
+    true
+  );
 
+  const feather = cachedFeathers[floor(hoveredFeatherIndex)];
 
-  const feather = cachedFeathers[hoveredFeatherIndex];
+  const angleBounds = {
+    start: hoveredFeatherIndex * ANGLE_SLICED_WIDTH - ANGLE_SLICED_WIDTH / 2,
+    end:
+      (hoveredFeatherIndex + 1) * ANGLE_SLICED_WIDTH - ANGLE_SLICED_WIDTH / 2,
+  };
 
-  if (isMouseWithinBigFeatherCircle) {
+  //   rotate(angleBounds.start);
+  //   stroke('red')
+  //   line(0, 0, 0, -height);
+  //   rotate(-angleBounds.start);
 
-    // this needs to be constrained to within a reasonable bound
-    // also, this needs to be conditional
+  //   text(hoveredFeatherIndex.toFixed(2), 0, 0)
+
+  // rotate(angleBounds.end)
+  // stroke('blue')
+  // line(0,0,0, -height)
+  // rotate(- angleBounds.end)
+
+  console.debug({ angleBounds });
+
+  if (
+    isMouseWithinBigFeatherCircle &&
+    angleOfMouse < angleBounds.end &&
+    angleOfMouse > angleBounds.start
+  ) {
     feather.highlighted = true;
   } else {
     feather.highlighted = false;
@@ -190,8 +230,8 @@ function createFeathers(birdInfo, preppedData) {
       num,
       absoluteMinimum,
       absoluteMaximum,
-      10, // we start here so that even no feathers have a small indicator
-      maximumChartRadius * (1 - DONUT_HOLE) - ANNOTATION_RADIUS - ANCHOR_LENGTH,
+      10,
+      maximumChartRadius,
       true
     );
 
