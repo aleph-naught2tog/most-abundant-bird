@@ -1,4 +1,5 @@
 const ALPHA = 0.8;
+const SCALE_FACTOR = 1.05;
 
 class Feather {
   // these are mostly for clarity
@@ -56,13 +57,13 @@ class Feather {
     scale(1, 2);
 
     for (const barb of leftBarbs) {
-      barb.draw(this.highlighted);
+      barb.draw(this.highlighted, SCALE_FACTOR);
     }
 
     scale(-2, 1);
 
     for (const barb of rightBarbs) {
-      barb.draw(this.highlighted);
+      barb.draw(this.highlighted, SCALE_FACTOR);
     }
 
     pop();
@@ -95,7 +96,7 @@ class Feather {
     };
 
     translate(featherCircleCenter.x, featherCircleCenter.y);
-    drawOrigin();
+
     push();
     noFill();
     stroke('black');

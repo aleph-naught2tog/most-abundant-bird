@@ -16,21 +16,36 @@ class Barb {
   draw(isHighlighted = false) {
     push();
 
-    let strokeColor = this.color;
+    const strokeColor = this.color.slice(0, 3);
     strokeWeight(this.thickness);
 
+    const start = {
+      r: strokeColor[0],
+      g: strokeColor[1],
+      b: strokeColor[2],
+      alpha: 200,
+    };
+
+    const end = {
+      r: strokeColor[0],
+      g: strokeColor[1],
+      b: strokeColor[2],
+      alpha: 70,
+    };
+
     if (isHighlighted) {
-      scale(1.05, 1.05)
-      const [r,g,b,_a] = this.color;
-      strokeColor = [r,g,b, 255]
+      scale(1.05, 1.05);
+      start.alpha = 255;
+      end.alpha = 255;
     }
 
-    stroke(strokeColor);
-
-    beginShape();
-    vertex(this.start.x, this.start.y);
-    vertex(this.end.x, this.end.y);
-    endShape();
+    gradientLine(
+      this.start,
+      this.end,
+      [start.r, start.g, start.b, start.alpha],
+      [end.r, end.g, end.b, end.alpha],
+      this.thickness
+    );
 
     pop();
   }

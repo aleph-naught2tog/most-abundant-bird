@@ -50,8 +50,8 @@ function getFeatherConfig(length) {
   const heightScale = 0.5;
   const featherWidth = length * 0.15;
   const featherHeight = length * heightScale;
-  const step = floor(map(Math.random(), 0, 1, 3, 5, true));
-  // const step = 2;
+  // const step = floor(map(Math.random(), 0, 1, 3, 5, true));
+  const step = 2;
 
   return {
     heightScale,
@@ -95,4 +95,43 @@ function getCurrentOriginInCanvasCoords() {
   let yOfOrigin = y_0 / scaleFactor;
 
   return { x: xOfOrigin, y: yOfOrigin };
+}
+
+/**
+ *
+ * @param {{x: number, y: number}} x_0
+ * @param {{x: number, y: number}} y_0
+ * @param {Color} startColor rgb color array
+ * @param {Color} endColor rgb color array
+ */
+function gradientLine(
+  { x: x_0, y: y_0 },
+  { x: x_1, y: y_1 },
+  startColor,
+  endColor,
+  thickness = 1
+) {
+  push();
+  const ctx = drawingContext;
+  const originalStrokeStyle = ctx.strokeStyle;
+
+  const gradient = ctx.createLinearGradient(x_0, y_0, x_1, y_1);
+  const cssStartColor = `rgba(${startColor[0]}, ${startColor[1]}, ${
+    startColor[2]
+  }, ${map(startColor[3], 0, 255, 0, 1)})`;
+  const cssEndColor = `rgba(${endColor[0]}, ${endColor[1]}, ${
+    endColor[2]
+  }, ${map(endColor[3], 0, 255, 0, 1)})`;
+
+  gradient.addColorStop(0.5, cssStartColor);
+  gradient.addColorStop(0.75, lerpColor(color(startColor), color(endColor), 0.5));
+  gradient.addColorStop(1, cssEndColor);
+
+  ctx.strokeStyle = gradient;
+
+  strokeWeight(thickness);
+  line(x_0, y_0, x_1, y_1);
+
+  ctx.strokeStyle = originalStrokeStyle;
+  pop();
 }

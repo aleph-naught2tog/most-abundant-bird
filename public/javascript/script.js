@@ -37,6 +37,7 @@ function preload() {
   }
 }
 
+// BUG/PERFORMANCE: the first one you hover over takes the longest
 function setup() {
   // this is the default, but good for clarity
   angleMode(RADIANS);
