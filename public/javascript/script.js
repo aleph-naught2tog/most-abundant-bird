@@ -55,8 +55,6 @@ function setup() {
 
   cachedFeathers = createFeathers(BIRD_INFO, maximumData);
 
-  const chartDiameter = getMaximumChartDiameter();
-  drawFeathers(chartDiameter);
 }
 
 function draw() {

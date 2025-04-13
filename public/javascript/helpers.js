@@ -98,40 +98,56 @@ function getCurrentOriginInCanvasCoords() {
 }
 
 /**
- *
- * @param {{x: number, y: number}} x_0
- * @param {{x: number, y: number}} y_0
- * @param {Color} startColor rgb color array
- * @param {Color} endColor rgb color array
  */
-function gradientLine(
+function drawGradientLine(optionsOrGradient, { start, end }, thickness = 1) {
+  let gradient;
+
+  if (optionsOrGradient instanceof CanvasGradient) {
+    gradient = optionsOrGradient;
+  } else {
+    const { startColor, endColor } = optionsOrGradient;
+
+    gradient = createGradient(start, end, startColor, endColor);
+  }
+
+  const ctx = drawingContext;
+  const originalStrokeStyle = ctx.strokeStyle;
+
+  push();
+
+  ctx.strokeStyle = gradient;
+
+  strokeWeight(thickness);
+  line(start.x, start.y, end.x, end.y);
+
+  ctx.strokeStyle = originalStrokeStyle;
+
+  pop();
+}
+
+function createGradient(
   { x: x_0, y: y_0 },
   { x: x_1, y: y_1 },
   startColor,
-  endColor,
-  thickness = 1
+  endColor
 ) {
-  push();
   const ctx = drawingContext;
-  const originalStrokeStyle = ctx.strokeStyle;
 
   const gradient = ctx.createLinearGradient(x_0, y_0, x_1, y_1);
   const cssStartColor = `rgba(${startColor[0]}, ${startColor[1]}, ${
     startColor[2]
   }, ${map(startColor[3], 0, 255, 0, 1)})`;
+
   const cssEndColor = `rgba(${endColor[0]}, ${endColor[1]}, ${
     endColor[2]
   }, ${map(endColor[3], 0, 255, 0, 1)})`;
 
   gradient.addColorStop(0.5, cssStartColor);
-  gradient.addColorStop(0.75, lerpColor(color(startColor), color(endColor), 0.5));
+  gradient.addColorStop(
+    0.75,
+    lerpColor(color(startColor), color(endColor), 0.5)
+  );
   gradient.addColorStop(1, cssEndColor);
 
-  ctx.strokeStyle = gradient;
-
-  strokeWeight(thickness);
-  line(x_0, y_0, x_1, y_1);
-
-  ctx.strokeStyle = originalStrokeStyle;
-  pop();
+  return gradient;
 }

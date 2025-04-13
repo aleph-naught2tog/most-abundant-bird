@@ -83,7 +83,6 @@ class Feather {
   _drawAnnotation() {
     /* REMEMBER: isMousePressed won't work if you aren't using `draw`! */
 
-    // BUG: 10 works, but if it changes, the other things don't go well
     const radius = 10;
 
     const anchorLength = 30;
@@ -106,7 +105,9 @@ class Feather {
 
     const xStart = featherCircleCenter.x;
 
-    // backs us to the radius + how long the anchor should be; offsetFromFeatherTip bumps us off the feather tip (we ADD it here instead of subtract because we are on the -Y axis, so this moves us back up)
+    // backs us to the radius + how long the anchor should be;
+    // offsetFromFeatherTip bumps us off the feather tip (we ADD it here instead
+    // of subtract because we are on the -Y axis, so this moves us back up)
     const yStart = -1 * (radius + anchorLength) + offsetFromFeatherTip;
 
     // lands us at the bottom point of the circle
