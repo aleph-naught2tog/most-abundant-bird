@@ -21,7 +21,7 @@ const BACKGROUND = 'lemonchiffon';
 const DONUT_HOLE = 0.2;
 
 // upper limit is half the length of
-const CHUNK_SIZE = 24;
+const CHUNK_SIZE = 2;
 const COLOR_COUNT = 50;
 const GRAPH_ROTATION = Math.PI;
 
@@ -72,14 +72,10 @@ function setup() {
 
   background(BACKGROUND);
 
-  drawGrid(GRID_COUNT);
-
   maximumData = toMaximumInfoColumns(loadedTableData, CHUNK_SIZE);
   initPalettes();
 
   cachedFeathers = createFeathers(TOP_BIRD_INFO, maximumData);
-  // doing this so we can focus on 1
-  cachedFeathers = [cachedFeathers[0]];
 
   const chartDiameter = getMaximumChartDiameter();
   drawFeathers(chartDiameter);
@@ -88,7 +84,6 @@ function setup() {
 function draw() {
   background(BACKGROUND);
 
-  drawGrid(GRID_COUNT);
   const chartDiameter = getMaximumChartDiameter();
   drawFeathers(chartDiameter);
 }
@@ -112,11 +107,8 @@ function initPalettes() {
 
 /**
  * @param {number} chartDiameter
- * @param {TranslationCoordinates} transCoords
  */
 function drawFeathers(chartDiameter) {
-  drawCoordinatePoints('red');
-
   for (const feather of cachedFeathers) {
     push();
 
@@ -127,23 +119,21 @@ function drawFeathers(chartDiameter) {
 
     // hmmmm, not sure this should be on feather, but does make it easier
     translate(translationToCanvasCenter.x, translationToCanvasCenter.y);
-    drawCoordinatePoints('orange');
 
     push();
     noFill();
     circle(0, 0, chartDiameter * DONUT_HOLE);
     pop();
 
-    rotate(GRAPH_ROTATION);
-    drawCoordinatePoints('yellow');
+    rotate(feather.angle);
 
     // translates us to the outside of the circle above
     const translationToDonutHoleEdge = {
       x: 0,
       y: (chartDiameter * DONUT_HOLE) / 2,
     };
+
     translate(translationToDonutHoleEdge.x, translationToDonutHoleEdge.y);
-    drawCoordinatePoints('lime');
 
     feather.draw();
 
@@ -183,7 +173,7 @@ function createFeathers(birdInfo, preppedData) {
     );
 
     // we rotate back by PI because the feathers start at 0º
-    const rotationAngle = theta - PI;
+    const rotationAngle = theta - GRAPH_ROTATION;
 
     const feather = new Feather({
       angle: rotationAngle,

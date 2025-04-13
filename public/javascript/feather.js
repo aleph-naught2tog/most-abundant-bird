@@ -60,39 +60,12 @@ class Feather {
     return [red, green, blue, alpha];
   }
 
-  // THIS is the failure spot
   _drawAnnotation() {
     /* REMEMBER: isMousePressed won't work if you aren't using `draw`! */
 
     // translate to the tip of the feather
     const translationToFeatherTip = { x: 0, y: this.length };
     translate(translationToFeatherTip.x, translationToFeatherTip.y);
-
-    // https://stackoverflow.com/a/72160964
-    // a c e
-    // b d f
-    // 0 0 1
-    // x_new = a x + c y + e
-    // y_new = b x + d y + f
-    // origin - current point - is then at:
-    // x = a.0 + c.0 + e = e
-    // y = b.0 + d.0 + f = f
-    let matrix = drawingContext.getTransform();
-    let x_0 = matrix['e'];
-    let y_0 = matrix['f'];
-    let x_1 = matrix['a'] + matrix['e'];
-    let y_1 = matrix['b'] + matrix['f'];
-
-    // However, the context has media coordinates, not p5. taking
-    // the distance between points lets use determine the
-    // scale assuming x and y scaling is the same.
-    let media_per_unit = dist(x_0, y_0, x_1, y_1);
-    // p5_current_x, p5_current_y is the p5 coords of our origin
-    let p5_current_x = x_0 / media_per_unit;
-    let p5_current_y = y_0 / media_per_unit;
-
-    // we're still not in canvas coordinates, but our axes are back to normal now
-    drawCoordinatePoints('cyan');
 
     const featherCircleCenter = { x: 0, y: 0 };
     const radius = this.length / 10;

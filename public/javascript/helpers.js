@@ -79,83 +79,20 @@ function isPointInsideCircle(point, circleCenter, circleRadius) {
   return distanceToPointFromCenter < circleRadius;
 }
 
-function drawProbablyGreenCanvasPoint({ x, y }, desiredColor) {
-  push();
-  strokeWeight(15);
-  const strokeC = desiredColor ?? color(0, 255, 0, 120);
-  stroke(strokeC);
-
-  point(x, y);
-  pop();
-}
-
-function drawProbablyBlueCirclePoint({ x, y }, desiredColor) {
-  push();
-  strokeWeight(25);
-  const strokeC = desiredColor ?? color(0, 0, 255, 60);
-  stroke(strokeC);
-
-  point(x, y);
-  pop();
-}
-
-const vecToPoint = ([x, y]) => ({ x, y });
-
-function drawGrid(gridCount) {
-  push();
-
-  stroke('darkgray');
-  strokeWeight(2);
-
-  for (let x = 0; x <= width; x += width / gridCount) {
-    for (let y = 0; y <= width; y += height / gridCount) {
-      line(x, 0, x, height);
-      line(0, y, height, y);
-    }
-  }
-
-  pop();
-}
-
-function drawCoordinatePoints(strokeColor) {
-  push();
-
-  stroke(strokeColor);
-  strokeWeight(5);
-
-  text('x=0,y=0', 0, 0);
-  text('x=1,y=0', 100, 0);
-  text('x=0,y=1', 0, 100);
-  text('x=-1,y=0', -100, 0);
-  text('x=0,y=-1', 0, -100);
-
-  pop();
-}
-
 function getCurrentOriginInCanvasCoords() {
   // https://stackoverflow.com/a/72160964
-  // a c e
-  // b d f
-  // 0 0 1
-  // x_new = a x + c y + e
-  // y_new = b x + d y + f
-  // origin - current point - is then at:
-  // x = a.0 + c.0 + e = e
-  // y = b.0 + c.0 + f = f
-  let matrix = drawingContext.getTransform();
+  const currentMatrix = drawingContext.getTransform();
 
-  let x_0 = matrix['e'];
-  let y_0 = matrix['f'];
+  const x_0 = currentMatrix['e'];
+  const y_0 = currentMatrix['f'];
 
-  let x_1 = matrix['a'] + matrix['e'];
-  let y_1 = matrix['b'] + matrix['f'];
-  // However, the context has media coordinates, not p5. taking
-  // the distance between points lets use determine the
-  // scale assuming x and y scaling is the same.
-  let media_per_unit = dist(x_0, y_0, x_1, y_1);
+  const x_1 = currentMatrix['a'] + currentMatrix['e'];
+  const y_1 = currentMatrix['b'] + currentMatrix['f'];
 
-  let p5_current_x = x_0 / media_per_unit;
-  let p5_current_y = y_0 / media_per_unit;
+  const scaleFactor = dist(x_0, y_0, x_1, y_1);
 
-  return { x: p5_current_x, y: p5_current_y };
+  let xOfOrigin = x_0 / scaleFactor;
+  let yOfOrigin = y_0 / scaleFactor;
+
+  return { x: xOfOrigin, y: yOfOrigin };
 }
