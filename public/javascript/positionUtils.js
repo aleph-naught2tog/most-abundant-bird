@@ -55,6 +55,6 @@ function drawOrigin() {
   push();
   noStroke()
   fill('orange');
-  circle(0, 0, 4);
+  circle(0, 0, 5);
   pop();
 }

@@ -118,21 +118,7 @@ class Feather {
     line(xStart, yStart, xStart, yEnd);
     pop();
 
-    // this puts us with the text facing upwards for EVERY feather
-
-    const mousePoint = { x: mouseX, y: mouseY };
-
-    const originInCanvasCoords = getCurrentOriginInCanvasCoords();
-
-    const isMouseWithinCircle = isPointInsideCircle(
-      mousePoint,
-      originInCanvasCoords,
-      radius
-    );
-
-    this.highlighted = isMouseWithinCircle;
-
-    if (isMouseWithinCircle) {
+    if (this.highlighted) {
       rotate(TAU - this.angle);
       text(`${this.label}`, 20, -20);
       rotate(this.angle - TAU);

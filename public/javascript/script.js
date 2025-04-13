@@ -6,9 +6,12 @@ const CHUNK_SIZE = 2;
 const COLOR_COUNT = 50;
 const GRAPH_ROTATION = Math.PI;
 
+let internalCircleDiameter = -1;
+
 let hoveredBirdName = null;
 
 let maximumData = null;
+let maximumFeatherRadius = -1;
 
 /** @type {Array<Feather>} */
 let cachedFeathers = [];
@@ -20,6 +23,10 @@ const getCanvasHeight = () => 700;
 // const getCanvasWidth = () => windowWidth / 2;
 const getCanvasWidth = () => 800;
 const getMaximumChartDiameter = () => getCanvasWidth();
+const getTranslationToCanvasCenter = () => ({
+  x: width / 2,
+  y: height / 2,
+});
 
 // -----------------------------------
 // ------- Lifecycle functions -------
@@ -54,7 +61,6 @@ function setup() {
   initPalettes();
 
   cachedFeathers = createFeathers(BIRD_INFO, maximumData);
-
 }
 
 function draw() {
@@ -62,6 +68,8 @@ function draw() {
 
   const chartDiameter = getMaximumChartDiameter();
   drawFeathers(chartDiameter);
+
+  doMouseMove();
 }
 
 // -----------------------------------
@@ -88,17 +96,16 @@ function drawFeathers(chartDiameter) {
   for (const feather of cachedFeathers) {
     push();
 
-    const translationToCanvasCenter = {
-      x: width / 2,
-      y: height / 2,
-    };
+    const translationToCanvasCenter = getTranslationToCanvasCenter();
 
     // hmmmm, not sure this should be on feather, but does make it easier
     translate(translationToCanvasCenter.x, translationToCanvasCenter.y);
 
+    internalCircleDiameter = chartDiameter * DONUT_HOLE;
+
     push();
     noFill();
-    circle(0, 0, chartDiameter * DONUT_HOLE);
+    circle(0, 0, internalCircleDiameter);
     pop();
 
     rotate(feather.angle);
@@ -107,7 +114,7 @@ function drawFeathers(chartDiameter) {
     // translates us to the outside of the circle above
     const translationToDonutHoleEdge = {
       x: 0,
-      y: (chartDiameter * DONUT_HOLE) / 2 + offset,
+      y: internalCircleDiameter / 2 + offset,
     };
 
     translate(translationToDonutHoleEdge.x, translationToDonutHoleEdge.y);
@@ -116,6 +123,55 @@ function drawFeathers(chartDiameter) {
 
     pop();
   }
+}
+
+function doMouseMove() {
+  const mousePoint = { x: mouseX, y: mouseY };
+
+  drawOrigin();
+  // circle(getTranslationToCanvasCenter().x, getTranslationToCanvasCenter().y, internalCircleDiameter)
+  const isMouseWithinBigFeatherCircle = isPointInsideCircle(
+    mousePoint,
+    getTranslationToCanvasCenter(),
+    internalCircleDiameter / 2
+  );
+
+  const trans = getTranslationToCanvasCenter();
+  translate(trans.x, trans.y);
+  // Get the mouse's coordinates relative to the origin.
+  const x = mouseX - trans.x;
+  const y = mouseY - trans.y;
+
+  // Calculate the angle between the mouse and the origin. we need to rotate
+  // back by PI/2 because of how the unit circle differs from cartestian
+  // coordinates doing the + TAU % TAU skips the discontinuities in atan2
+  const angle = (atan2(y, x) + TAU + PI / 2) % TAU;
+
+  // Rotate.
+  // rotate(a);
+
+  // Draw the shape.
+  // line(0, 0, 60, 0); // positive x
+
+  const hoveredFeatherIndex =
+    floor(map(angle, 0, TAU, 0, cachedFeathers.length, true));
+
+
+  const feather = cachedFeathers[hoveredFeatherIndex];
+
+  // this needs to be constrained to within a reasonable bound
+  // also, this needs to be conditional
+  feather.highlighted = true;
+
+  // const originInCanvasCoords = getCurrentOriginInCanvasCoords();
+
+  // const isMouseWithinCircle = isPointInsideCircle(
+  //   mousePoint,
+  //   originInCanvasCoords,
+  //   radius
+  // );
+
+  // this.highlighted = isMouseWithinCircle;
 }
 
 function createFeathers(birdInfo, preppedData) {
@@ -146,7 +202,8 @@ function createFeathers(birdInfo, preppedData) {
       absoluteMinimum,
       absoluteMaximum,
       10, // we start here so that even no feathers have a small indicator
-      chartDiameter / 2
+      chartDiameter / 2,
+      true
     );
 
     // we rotate back by PI because the feathers start at 0º
@@ -158,8 +215,8 @@ function createFeathers(birdInfo, preppedData) {
       length: radius,
       data: {
         label: closestBirdName,
-        value: num
-      }
+        value: num,
+      },
     });
 
     // QUESTION: why are we doing this twice
