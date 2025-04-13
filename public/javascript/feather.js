@@ -49,8 +49,8 @@ class Feather {
   _drawBarbs() {
     const lengthDivider = floor(this.barbs.length / 2);
 
-    const leftBarbs = this.barbs.slice(0, lengthDivider);
-    const rightBarbs = this.barbs.slice(lengthDivider);
+    const leftBarbs = this.barbs.slice(0, lengthDivider).reverse();
+    const rightBarbs = this.barbs.slice(lengthDivider).reverse();
 
     push();
     scale(1, 2);
