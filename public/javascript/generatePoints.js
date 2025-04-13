@@ -35,7 +35,7 @@ function* generatePoints(length) {
     const p1 = createVector(aw, stack);
     const p2 = p1.lerp(end, map(index, 0, length, 0, 1));
 
-    if (index < this.length * 0.1) {
+    if (index < length * 0.1) {
       p2.x *= random(0.8, 1.2);
       p2.y *= random(0.8, 1.2);
     }
