@@ -1,4 +1,4 @@
-const TOP_BIRD_INFO = {
+const BIRD_INFO = {
   'American Crow': {
     imageUrl:
       'https://cdn.glitch.global/00f42083-b668-494f-ace0-e024365392d8/american_crow.jpg?v=1744300414058',

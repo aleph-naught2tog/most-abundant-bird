@@ -1,23 +1,4 @@
-/*
-  Debug notes:
-  * pages
-    * debug.html uses the basic translation and point translation/checking code,
-      and works as intended
-    * index.html is the actual bird code, and is broken
-  * we're calling the script once in `setup`
-  * a fake mouse point is being used so we don't need the `draw` loop; it IS
-    within the smallest circle at the top of the feather
-  * the `isPointWithinCircle`, `translatePoint`, and `TranslationCoordinates` all work as intended in the `debug.html` file
-  *  we're only rendering 2 feathers intentionally (so we can hardcode a fake mouse point we know is within bounds)
-
-  The thing that is broken is that when we click with the mouse (this is
-  currently a hardcoded fake mouse click within the top circle), the x
-  coordinate translates correctly, but the y coordinate is super off.
-
-  Specifically, the issue appears to be in Feather#_drawAnnotation.
-*/
-
-const BACKGROUND = 'lemonchiffon';
+const BACKGROUND_COLOR = 'lemonchiffon';
 const DONUT_HOLE = 0.2;
 
 // upper limit is half the length of
@@ -35,26 +16,22 @@ let loadedTableData = null;
 
 // NOTE: windowHeight will exist by the time this is called
 // const getCanvasHeight = () => windowWidth / 2;
-const getCanvasHeight = () => 800;
+const getCanvasHeight = () => 700;
 // const getCanvasWidth = () => windowWidth / 2;
 const getCanvasWidth = () => 800;
 const getMaximumChartDiameter = () => getCanvasWidth();
-
-const GRID_COUNT = getCanvasHeight() / 100;
-
-let FAKE_MOUSE_POINT = { x: 410, y: 130 };
 
 // -----------------------------------
 // ------- Lifecycle functions -------
 // -----------------------------------
 
 function preload() {
-  loadTable('/data/wi_histogram.tsv', 'tsv', (data) => {
+  loadTable('/data/wi_histogram.tsv', (data) => {
     loadedTableData = data;
   });
 
-  for (const birdName in TOP_BIRD_INFO) {
-    const metadata = TOP_BIRD_INFO[birdName];
+  for (const birdName in BIRD_INFO) {
+    const metadata = BIRD_INFO[birdName];
 
     metadata.image = loadImage(metadata.imageUrl);
   }
@@ -70,19 +47,19 @@ function setup() {
   const canvas = createCanvas(canvasWidth, canvasHeight);
   canvas.parent('canvas_container');
 
-  background(BACKGROUND);
+  background(BACKGROUND_COLOR);
 
   maximumData = toMaximumInfoColumns(loadedTableData, CHUNK_SIZE);
   initPalettes();
 
-  cachedFeathers = createFeathers(TOP_BIRD_INFO, maximumData);
+  cachedFeathers = createFeathers(BIRD_INFO, maximumData);
 
   const chartDiameter = getMaximumChartDiameter();
   drawFeathers(chartDiameter);
 }
 
 function draw() {
-  background(BACKGROUND);
+  background(BACKGROUND_COLOR);
 
   const chartDiameter = getMaximumChartDiameter();
   drawFeathers(chartDiameter);
@@ -93,8 +70,8 @@ function draw() {
 // -----------------------------------
 
 function initPalettes() {
-  for (const birdName in TOP_BIRD_INFO) {
-    const metadata = TOP_BIRD_INFO[birdName];
+  for (const birdName in BIRD_INFO) {
+    const metadata = BIRD_INFO[birdName];
 
     metadata.palette = createPalette(
       metadata.image,
