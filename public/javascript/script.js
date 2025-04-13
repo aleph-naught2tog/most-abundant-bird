@@ -179,6 +179,10 @@ function createFeathers(birdInfo, preppedData) {
       angle: rotationAngle,
       colors: metadata.palette,
       length: radius,
+      data: {
+        label: closestBirdName,
+        value: num
+      }
     });
 
     // QUESTION: why are we doing this twice

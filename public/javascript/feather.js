@@ -12,9 +12,18 @@ class Feather {
    * @param {Array<Barb>} options.barbs
    * @param {number} options.angle in radians
    * @param {number} options.length
+   * @param {Object} options.data
+   * @param {string} options.data.label
+   * @param {number} options.data.value
    */
   constructor(options) {
-    const { barbs, angle, colors, length, translationCoordinates } = options;
+    const {
+      barbs,
+      angle,
+      colors,
+      length,
+      data: { label, value },
+    } = options;
     // this is awkward but types!
     const defaultBarbs = /** @type {Array<Barb>} */ ([]);
 
@@ -22,6 +31,9 @@ class Feather {
     this.angle = angle;
     this.colors = colors;
     this.length = length;
+
+    this.label = label;
+    this.value = value;
   }
 
   draw() {
@@ -42,6 +54,7 @@ class Feather {
     for (const barb of rightBarbs) {
       barb.draw();
     }
+
     pop();
 
     this._drawRachis();
@@ -76,22 +89,21 @@ class Feather {
     circle(featherCircleCenter.x, featherCircleCenter.y, radius * 2);
     pop();
 
-    rotate(-GRAPH_ROTATION);
+    // this puts us with the text facing upwards for EVERY feather
+    rotate(TAU - this.angle);
 
-    if (mouseIsPressed) {
-      const mousePoint = { x: mouseX, y: mouseY };
+    const mousePoint = { x: mouseX, y: mouseY };
 
-      const originInCanvasCoords = getCurrentOriginInCanvasCoords();
+    const originInCanvasCoords = getCurrentOriginInCanvasCoords();
 
-      const isMouseWithinCircle = isPointInsideCircle(
-        mousePoint,
-        originInCanvasCoords,
-        radius
-      );
+    const isMouseWithinCircle = isPointInsideCircle(
+      mousePoint,
+      originInCanvasCoords,
+      radius
+    );
 
-      if (isMouseWithinCircle) {
-        text('hello world', 20, 20);
-      }
+    if (isMouseWithinCircle) {
+      text(`${this.label}`, 20, -20);
     }
   }
 
