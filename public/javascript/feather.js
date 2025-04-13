@@ -143,9 +143,9 @@ class Feather {
       ANNOTATION_RADIUS
     );
 
-    this.highlighted = isMouseWithinCircle;
+    this.highlighted = isMouseWithinCircle || this.highlighted;
 
-    if (isMouseWithinCircle) {
+    if (this.highlighted) {
       rotate(TAU - this.angle);
       text(`${this.label}`, 20, -20);
       rotate(this.angle - TAU);

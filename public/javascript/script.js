@@ -1,10 +1,17 @@
 const BACKGROUND_COLOR = 'lemonchiffon';
 const DONUT_HOLE = 0.2;
 
-// upper limit is half the length of
+const EXTRA_DIAMETER = 100;
+const OFFSET_FROM_INTERNAL_CIRCLE = 10;
+
+const TOTAL_COUNT = 48;
+// upper limit is half of TOTAL_COUNT
 const CHUNK_SIZE = 2;
 const COLOR_COUNT = 50;
 const GRAPH_ROTATION = Math.PI;
+const ANGLE_SLICED_WIDTH = (Math.PI * 2) / (TOTAL_COUNT / CHUNK_SIZE);
+
+let internalCircleDiameter = -1;
 
 let hoveredBirdName = null;
 
@@ -14,12 +21,17 @@ let maximumData = null;
 let cachedFeathers = [];
 let loadedTableData = null;
 
-// NOTE: windowHeight will exist by the time this is called
-// const getCanvasHeight = () => windowWidth / 2;
 const getCanvasHeight = () => 700;
-// const getCanvasWidth = () => windowWidth / 2;
 const getCanvasWidth = () => 800;
-const getMaximumChartDiameter = () => getCanvasWidth();
+const getMaximumChartRadius = () => {
+  const baseWidth = (getCanvasWidth() / 2) * (1 - DONUT_HOLE);
+  return baseWidth + (ANNOTATION_RADIUS - ANNOTATION_LINE_LENGTH);
+};
+
+const getTranslationToCanvasCenter = () => ({
+  x: width / 2,
+  y: height / 2,
+});
 
 // -----------------------------------
 // ------- Lifecycle functions -------
@@ -54,14 +66,17 @@ function setup() {
   initPalettes();
 
   cachedFeathers = createFeathers(BIRD_INFO, maximumData);
-
 }
 
 function draw() {
   background(BACKGROUND_COLOR);
 
-  const chartDiameter = getMaximumChartDiameter();
-  drawFeathers(chartDiameter);
+  const maximumChartRadius = getMaximumChartRadius();
+  drawFeathers(maximumChartRadius * 2);
+}
+
+function mouseMoved() {
+  highlightBasedOnSlice()
 }
 
 // -----------------------------------
@@ -85,29 +100,28 @@ function initPalettes() {
  * @param {number} chartDiameter
  */
 function drawFeathers(chartDiameter) {
+  internalCircleDiameter = chartDiameter * DONUT_HOLE;
+
   for (const feather of cachedFeathers) {
     push();
 
-    const translationToCanvasCenter = {
-      x: width / 2,
-      y: height / 2,
-    };
+    const translationToCanvasCenter = getTranslationToCanvasCenter();
 
     // hmmmm, not sure this should be on feather, but does make it easier
     translate(translationToCanvasCenter.x, translationToCanvasCenter.y);
 
     push();
     noFill();
-    circle(0, 0, chartDiameter * DONUT_HOLE);
+    circle(0, 0, internalCircleDiameter);
+    // circle(0, 0, getMaximumChartRadius() * 2 + EXTRA_DIAMETER);
     pop();
 
     rotate(feather.angle);
 
-    const offset = 10;
     // translates us to the outside of the circle above
     const translationToDonutHoleEdge = {
       x: 0,
-      y: (chartDiameter * DONUT_HOLE) / 2 + offset,
+      y: (internalCircleDiameter / 2) + OFFSET_FROM_INTERNAL_CIRCLE,
     };
 
     translate(translationToDonutHoleEdge.x, translationToDonutHoleEdge.y);
@@ -124,7 +138,7 @@ function createFeathers(birdInfo, preppedData) {
 
   const feathers = [];
 
-  const chartDiameter = window.width / 2;
+  const maximumChartRadius = getMaximumChartRadius();
 
   for (let index = 0; index < preppedData.length; index++) {
     const num = preppedData[index].maximum;
@@ -146,7 +160,8 @@ function createFeathers(birdInfo, preppedData) {
       absoluteMinimum,
       absoluteMaximum,
       10, // we start here so that even no feathers have a small indicator
-      chartDiameter / 2
+      maximumChartRadius,
+      true
     );
 
     // we rotate back by PI because the feathers start at 0º
@@ -158,8 +173,8 @@ function createFeathers(birdInfo, preppedData) {
       length: radius,
       data: {
         label: closestBirdName,
-        value: num
-      }
+        value: num,
+      },
     });
 
     // QUESTION: why are we doing this twice
