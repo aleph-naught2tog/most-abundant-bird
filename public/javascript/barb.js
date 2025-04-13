@@ -20,12 +20,10 @@ class Barb {
     strokeWeight(this.thickness);
 
     if (isHighlighted) {
-      scale(1.1, 1.1)
+      scale(1.05, 1.05)
       const [r,g,b,_a] = this.color;
-      strokeColor = [r * 2, g * 2, b * 2, 255]
+      strokeColor = [r,g,b, 255]
     }
-
-    console.debug({ before: this.color, after: strokeColor })
 
     stroke(strokeColor);
 

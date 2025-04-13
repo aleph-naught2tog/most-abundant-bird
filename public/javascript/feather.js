@@ -1,4 +1,4 @@
-const ALPHA = 0.9;
+const ALPHA = 0.5;
 
 class Feather {
   // these are mostly for clarity
@@ -34,6 +34,8 @@ class Feather {
 
     this.label = label;
     this.value = value;
+
+    this.highlighted = false;
   }
 
   draw() {
@@ -44,7 +46,7 @@ class Feather {
     this._drawAnnotation();
   }
 
-  _drawBarbs(isHighlighted = false) {
+  _drawBarbs() {
     const lengthDivider = floor(this.barbs.length / 2);
 
     const leftBarbs = this.barbs.slice(0, lengthDivider);
@@ -54,13 +56,13 @@ class Feather {
     scale(1, 2);
 
     for (const barb of leftBarbs) {
-      barb.draw(isHighlighted);
+      barb.draw(this.highlighted);
     }
 
     scale(-2, 1);
 
     for (const barb of rightBarbs) {
-      barb.draw(isHighlighted);
+      barb.draw(this.highlighted);
     }
 
     pop();
@@ -116,6 +118,8 @@ class Feather {
       radius
     );
 
+    this.highlighted = isMouseWithinCircle;
+
     if (isMouseWithinCircle) {
       rotate(TAU - this.angle);
       text(`${this.label}`, 20, -20);
@@ -134,9 +138,7 @@ class Feather {
       );
       pop();
 
-      translate(-featherCircleCenter.x, -featherCircleCenter.y)
-
-      this._drawBarbs(true);
+      translate(-featherCircleCenter.x, -featherCircleCenter.y);
     }
   }
 

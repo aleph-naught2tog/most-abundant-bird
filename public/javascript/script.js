@@ -104,10 +104,11 @@ function drawFeathers(chartDiameter) {
 
     rotate(feather.angle);
 
+    const offset = 10;
     // translates us to the outside of the circle above
     const translationToDonutHoleEdge = {
       x: 0,
-      y: (chartDiameter * DONUT_HOLE) / 2,
+      y: (chartDiameter * DONUT_HOLE) / 2 + offset,
     };
 
     translate(translationToDonutHoleEdge.x, translationToDonutHoleEdge.y);
