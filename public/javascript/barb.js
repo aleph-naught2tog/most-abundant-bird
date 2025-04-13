@@ -40,23 +40,8 @@ class Barb {
       end.alpha = 255;
     }
 
-    // if (!this.gradient) {
-    //   this.gradient = createGradient(
-    //     this.start,
-    //     this.end,
-    //     [start.r, start.g, start.b, start.alpha],
-    //     [end.r, end.g, end.b, end.alpha]
-    //   );
-    // }
-
     stroke(...strokeColor, 200);
     line(this.start.x, this.start.y, this.end.x, this.end.y)
-
-    // drawGradientLine(
-    //   this.gradient,
-    //   { start: this.start, end: this.end },
-    //   this.thickness
-    // );
 
     pop();
   }

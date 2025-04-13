@@ -143,11 +143,11 @@ function doMouseMove() {
   const mousePoint = { x: mouseX, y: mouseY };
 
   drawOrigin();
-  // circle(getTranslationToCanvasCenter().x, getTranslationToCanvasCenter().y, internalCircleDiameter)
+
   const isMouseWithinBigFeatherCircle = isPointInsideCircle(
     mousePoint,
     getTranslationToCanvasCenter(),
-    getMaximumChartRadius()
+    getMaximumChartRadius() + EXTRA_DIAMETER / 2
   );
 
   const trans = getTranslationToCanvasCenter();
@@ -172,35 +172,17 @@ function doMouseMove() {
 
   const feather = cachedFeathers[floor(hoveredFeatherIndex)];
 
+  // subtracting ANGLE_SLICED_WIDTH / 2 centers us, like the feather
   const angleBounds = {
     start: hoveredFeatherIndex * ANGLE_SLICED_WIDTH - ANGLE_SLICED_WIDTH / 2,
     end:
       (hoveredFeatherIndex + 1) * ANGLE_SLICED_WIDTH - ANGLE_SLICED_WIDTH / 2,
   };
 
-  //   rotate(angleBounds.start);
-  //   stroke('red')
-  //   line(0, 0, 0, -height);
-  //   rotate(-angleBounds.start);
-
-  //   text(hoveredFeatherIndex.toFixed(2), 0, 0)
-
-  // rotate(angleBounds.end)
-  // stroke('blue')
-  // line(0,0,0, -height)
-  // rotate(- angleBounds.end)
-
-  console.debug({ angleBounds });
-
-  if (
+  feather.highlighted =
     isMouseWithinBigFeatherCircle &&
     angleOfMouse < angleBounds.end &&
-    angleOfMouse > angleBounds.start
-  ) {
-    feather.highlighted = true;
-  } else {
-    feather.highlighted = false;
-  }
+    angleOfMouse > angleBounds.start;
 }
 
 function createFeathers(birdInfo, preppedData) {
