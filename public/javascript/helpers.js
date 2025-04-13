@@ -52,6 +52,8 @@ function isPointInsideCircle(point, circleCenter, circleRadius) {
   return distanceToPointFromCenter < circleRadius;
 }
 
+// TODO: if we track the transform matrix ourself, we can get rid of the context
+// call here
 function getCurrentOriginInCanvasCoords() {
   // https://stackoverflow.com/a/72160964
   const currentMatrix = drawingContext.getTransform();

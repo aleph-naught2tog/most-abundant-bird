@@ -46,6 +46,7 @@ class Feather {
     this.value = value;
 
     this.highlighted = false;
+    this.originInCanvasCoords = null;
   }
 
   draw() {
@@ -133,16 +134,20 @@ class Feather {
 
     // this puts us with the text facing upwards for EVERY feather
 
-    const mousePoint = { x: mouseX, y: mouseY };
+    if (!this.originInCanvasCoords) {
+      this.originInCanvasCoords = getCurrentOriginInCanvasCoords();
+    }
 
-    const originInCanvasCoords = getCurrentOriginInCanvasCoords();
+    const mousePoint = { x: mouseX, y: mouseY };
 
     const isMouseWithinCircle = isPointInsideCircle(
       mousePoint,
-      originInCanvasCoords,
+      this.originInCanvasCoords,
       ANNOTATION_RADIUS
     );
 
+    // if we're using the highlightOnSlice code,
+    // this should be || this.highlighted
     this.highlighted = isMouseWithinCircle;
 
     if (this.highlighted) {

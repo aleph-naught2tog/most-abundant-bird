@@ -24,7 +24,7 @@ class Barb {
       scale(1.05, 1.05);
     }
 
-    stroke(...strokeColor, 200);
+    stroke(...strokeColor, isHighlighted ? 255 : 200);
     line(this.start.x, this.start.y, this.end.x, this.end.y)
 
     pop();

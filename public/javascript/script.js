@@ -81,7 +81,7 @@ function draw() {
 }
 
 function mouseMoved() {
-  // highlightBasedOnSlice()
+
 }
 
 // -----------------------------------
