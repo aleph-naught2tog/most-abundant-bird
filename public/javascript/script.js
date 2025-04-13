@@ -1,6 +1,7 @@
+const ASPECT_RATIO = 7/5;
 const BACKGROUND_COLOR = 'lemonchiffon';
-const DONUT_HOLE = 0.2;
 
+const DONUT_HOLE = 0.2;
 const EXTRA_DIAMETER = 100;
 const OFFSET_FROM_INTERNAL_CIRCLE = 10;
 
@@ -21,10 +22,14 @@ let maximumData = null;
 let cachedFeathers = [];
 let loadedTableData = null;
 
-const getCanvasHeight = () => 700;
-const getCanvasWidth = () => 800;
+const getCanvasHeight = () => {
+  return windowHeight - 32;
+};
+const getCanvasWidth = () => {
+  return getCanvasHeight() * ASPECT_RATIO;
+};
 const getMaximumChartRadius = () => {
-  const baseWidth = (getCanvasWidth() / 2) * (1 - DONUT_HOLE);
+  const baseWidth = (getCanvasHeight() / 2) * (1 - DONUT_HOLE);
   return baseWidth + (ANNOTATION_RADIUS - ANNOTATION_LINE_LENGTH);
 };
 
@@ -76,7 +81,7 @@ function draw() {
 }
 
 function mouseMoved() {
-  highlightBasedOnSlice()
+  // highlightBasedOnSlice()
 }
 
 // -----------------------------------
