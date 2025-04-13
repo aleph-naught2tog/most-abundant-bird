@@ -108,13 +108,6 @@ class Feather {
 
     translate(annotationCircleCenter.x, annotationCircleCenter.y);
 
-    const featherCircleCenter = {
-      x: 0,
-      y: this.length + ANNOTATION_LINE_LENGTH + OFFSET_FROM_FEATHER_TIP,
-    };
-
-    translate(featherCircleCenter.x, featherCircleCenter.y);
-
     push();
     noFill();
     stroke('black');
@@ -122,12 +115,14 @@ class Feather {
     push();
     strokeWeight(4);
 
-    const xStart = featherCircleCenter.x;
+    const xStart = annotationCircleCenter.x;
 
     // backs us to the radius + how long the anchor should be;
     // offsetFromFeatherTip bumps us off the feather tip (we ADD it here instead
     // of subtract because we are on the -Y axis, so this moves us back up)
-    const yStart = -1 * (ANNOTATION_RADIUS + ANNOTATION_LINE_LENGTH) + OFFSET_FROM_FEATHER_TIP;
+    const yStart =
+      -1 * (ANNOTATION_RADIUS + ANNOTATION_LINE_LENGTH) +
+      OFFSET_FROM_FEATHER_TIP;
 
     // lands us at the bottom point of the circle
     const yEnd = -1 * ANNOTATION_RADIUS;
@@ -160,22 +155,17 @@ class Feather {
       stroke('cyan');
       strokeWeight(3);
       circle(0, 0, ANNOTATION_RADIUS * 2);
-      line(
-        xStart,
-        yStart,
-        xStart,
-        yEnd
-      );
+      line(xStart, yStart, xStart, yEnd);
       pop();
 
-      translate(-featherCircleCenter.x, -featherCircleCenter.y);
+      translate(-annotationCircleCenter.x, -annotationCircleCenter.y);
     }
 
-    pop()
+    pop();
   }
 
   _drawRachis() {
-    push()
+    push();
     const sw = map(this.length, 10, window.width / 4, 0.5, 1);
     strokeWeight(sw);
     stroke(this._getRachisColor());
@@ -184,7 +174,7 @@ class Feather {
 
     // draw a line from the outer circle to halfway up the feather
     line(0, 0, 0, rachisLength);
-    pop()
+    pop();
   }
 
   createBarbs() {
