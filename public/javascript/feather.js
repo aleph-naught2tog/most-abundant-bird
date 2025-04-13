@@ -1,6 +1,15 @@
 const ALPHA = 0.8;
 const SCALE_FACTOR = 1.05;
 
+const ANNOTATION_RADIUS = 10;
+const ANNOTATION_LINE_LENGTH = 30;
+// this must be less than the anchorLength
+const OFFSET_FROM_FEATHER_TIP = 15;
+
+if (ANNOTATION_LINE_LENGTH <= OFFSET_FROM_FEATHER_TIP) {
+  throw new Error('Your annotation line will not appear.');
+}
+
 class Feather {
   // these are mostly for clarity
   barbs = [];
@@ -80,19 +89,28 @@ class Feather {
     return [red, green, blue, alpha];
   }
 
+  _getAnnotationCenter() {
+    const totalLength = (this.length + ANNOTATION_LINE_LENGTH) * SCALE_SCALE;
+    const y = totalLength + OFFSET_FROM_FEATHER_TIP;
+
+    return {
+      x: 0,
+      y,
+    };
+  }
+
   _drawAnnotation() {
-    push()
     /* REMEMBER: isMousePressed won't work if you aren't using `draw`! */
 
-    const radius = 10;
+    push();
 
-    const anchorLength = 30;
-    // this must be less than the anchorLength
-    const offsetFromFeatherTip = 10;
+    const annotationCircleCenter = this._getAnnotationCenter();
+
+    translate(annotationCircleCenter.x, annotationCircleCenter.y);
 
     const featherCircleCenter = {
       x: 0,
-      y: this.length + anchorLength + offsetFromFeatherTip,
+      y: this.length + ANNOTATION_LINE_LENGTH + OFFSET_FROM_FEATHER_TIP,
     };
 
     translate(featherCircleCenter.x, featherCircleCenter.y);
@@ -100,7 +118,7 @@ class Feather {
     push();
     noFill();
     stroke('black');
-    circle(0, 0, radius * 2);
+    circle(0, 0, ANNOTATION_RADIUS * 2);
     push();
     strokeWeight(4);
 
@@ -109,10 +127,10 @@ class Feather {
     // backs us to the radius + how long the anchor should be;
     // offsetFromFeatherTip bumps us off the feather tip (we ADD it here instead
     // of subtract because we are on the -Y axis, so this moves us back up)
-    const yStart = -1 * (radius + anchorLength) + offsetFromFeatherTip;
+    const yStart = -1 * (ANNOTATION_RADIUS + ANNOTATION_LINE_LENGTH) + OFFSET_FROM_FEATHER_TIP;
 
     // lands us at the bottom point of the circle
-    const yEnd = -1 * radius;
+    const yEnd = -1 * ANNOTATION_RADIUS;
 
     pop();
     line(xStart, yStart, xStart, yEnd);
@@ -127,7 +145,7 @@ class Feather {
     const isMouseWithinCircle = isPointInsideCircle(
       mousePoint,
       originInCanvasCoords,
-      radius
+      ANNOTATION_RADIUS
     );
 
     this.highlighted = isMouseWithinCircle;
@@ -141,7 +159,7 @@ class Feather {
       noFill();
       stroke('cyan');
       strokeWeight(3);
-      circle(0, 0, radius * 2);
+      circle(0, 0, ANNOTATION_RADIUS * 2);
       line(
         xStart,
         yStart,

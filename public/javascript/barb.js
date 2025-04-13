@@ -20,43 +20,12 @@ class Barb {
     const strokeColor = this.color.slice(0, 3);
     strokeWeight(this.thickness);
 
-    const start = {
-      r: strokeColor[0],
-      g: strokeColor[1],
-      b: strokeColor[2],
-      alpha: 200,
-    };
-
-    const end = {
-      r: strokeColor[0],
-      g: strokeColor[1],
-      b: strokeColor[2],
-      alpha: 70,
-    };
-
     if (isHighlighted) {
       scale(1.05, 1.05);
-      start.alpha = 255;
-      end.alpha = 255;
     }
-
-    // if (!this.gradient) {
-    //   this.gradient = createGradient(
-    //     this.start,
-    //     this.end,
-    //     [start.r, start.g, start.b, start.alpha],
-    //     [end.r, end.g, end.b, end.alpha]
-    //   );
-    // }
 
     stroke(...strokeColor, 200);
     line(this.start.x, this.start.y, this.end.x, this.end.y)
-
-    // drawGradientLine(
-    //   this.gradient,
-    //   { start: this.start, end: this.end },
-    //   this.thickness
-    // );
 
     pop();
   }
