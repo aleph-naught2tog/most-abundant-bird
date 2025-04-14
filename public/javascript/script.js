@@ -1,10 +1,18 @@
+const ASPECT_RATIO = 6 / 4;
 const BACKGROUND_COLOR = 'lemonchiffon';
-const DONUT_HOLE = 0.2;
 
-// upper limit is half the length of
+const DONUT_HOLE = 0.2;
+const EXTRA_DIAMETER = 100;
+const OFFSET_FROM_INTERNAL_CIRCLE = 10;
+
+const TOTAL_COUNT = 48;
+// upper limit is half of TOTAL_COUNT
 const CHUNK_SIZE = 2;
-const COLOR_COUNT = 50;
+const COLOR_COUNT = 200;
 const GRAPH_ROTATION = Math.PI;
+const ANGLE_SLICED_WIDTH = (Math.PI * 2) / (TOTAL_COUNT / CHUNK_SIZE);
+
+let internalCircleDiameter = -1;
 
 let hoveredBirdName = null;
 
@@ -14,12 +22,23 @@ let maximumData = null;
 let cachedFeathers = [];
 let loadedTableData = null;
 
-// NOTE: windowHeight will exist by the time this is called
-// const getCanvasHeight = () => windowWidth / 2;
-const getCanvasHeight = () => 700;
-// const getCanvasWidth = () => windowWidth / 2;
-const getCanvasWidth = () => 800;
-const getMaximumChartDiameter = () => getCanvasWidth();
+const getCanvasHeight = () => {
+  return windowHeight - 32;
+};
+
+const getCanvasWidth = () => {
+  return getCanvasHeight() * ASPECT_RATIO;
+};
+
+const getMaximumChartRadius = () => {
+  const baseWidth = (getCanvasHeight() / 2) * (1 - DONUT_HOLE);
+  return baseWidth + (ANNOTATION_RADIUS - ANNOTATION_LINE_LENGTH) + 100;
+};
+
+const getTranslationToCircleCenter = () => ({
+  x: width / 4,
+  y: height / 3.5,
+});
 
 // -----------------------------------
 // ------- Lifecycle functions -------
@@ -37,6 +56,7 @@ function preload() {
   }
 }
 
+// BUG/PERFORMANCE: the first one you hover over takes the longest
 function setup() {
   // this is the default, but good for clarity
   angleMode(RADIANS);
@@ -47,22 +67,27 @@ function setup() {
   const canvas = createCanvas(canvasWidth, canvasHeight);
   canvas.parent('canvas_container');
 
-  background(BACKGROUND_COLOR);
-
   maximumData = toMaximumInfoColumns(loadedTableData, CHUNK_SIZE);
   initPalettes();
 
   cachedFeathers = createFeathers(BIRD_INFO, maximumData);
 
-  const chartDiameter = getMaximumChartDiameter();
-  drawFeathers(chartDiameter);
+  // const maximumChartRadius = getMaximumChartRadius();
+  // background(BACKGROUND_COLOR);
+  // drawFeathers(maximumChartRadius * 2);
+  // drawMonths();
 }
 
 function draw() {
+  const maximumChartRadius = getMaximumChartRadius();
   background(BACKGROUND_COLOR);
 
-  const chartDiameter = getMaximumChartDiameter();
-  drawFeathers(chartDiameter);
+  drawMonths();
+  drawFeathers(maximumChartRadius * 2);
+}
+
+function mouseMoved() {
+  // highlightBasedOnSlice();
 }
 
 // -----------------------------------
@@ -86,35 +111,68 @@ function initPalettes() {
  * @param {number} chartDiameter
  */
 function drawFeathers(chartDiameter) {
+  internalCircleDiameter = chartDiameter * DONUT_HOLE;
+
+  /** @type {Feather|null} */
+  let highlightedFeather = null;
+
   for (const feather of cachedFeathers) {
     push();
 
-    const translationToCanvasCenter = {
-      x: width / 2,
-      y: height / 2,
-    };
+    const translationToCanvasCenter = getTranslationToCircleCenter();
 
-    // hmmmm, not sure this should be on feather, but does make it easier
     translate(translationToCanvasCenter.x, translationToCanvasCenter.y);
 
     push();
     noFill();
-    circle(0, 0, chartDiameter * DONUT_HOLE);
+    circle(0, 0, internalCircleDiameter);
+    // circle(0, 0, getMaximumChartRadius() * 2 + EXTRA_DIAMETER);
     pop();
 
     rotate(feather.angle);
 
     // translates us to the outside of the circle above
+    const offset = feather.highlighted ? 10 : 0;
     const translationToDonutHoleEdge = {
       x: 0,
-      y: (chartDiameter * DONUT_HOLE) / 2,
+      y: internalCircleDiameter / 2 + OFFSET_FROM_INTERNAL_CIRCLE + offset,
     };
 
     translate(translationToDonutHoleEdge.x, translationToDonutHoleEdge.y);
 
+    if (feather.highlighted) {
+      highlightedFeather = feather;
+      pop();
+      continue;
+    }
+
     feather.draw();
 
+    translate(-translationToCanvasCenter.x, -translationToCanvasCenter.y);
+    rotate(-feather.angle);
+
     pop();
+  }
+
+  if (highlightedFeather) {
+    const featherOrigin = highlightedFeather.originInCanvasCoords;
+
+    if (!featherOrigin) {
+      return;
+    }
+
+    const theta = highlightedFeather.angle + PI / 2;
+    const circleCenter = getTranslationToCircleCenter();
+
+    const x = circleCenter.x + cos(theta) * (internalCircleDiameter / 2 + 11);
+    const y = circleCenter.y + sin(theta) * (internalCircleDiameter / 2 + 11);
+    translate(x, y);
+    rotate(theta - PI / 2)
+
+    highlightedFeather.draw();
+
+    rotate(-theta - PI / 2);
+    translate(-x, -y);
   }
 }
 
@@ -124,7 +182,7 @@ function createFeathers(birdInfo, preppedData) {
 
   const feathers = [];
 
-  const chartDiameter = window.width / 2;
+  const maximumChartRadius = getMaximumChartRadius();
 
   for (let index = 0; index < preppedData.length; index++) {
     const num = preppedData[index].maximum;
@@ -146,7 +204,8 @@ function createFeathers(birdInfo, preppedData) {
       absoluteMinimum,
       absoluteMaximum,
       10, // we start here so that even no feathers have a small indicator
-      chartDiameter / 2
+      maximumChartRadius,
+      true
     );
 
     // we rotate back by PI because the feathers start at 0º
@@ -158,8 +217,8 @@ function createFeathers(birdInfo, preppedData) {
       length: radius,
       data: {
         label: closestBirdName,
-        value: num
-      }
+        value: num,
+      },
     });
 
     // QUESTION: why are we doing this twice
@@ -170,4 +229,30 @@ function createFeathers(birdInfo, preppedData) {
   }
 
   return feathers;
+}
+
+function drawMonths() {
+  const numberOfMonths = 12;
+  const circleCenter = getTranslationToCircleCenter();
+
+  for (let monthIndex = 1; monthIndex <= numberOfMonths; monthIndex += 1) {
+    push();
+
+    const theta = map(monthIndex, 0, numberOfMonths, 0, TAU) - PI / 2;
+
+    const date = new Date(1990, monthIndex, 10); // 2009-11-10
+    const month = date
+      .toLocaleString('default', { month: 'long' })
+      .slice(0, 1);
+
+    strokeWeight(2);
+    textAlign(CENTER, CENTER);
+    text(
+      month,
+      circleCenter.x + cos(theta) * (internalCircleDiameter / 2) * 0.85, // * dir.x),
+      circleCenter.y + sin(theta) * (internalCircleDiameter / 2) * 0.85 + 2 // + (10 * dir.y)
+    );
+
+    pop();
+  }
 }

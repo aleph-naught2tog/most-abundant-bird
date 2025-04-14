@@ -35,33 +35,6 @@ function getRandomStrokeWeight() {
 }
 
 /**
- * Creates an object of useful information for generating a feather.
- *
- * @param {number} length
- *
- * @returns {{
- *  heightScale: number,
- *  featherWidth: number,
- *  featherHeight: number,
- *  step: number
- * }} a config of information about a feather
- */
-function getFeatherConfig(length) {
-  const heightScale = 0.5;
-  const featherWidth = length * 0.15;
-  const featherHeight = length * heightScale;
-  const step = floor(map(Math.random(), 0, 1, 3, 5, true));
-  // const step = 2;
-
-  return {
-    heightScale,
-    featherWidth,
-    featherHeight,
-    step,
-  };
-}
-
-/**
  * @param {{x: number, y: number}} point the point we're checking
  * @param {{x: number, y: number}} circleCenter the center of the circle
  * @param {number} circleRadius the radius of the circle
@@ -79,6 +52,8 @@ function isPointInsideCircle(point, circleCenter, circleRadius) {
   return distanceToPointFromCenter < circleRadius;
 }
 
+// TODO: if we track the transform matrix ourself, we can get rid of the context
+// call here
 function getCurrentOriginInCanvasCoords() {
   // https://stackoverflow.com/a/72160964
   const currentMatrix = drawingContext.getTransform();
@@ -95,4 +70,59 @@ function getCurrentOriginInCanvasCoords() {
   let yOfOrigin = y_0 / scaleFactor;
 
   return { x: xOfOrigin, y: yOfOrigin };
+}
+
+/**
+ */
+function drawGradientLine(optionsOrGradient, { start, end }, thickness = 1) {
+  let gradient;
+
+  if (optionsOrGradient instanceof CanvasGradient) {
+    gradient = optionsOrGradient;
+  } else {
+    const { startColor, endColor } = optionsOrGradient;
+
+    gradient = createGradient(start, end, startColor, endColor);
+  }
+
+  const ctx = drawingContext;
+  const originalStrokeStyle = ctx.strokeStyle;
+
+  push();
+
+  ctx.strokeStyle = gradient;
+
+  strokeWeight(thickness);
+  line(start.x, start.y, end.x, end.y);
+
+  ctx.strokeStyle = originalStrokeStyle;
+
+  pop();
+}
+
+function createGradient(
+  { x: x_0, y: y_0 },
+  { x: x_1, y: y_1 },
+  startColor,
+  endColor
+) {
+  const ctx = drawingContext;
+
+  const gradient = ctx.createLinearGradient(x_0, y_0, x_1, y_1);
+  const cssStartColor = `rgba(${startColor[0]}, ${startColor[1]}, ${
+    startColor[2]
+  }, ${map(startColor[3], 0, 255, 0, 1)})`;
+
+  const cssEndColor = `rgba(${endColor[0]}, ${endColor[1]}, ${
+    endColor[2]
+  }, ${map(endColor[3], 0, 255, 0, 1)})`;
+
+  gradient.addColorStop(0.5, cssStartColor);
+  gradient.addColorStop(
+    0.75,
+    lerpColor(color(startColor), color(endColor), 0.5)
+  );
+  gradient.addColorStop(1, cssEndColor);
+
+  return gradient;
 }
