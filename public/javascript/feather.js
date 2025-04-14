@@ -113,7 +113,7 @@ class Feather {
 
       // if we're using the highlightOnSlice code,
       // this should be || this.highlighted
-      return isMouseWithinCircle || this.highlighted;
+      return isMouseWithinCircle// || this.highlighted;
     }
 
     return false;
@@ -158,15 +158,15 @@ class Feather {
     }
 
     if (this.highlighted) {
-      // push();
-      // noFill();
-      // stroke('cyan');
-      // strokeWeight(3);
-      // circle(0, 0, ANNOTATION_RADIUS * 2);
-      // line(xStart, yStart, xStart, yEnd);
-      // pop();
+      push();
+      noFill();
+      stroke('cyan');
+      strokeWeight(3);
+      circle(0, 0, ANNOTATION_RADIUS * 2);
+      line(xStart, yStart, xStart, yEnd);
+      pop();
 
-      // translate(-annotationCircleCenter.x, -annotationCircleCenter.y);
+      translate(-annotationCircleCenter.x, -annotationCircleCenter.y);
     }
 
     pop();
@@ -179,10 +179,9 @@ class Feather {
     stroke(this._getRachisColor());
 
     const rachisLength = this.length / 2;
-    const offset = this.highlighted ? 10 : 0;
 
     // draw a line from the outer circle to halfway up the feather
-    line(0, 0 + offset, 0, rachisLength + offset);
+    line(0, 0, 0, rachisLength );
     pop();
   }
 

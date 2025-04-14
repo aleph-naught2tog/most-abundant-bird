@@ -8,7 +8,7 @@ const OFFSET_FROM_INTERNAL_CIRCLE = 10;
 const TOTAL_COUNT = 48;
 // upper limit is half of TOTAL_COUNT
 const CHUNK_SIZE = 2;
-const COLOR_COUNT = 50;
+const COLOR_COUNT = 200;
 const GRAPH_ROTATION = Math.PI;
 const ANGLE_SLICED_WIDTH = (Math.PI * 2) / (TOTAL_COUNT / CHUNK_SIZE);
 
@@ -87,7 +87,7 @@ function draw() {
 }
 
 function mouseMoved() {
-  highlightBasedOnSlice();
+  // highlightBasedOnSlice();
 }
 
 // -----------------------------------
@@ -156,7 +156,6 @@ function drawFeathers(chartDiameter) {
 
   if (highlightedFeather) {
     const featherOrigin = highlightedFeather.originInCanvasCoords;
-    console.debug({ featherOrigin })
 
     if (!featherOrigin) {
       return;
@@ -165,11 +164,10 @@ function drawFeathers(chartDiameter) {
     const theta = highlightedFeather.angle + PI / 2;
     const circleCenter = getTranslationToCircleCenter();
 
-    const y = circleCenter.y + sin(theta) * (internalCircleDiameter / 2 + 40);
-    const x = circleCenter.x + cos(theta) * (internalCircleDiameter / 2 + 40);
+    const x = circleCenter.x + cos(theta) * (internalCircleDiameter / 2 + 11);
+    const y = circleCenter.y + sin(theta) * (internalCircleDiameter / 2 + 11);
     translate(x, y);
     rotate(theta - PI / 2)
-
 
     highlightedFeather.draw();
 
