@@ -1,0 +1,4 @@
+{
+  "compilerOptions": { "noEmit": true, "checkJs": true },
+  "include": ["./public/javascript/**/*"]
+}

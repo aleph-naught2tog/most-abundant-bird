@@ -12,6 +12,7 @@
 - [ ] add data display
   - [ ] bird name
   - [ ] photo?
+- [ ] add types
 
 ## IDEAS
 
