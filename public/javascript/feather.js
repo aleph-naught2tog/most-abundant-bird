@@ -50,11 +50,33 @@ class Feather {
   }
 
   draw() {
+    this.highlighted = this._shouldBeHighlighted();
+
     this._drawRachis();
 
     this._drawBarbs();
 
     this._drawAnnotation();
+  }
+
+  createBarbs() {
+    const pointCount = this.length;
+    const points = generatePoints(pointCount);
+
+    for (const { p0, p2, index } of points) {
+      const currentColor = getColorAtIndex(index, this.length, this.colors);
+      const [r, g, b, _alpha] = currentColor;
+
+      const scaledAlpha = map(ALPHA, 0, 1, 0, 255);
+      const barb = new Barb({
+        start: { x: p0.x, y: p0.y },
+        end: { x: p2.x, y: p2.y },
+        color: [r, g, b, scaledAlpha],
+        thickness: getRandomStrokeWeight(),
+      });
+
+      this.barbs.push(barb);
+    }
   }
 
   _drawBarbs() {
@@ -79,25 +101,22 @@ class Feather {
     pop();
   }
 
-  _getRachisColor() {
-    const exemplarBarb = this.barbs[0];
+  _shouldBeHighlighted() {
+    const mousePoint = { x: mouseX, y: mouseY };
 
-    const red = exemplarBarb.color[0] / 1.25;
-    const green = exemplarBarb.color[1] / 1.25;
-    const blue = exemplarBarb.color[2] / 1.25;
-    const alpha = exemplarBarb.color[3] * 0.85;
+    if (this.originInCanvasCoords) {
+      const isMouseWithinCircle = isPointInsideCircle(
+        mousePoint,
+        this.originInCanvasCoords,
+        ANNOTATION_RADIUS
+      );
 
-    return [red, green, blue, alpha];
-  }
+      // if we're using the highlightOnSlice code,
+      // this should be || this.highlighted
+      return isMouseWithinCircle// || this.highlighted;
+    }
 
-  _getAnnotationCenter() {
-    const totalLength = (this.length + ANNOTATION_LINE_LENGTH) * SCALE_SCALE;
-    const y = totalLength + OFFSET_FROM_FEATHER_TIP;
-
-    return {
-      x: 0,
-      y,
-    };
+    return false;
   }
 
   _drawAnnotation() {
@@ -138,18 +157,6 @@ class Feather {
       this.originInCanvasCoords = getCurrentOriginInCanvasCoords();
     }
 
-    const mousePoint = { x: mouseX, y: mouseY };
-
-    const isMouseWithinCircle = isPointInsideCircle(
-      mousePoint,
-      this.originInCanvasCoords,
-      ANNOTATION_RADIUS
-    );
-
-    // if we're using the highlightOnSlice code,
-    // this should be || this.highlighted
-    this.highlighted = isMouseWithinCircle;
-
     if (this.highlighted) {
       push();
       noFill();
@@ -174,27 +181,30 @@ class Feather {
     const rachisLength = this.length / 2;
 
     // draw a line from the outer circle to halfway up the feather
-    line(0, 0, 0, rachisLength);
+    line(0, 0, 0, rachisLength );
     pop();
   }
 
-  createBarbs() {
-    const pointCount = this.length;
-    const points = generatePoints(pointCount);
+  _getRachisColor() {
+    const exemplarBarb = this.barbs[0];
 
-    for (const { p0, p2, index } of points) {
-      const currentColor = getColorAtIndex(index, this.length, this.colors);
-      const [r, g, b, _alpha] = currentColor;
+    const red = exemplarBarb.color[0] / 1.25;
+    const green = exemplarBarb.color[1] / 1.25;
+    const blue = exemplarBarb.color[2] / 1.25;
+    const alpha = exemplarBarb.color[3] * 0.85;
 
-      const scaledAlpha = map(ALPHA, 0, 1, 0, 255);
-      const barb = new Barb({
-        start: { x: p0.x, y: p0.y },
-        end: { x: p2.x, y: p2.y },
-        color: [r, g, b, scaledAlpha],
-        thickness: getRandomStrokeWeight(),
-      });
-
-      this.barbs.push(barb);
-    }
+    return [red, green, blue, alpha];
   }
+
+  _getAnnotationCenter() {
+    const offset = this.highlighted ? 0 : 0;
+    const totalLength = (this.length + ANNOTATION_LINE_LENGTH) * SCALE_SCALE;
+    const y = totalLength + OFFSET_FROM_FEATHER_TIP + offset;
+
+    return {
+      x: 0,
+      y,
+    };
+  }
+
 }
