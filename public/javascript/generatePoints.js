@@ -4,8 +4,12 @@ const SCALE_SCALE = 0.75;
 const HEIGHT_SCALE = SCALE_SCALE * 0.5;
 const WIDTH_SCALE = SCALE_SCALE * 0.15;
 
-// length also represents the point count
+/**
+ * @param {number} length
+ * @returns {Generator<{p0: P5Vector, p2: P5Vector, index: number}>}
+ */
 function* generatePoints(length) {
+  // length also represents the point count
   const featherWidth = length * WIDTH_SCALE;
   const featherHeight = length * HEIGHT_SCALE;
   // const step = floor(map(Math.random(), 0, 1, 3, 5, true));

@@ -1,4 +1,4 @@
 {
-  "compilerOptions": { "noEmit": true, "checkJs": true },
+  "compilerOptions": { "noEmit": true, "checkJs": true, "target": "ES2015" },
   "include": ["./public/javascript/**/*"]
 }

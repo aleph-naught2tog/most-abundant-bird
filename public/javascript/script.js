@@ -62,6 +62,7 @@ function preload() {
 // BUG/PERFORMANCE: the first one you hover over takes the longest
 function setup() {
   // this is the default, but good for clarity
+  console.debug({ RADIANS })
   angleMode(RADIANS);
 
   const canvasHeight = getCanvasHeight();
@@ -69,6 +70,8 @@ function setup() {
 
   const canvas = createCanvas(canvasWidth, canvasHeight);
   canvas.parent("canvas_container");
+  let res =canvas.mouseClicked((args) => console.log('click', args))
+  console.log({res})
 
   maximumData = toMaximumInfoColumns(loadedTableData, CHUNK_SIZE);
   initPalettes();

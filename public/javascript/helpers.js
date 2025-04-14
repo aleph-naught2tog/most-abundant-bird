@@ -2,6 +2,14 @@
  * @typedef {{x: number, y: number}} Point
  */
 
+/**
+ *
+ * @param {P5Image} image
+ * @param {number} num
+ * @param {number} start
+ * @param {number} end
+ * @returns {RGBColor[]} the array of colors
+ */
 function createPalette(image, num, start, end) {
   // h/t to Jer Thorp for this!
 
@@ -120,7 +128,7 @@ function createGradient(
   gradient.addColorStop(0.5, cssStartColor);
   gradient.addColorStop(
     0.75,
-    lerpColor(color(startColor), color(endColor), 0.5)
+    lerpColor(color(startColor), color(endColor), 0.5).toString()
   );
   gradient.addColorStop(1, cssEndColor);
 

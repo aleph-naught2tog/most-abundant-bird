@@ -11,17 +11,12 @@ if (ANNOTATION_LINE_LENGTH <= OFFSET_FROM_FEATHER_TIP) {
 }
 
 class Feather {
-  // these are mostly for clarity
-  barbs = [];
-  angle = -1;
-  colors = [[]];
-  length = -1;
-
   /**
    * @param {Object} options
-   * @param {Array<Barb>} options.barbs
+   * @param {Array<Barb>} [options.barbs]
    * @param {number} options.angle in radians
    * @param {number} options.length
+   * @param {Array<RGBColor>} options.colors;
    * @param {Object} options.data
    * @param {string} options.data.label
    * @param {number} options.data.value
@@ -112,9 +107,9 @@ class Feather {
       );
 
       if (shouldUseFeatherHover) {
-        return isMouseWithinCircle || this.highlighted;  
+        return isMouseWithinCircle || this.highlighted;
       }
-      
+
       return isMouseWithinCircle// || this.highlighted;
     }
 
@@ -187,6 +182,10 @@ class Feather {
     pop();
   }
 
+  /**
+   *
+   * @returns {RGBColor}
+   */
   _getRachisColor() {
     const exemplarBarb = this.barbs[0];
 

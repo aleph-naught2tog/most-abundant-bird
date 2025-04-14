@@ -27,7 +27,7 @@ function parseToColumns(tableData, chunkSize) {
       const datum = tableData.get(rowIndex, columnIndex);
 
       if (columnIndex > 0) {
-        const datumAsFloat = parseFloat(datum, 10);
+        const datumAsFloat = parseFloat(datum);
         monthlyTotal += datumAsFloat;
 
         if (columnIndex % chunkSize === 0) {

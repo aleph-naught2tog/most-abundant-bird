@@ -1,5 +1,8 @@
-// p5 things
-declare class P5Color {
+/**
+ * Note: this is NOT exhaustive. It mostly just is what has been used so far.
+ */
+
+interface P5Color {
   toString(): string;
 
   // depend on colorMode -- either 255 or 100 depending on which you picked
@@ -8,6 +11,8 @@ declare class P5Color {
   setBlue(blueValue: number): void;
   setAlpha(alphaValue: number): void;
 }
+
+declare function createVector(x?: number, y?: number, z?: number): P5Vector;
 
 declare class P5Vector {
   x: number;
@@ -22,6 +27,22 @@ declare class P5Vector {
   lerp(otherVector: P5Vector, amount: number): P5Vector;
 }
 
+interface P5Image {
+  width: number;
+  height: number;
+
+  /**
+   * A flat array of RGBA values. so [r_00, g_00, b_00, a_00, r_10, g_20...]
+   */
+  pixels: number[];
+
+  loadPixels(): void;
+  updatePixels(): void;
+
+  get(): number[];
+  get(x: number, y: number): RGBColor;
+  get(x0: number, y0: number, x1: number, y1: number): P5Image;
+}
 // depends on colorMode
 type CSSColorName = string;
 type HexCode = string; // starts with # and is 3, 6, or 8 hex digits
@@ -72,7 +93,21 @@ declare function scale(scaleFactor: number): void;
 declare function scale(xScale: number, yScale?: number, zScale?: number): void;
 declare function scale(scaleVector: P5Vector): void;
 
+declare function max(arr: number[]): number;
+declare function max(...arr: number[]): number;
+
+declare function min(arr: number[]): number;
+declare function min(...arr: number[]): number;
+
 declare function floor(value: number): number;
+
+declare function random(): number;
+declare function random(excludedMax: number): number;
+declare function random(min: number, excludedMax: number): number;
+declare function random<T>(choices: T[]): T;
+
+declare function pow(base: number, exponent: number): number;
+
 declare function map(
   valueToMap: number,
   valueRangeMin: number,
@@ -82,22 +117,21 @@ declare function map(
   withinBounds = true
 ): number;
 
+declare function line(x0: number, y0: number, x1: number, y1: number): void;
 declare function line(
-  x_0: number,
-  y_0: number,
-  x_1: number,
-  y_1: number
-): void;
-declare function line(
-  x_0: number,
-  y_0: number,
-  x_1: number,
-  y_1: number,
-  z_0: number,
-  z_1: number
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number,
+  z0: number,
+  z1: number
 ): void;
 
-declare function circle(centerX: number, centerY: number, diameter: number): void;
+declare function circle(
+  centerX: number,
+  centerY: number,
+  diameter: number
+): void;
 
 declare function text(
   str: string,
@@ -107,16 +141,47 @@ declare function text(
   maxHeight?: number
 ): void;
 
+declare const LEFT = 'left';
+declare const CENTER = 'center';
+declare const RIGHT = 'right';
+declare const TOP = 'top';
+declare const BOTTOM = 'bottom';
+declare const BASELINE = 'baseline';
+type HorizontalAlignment = typeof LEFT | typeof CENTER | typeof RIGHT;
+type VerticalAlignment =
+  | typeof TOP
+  | typeof BOTTOM
+  | typeof CENTER
+  | typeof BASELINE;
+declare function textAlign(horizAlign: string, vertAlign?: string);
+
 // needs table type
 declare function loadTable(filename: string, callback: () => void): void;
-declare function loadImage(url: string): void;
+declare function loadImage(
+  url: string,
+  onSuccess?: (i: P5Image) => void,
+  onError?: (e: any) => void
+): void;
 
-declare const RADIANS: string;
+declare const RADIANS = 'RADIANS';
+declare const DEGREES = 'DEGREES';
+declare type AngleMode = typeof RADIANS | typeof DEGREES;
+
+declare function cos(theta: number): number;
+declare function sin(theta: number): number;
+declare function atan2(y: number, x: number): Angle;
+
+declare const P2D = 'p2d';
+declare const WEBGL = 'webgl';
+type RenderMode = typeof P2D | typeof WEBGL;
+
 declare const PI: number;
 declare const TAU: number;
 
 declare const width: number;
 declare const height: number;
+declare const windowHeight: number;
+declare const windowWidth: number;
 
 declare const mouseX: number;
 declare const mouseY: number;
@@ -124,3 +189,57 @@ declare const mouseY: number;
 declare interface Window {
   width: number;
 }
+
+declare function angleMode(): AngleMode;
+declare function angleMode(mode: AngleMode);
+
+declare function createCanvas(): P5Render;
+declare function createCanvas(width: number): P5Render;
+declare function createCanvas(width: number, height: number): P5Render;
+declare function createCanvas(
+  width: number,
+  height: number,
+  renderMode: RenderMode
+): P5Render;
+declare function createCanvas(
+  width: number,
+  height: number,
+  canvasElement: HTMLCanvasElement
+): P5Render;
+declare function createCanvas(
+  width: number,
+  height: number,
+  renderMode: RenderMode,
+  canvasElement: HTMLCanvasElement
+): P5Render;
+
+interface P5Element {
+  width: number;
+  height: number;
+
+  parent(): P5Element;
+  parent(elementId: string): void;
+  parent(element: P5Element): void;
+  parent(element: HTMLElement): void;
+
+  id(id: string): void;
+  id(): string;
+
+  class(className: string): void;
+  class(): string;
+}
+
+declare function point(vector: P5Vector);
+declare function point(x: number, y: number): void;
+declare function point(x: number, y: number, z: number): void;
+
+declare function dist(x0, y0, x1, y1): number;
+declare function dist(x0, y0, z0, x1, y1, z1): number;
+
+declare const drawingContext: CanvasRenderingContext2D;
+
+declare function lerpColor(
+  startColor: P5Color,
+  endColor: P5Color,
+  amount: number
+): P5Color;
