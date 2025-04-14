@@ -158,15 +158,15 @@ class Feather {
     }
 
     if (this.highlighted) {
-      push();
-      noFill();
-      stroke('cyan');
-      strokeWeight(3);
-      circle(0, 0, ANNOTATION_RADIUS * 2);
-      line(xStart, yStart, xStart, yEnd);
-      pop();
+      // push();
+      // noFill();
+      // stroke('cyan');
+      // strokeWeight(3);
+      // circle(0, 0, ANNOTATION_RADIUS * 2);
+      // line(xStart, yStart, xStart, yEnd);
+      // pop();
 
-      translate(-annotationCircleCenter.x, -annotationCircleCenter.y);
+      // translate(-annotationCircleCenter.x, -annotationCircleCenter.y);
     }
 
     pop();
@@ -198,7 +198,7 @@ class Feather {
   }
 
   _getAnnotationCenter() {
-    const offset = this.highlighted ? 5 : 0;
+    const offset = this.highlighted ? 0 : 0;
     const totalLength = (this.length + ANNOTATION_LINE_LENGTH) * SCALE_SCALE;
     const y = totalLength + OFFSET_FROM_FEATHER_TIP + offset;
 

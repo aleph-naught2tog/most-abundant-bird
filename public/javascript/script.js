@@ -165,16 +165,11 @@ function drawFeathers(chartDiameter) {
     const theta = highlightedFeather.angle + PI / 2;
     const circleCenter = getTranslationToCircleCenter();
 
-    x = circleCenter.x + cos(theta) * (internalCircleDiameter / 2), // * dir.x),
-      y = circleCenter.y + sin(theta) * (internalCircleDiameter / 2) + 2 // + (10 * dir.y)
-
-    // const x = circleCenter.x;
-    // const y = circleCenter.y;
-//
+    const y = circleCenter.y + sin(theta) * (internalCircleDiameter / 2 + 40);
+    const x = circleCenter.x + cos(theta) * (internalCircleDiameter / 2 + 40);
     translate(x, y);
     rotate(theta - PI / 2)
 
-    drawCoordinatePoints('magenta');
 
     highlightedFeather.draw();
 
