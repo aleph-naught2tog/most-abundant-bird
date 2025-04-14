@@ -1,8 +1,8 @@
+// BUG: we only seem to care about the feather for half of it
+
 function highlightBasedOnSlice() {
   cachedFeathers.forEach((f) => (f.highlighted = false));
   const mousePoint = { x: mouseX, y: mouseY };
-
-  drawOrigin();
 
   const isMouseWithinBigFeatherCircle = isPointInsideCircle(
     mousePoint,

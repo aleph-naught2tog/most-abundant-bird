@@ -1,7 +1,7 @@
 const ALPHA = 0.8;
 const SCALE_FACTOR = 1.05;
 
-const ANNOTATION_RADIUS = 10;
+const ANNOTATION_RADIUS = 15;
 const ANNOTATION_LINE_LENGTH = 30;
 // this must be less than the anchorLength
 const OFFSET_FROM_FEATHER_TIP = 15;
@@ -111,8 +111,10 @@ class Feather {
         ANNOTATION_RADIUS
       );
 
-      // if we're using the highlightOnSlice code,
-      // this should be || this.highlighted
+      if (shouldUseFeatherHover) {
+        return isMouseWithinCircle || this.highlighted;  
+      }
+      
       return isMouseWithinCircle// || this.highlighted;
     }
 

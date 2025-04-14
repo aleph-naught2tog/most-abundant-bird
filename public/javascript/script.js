@@ -1,5 +1,5 @@
 const ASPECT_RATIO = 6 / 4;
-const BACKGROUND_COLOR = 'lemonchiffon';
+const BACKGROUND_COLOR = "lemonchiffon";
 
 const DONUT_HOLE = 0.2;
 const EXTRA_DIAMETER = 100;
@@ -11,6 +11,8 @@ const CHUNK_SIZE = 2;
 const COLOR_COUNT = 200;
 const GRAPH_ROTATION = Math.PI;
 const ANGLE_SLICED_WIDTH = (Math.PI * 2) / (TOTAL_COUNT / CHUNK_SIZE);
+
+let shouldUseFeatherHover = true;
 
 let internalCircleDiameter = -1;
 
@@ -45,10 +47,11 @@ const getTranslationToCircleCenter = () => ({
 // -----------------------------------
 
 function preload() {
-  loadTable('/data/wi_histogram.tsv', (data) => {
+  loadTable("/data/wi_histogram.tsv", (data) => {
     loadedTableData = data;
   });
 
+  // TODO: we could probably speed this up a lot by just grabbing the color palettes ahead of time?
   for (const birdName in BIRD_INFO) {
     const metadata = BIRD_INFO[birdName];
 
@@ -65,7 +68,7 @@ function setup() {
   const canvasWidth = getCanvasWidth();
 
   const canvas = createCanvas(canvasWidth, canvasHeight);
-  canvas.parent('canvas_container');
+  canvas.parent("canvas_container");
 
   maximumData = toMaximumInfoColumns(loadedTableData, CHUNK_SIZE);
   initPalettes();
@@ -87,7 +90,9 @@ function draw() {
 }
 
 function mouseMoved() {
-  // highlightBasedOnSlice();
+  if (shouldUseFeatherHover) {
+    highlightBasedOnSlice();
+  }
 }
 
 // -----------------------------------
@@ -167,7 +172,7 @@ function drawFeathers(chartDiameter) {
     const x = circleCenter.x + cos(theta) * (internalCircleDiameter / 2 + 11);
     const y = circleCenter.y + sin(theta) * (internalCircleDiameter / 2 + 11);
     translate(x, y);
-    rotate(theta - PI / 2)
+    rotate(theta - PI / 2);
 
     highlightedFeather.draw();
 
@@ -241,9 +246,7 @@ function drawMonths() {
     const theta = map(monthIndex, 0, numberOfMonths, 0, TAU) - PI / 2;
 
     const date = new Date(1990, monthIndex, 10); // 2009-11-10
-    const month = date
-      .toLocaleString('default', { month: 'long' })
-      .slice(0, 1);
+    const month = date.toLocaleString("default", { month: "long" }).slice(0, 1);
 
     strokeWeight(2);
     textAlign(CENTER, CENTER);
