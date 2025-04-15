@@ -120,7 +120,7 @@ declare function map(
   valueRangeMax: number,
   targetRangeMin: number,
   targetRangeMax: number,
-  withinBounds = true
+  withinBounds?: boolean
 ): number;
 
 declare function line(x0: number, y0: number, x1: number, y1: number): void;
@@ -175,7 +175,7 @@ declare type AngleMode = typeof RADIANS | typeof DEGREES;
 
 declare function cos(theta: number): number;
 declare function sin(theta: number): number;
-declare function atan2(y: number, x: number): Angle;
+declare function atan2(y: number, x: number): number;
 
 declare const P2D = 'p2d';
 declare const WEBGL = 'webgl';
@@ -199,25 +199,25 @@ declare interface Window {
 declare function angleMode(): AngleMode;
 declare function angleMode(mode: AngleMode);
 
-declare function createCanvas(): P5Render;
-declare function createCanvas(width: number): P5Render;
-declare function createCanvas(width: number, height: number): P5Render;
+declare function createCanvas(): P5Element;
+declare function createCanvas(width: number): P5Element;
+declare function createCanvas(width: number, height: number): P5Element;
 declare function createCanvas(
   width: number,
   height: number,
   renderMode: RenderMode
-): P5Render;
+): P5Element;
 declare function createCanvas(
   width: number,
   height: number,
   canvasElement: HTMLCanvasElement
-): P5Render;
+): P5Element;
 declare function createCanvas(
   width: number,
   height: number,
   renderMode: RenderMode,
   canvasElement: HTMLCanvasElement
-): P5Render;
+): P5Element;
 
 interface P5Element {
   width: number;

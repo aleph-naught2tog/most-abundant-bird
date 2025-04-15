@@ -6,6 +6,6 @@ interface BirdMetadata {
   };
   image: P5Image | null;
   imagePalette: RGBColor[] | null;
-  colorBalette: RGBColor[] | null;
+  colorBlindPalette: RGBColor[] | null;
   // highContrastPalette: RGBColor[] | null;
 }
