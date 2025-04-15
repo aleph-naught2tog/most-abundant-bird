@@ -167,7 +167,7 @@ declare function loadImage(
   url: string,
   onSuccess?: (i: P5Image) => void,
   onError?: (e: any) => void
-): void;
+): P5Image;
 
 declare const RADIANS = 'RADIANS';
 declare const DEGREES = 'DEGREES';

@@ -55,8 +55,8 @@ class Feather {
   }
 
   createBarbs() {
-    const pointCount = this.length;
-    const barbCount = generatePoints(pointCount);
+    const pointCount = this.length
+    const barbCount = generatePoints(this.length, pointCount);
 
     for (const { p0, p2, index } of barbCount) {
       const currentColor = getColorAtIndex(index, pointCount, this.colors);

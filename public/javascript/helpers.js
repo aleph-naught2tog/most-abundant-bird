@@ -9,7 +9,7 @@
  * @param {[y: number, y: number]} end
  * @returns {RGBColor[]} the array of colors
  */
-function createPalette(image, colorCount, start, end) {
+function createPaletteFromImageByGet(image, colorCount, start, end) {
   // h/t to Jer Thorp for this!
 
   let palette = [];
@@ -31,7 +31,12 @@ function createPalette(image, colorCount, start, end) {
  * @param {[x: number, y: number]} secondPoint
  * @returns {RGBColor[]} the array of colors
  */
-function createPaletteFast(image, colorCount, firstPoint, secondPoint) {
+function createPaletteFromImageByPixelLoad(
+  image,
+  colorCount,
+  firstPoint,
+  secondPoint
+) {
   image.loadPixels();
 
   const imageWidth = image.width;
@@ -84,7 +89,7 @@ function createPaletteFast(image, colorCount, firstPoint, secondPoint) {
     ];
 
     // palette[index] = color;
-    palette.push(color)
+    palette.push(color);
 
     if (previousColor) {
       const amount = 0.001;
@@ -97,7 +102,7 @@ function createPaletteFast(image, colorCount, firstPoint, secondPoint) {
           lerp(previousColor[3], color[3], amount),
         ];
 
-        palette.push(lerpColor)
+        palette.push(lerpColor);
         previousColor = lerpColor;
       }
     }

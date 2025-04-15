@@ -101,33 +101,16 @@ function mouseMoved() {
 // -----------------------------------
 
 function initPalettes() {
-  console.debug('init palettes start')
   for (const birdName in BIRD_INFO) {
     const metadata = BIRD_INFO[birdName];
-    console.debug(birdName, metadata.palettePoints.start, metadata.palettePoints.end)
 
-    let start = +new Date()
-    metadata.palette = createPalette(
+    metadata.imagePalette = createPaletteFromImageByPixelLoad(
       metadata.image,
       COLOR_COUNT,
       metadata.palettePoints.start,
       metadata.palettePoints.end
     );
-
-    let afterOld = +new Date()
-
-    let newStart = +new Date()
-    metadata.palette = createPaletteFast(
-      metadata.image,
-      COLOR_COUNT,
-      metadata.palettePoints.start,
-      metadata.palettePoints.end
-    );
-
-    let afterNew = +new Date()
-    console.debug({old: (afterOld - start) / 1000, new: (afterNew - newStart) / 1000 })
   }
-  console.debug('init palettes end')
 }
 
 /**

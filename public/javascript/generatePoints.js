@@ -6,15 +6,16 @@ const WIDTH_SCALE = SCALE_SCALE * 0.15;
 
 /**
  * @param {number} length
+ * @param {pointCount} length
  * @returns {Generator<{p0: P5Vector, p2: P5Vector, index: number}>}
  */
 // TODO: separate out the length vs pointcount vs barb count
-function* generatePoints(length) {
+function* generatePoints(length, pointCount) {
   // length also represents the point count
   const featherWidth = length * WIDTH_SCALE;
   const featherHeight = length * HEIGHT_SCALE;
   // const step = floor(map(Math.random(), 0, 1, 3, 5, true));
-  const step = 2;
+  const step = (length/ pointCount);
 
   let end = createVector(0, featherHeight);
 
@@ -47,7 +48,7 @@ function* generatePoints(length) {
     const p2 = p1.lerp(end, map(index, 0, length, 0, 1));
 
     // this gives us more variation, mostly lower on the feather
-    if (index < length * 0.1) {
+    if (index < pointCount * 0.1) {
       // adjust the end point a little by a random amount
       p2.x *= random(0.8, 1.2);
       p2.y *= random(0.8, 1.2);
