@@ -54,18 +54,24 @@ function createPaletteFast(image, colorCount, firstPoint, secondPoint) {
   const length = dist(startX, startY, endX, endY);
 
   const slope = (endY - startY) / (endX - startX);
-  const b = slope * startY - slope * startX;
+  // y = mx + b
+  // 0 = mx + b - y
+  // -b = mx - y
+  // b = -mx + y
+  // b = y - mx
+  const b = startY - slope * startX;
   const getYOnLine = x => slope * x + b;
 
-  const getStartIndex = (x,y) => (x + y * imageWidth) * 4;
+  const getStartIndex = (x, y) => (x + y * imageWidth) * 4;
 
   const palette = [];
 
   const step = floor(length / (colorCount - 1)) || 1;
-  console.debug({ length, step, colorCount })
+  // console.debug({ distanceBetweenPoints: length, stepSize: step, colorCount })
 
   for (let x = startX, index = 0; x < endX; x += step, index += 1) {
     const y = floor(getYOnLine(x));
+    // console.debug(x,y)
     const startIndex = floor(getStartIndex(x, y));
 
     const color = [
@@ -74,6 +80,8 @@ function createPaletteFast(image, colorCount, firstPoint, secondPoint) {
       imagePixels[startIndex + 2],
       imagePixels[startIndex + 3],
     ];
+
+    // console.debug(color)
 
     palette[index] = color;
   }

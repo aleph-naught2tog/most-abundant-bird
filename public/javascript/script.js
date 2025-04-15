@@ -8,7 +8,7 @@ const OFFSET_FROM_INTERNAL_CIRCLE = 10;
 const TOTAL_COUNT = 48;
 // upper limit is half of TOTAL_COUNT
 const CHUNK_SIZE = 2;
-const COLOR_COUNT = 1000;
+const COLOR_COUNT = 10;
 const GRAPH_ROTATION = Math.PI;
 const ANGLE_SLICED_WIDTH = (Math.PI * 2) / (TOTAL_COUNT / CHUNK_SIZE);
 
@@ -104,6 +104,7 @@ function initPalettes() {
   console.debug('init palettes start')
   for (const birdName in BIRD_INFO) {
     const metadata = BIRD_INFO[birdName];
+    console.debug(birdName, metadata.palettePoints.start, metadata.palettePoints.end)
 
     let start = +new Date()
     metadata.palette = createPalette(
@@ -112,8 +113,6 @@ function initPalettes() {
       metadata.palettePoints.start,
       metadata.palettePoints.end
     );
-
-    console.debug(metadata.palette)
 
     let afterOld = +new Date()
 
