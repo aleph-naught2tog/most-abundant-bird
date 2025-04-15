@@ -182,6 +182,12 @@ function drawFeathers(chartDiameter) {
   }
 }
 
+/**
+ *
+ * @param {Record<string, BirdMetadata>} birdInfo
+ * @param {*} preppedData
+ * @returns
+ */
 function createFeathers(birdInfo, preppedData) {
   const absoluteMaximum = max(preppedData.map((m) => m.maximum));
   const absoluteMinimum = min(preppedData.map((m) => m.maximum));
@@ -219,7 +225,7 @@ function createFeathers(birdInfo, preppedData) {
 
     const feather = new Feather({
       angle: rotationAngle,
-      colors: metadata.palette,
+      colors: metadata.imagePalette,
       length: radius,
       data: {
         label: closestBirdName,
