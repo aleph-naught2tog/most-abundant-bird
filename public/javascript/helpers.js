@@ -2,16 +2,89 @@
  * @typedef {{x: number, y: number}} Point
  */
 
-function createPalette(image, num, start, end) {
+/**
+ * @param {P5Image} image
+ * @param {number} colorCount
+ * @param {[x: number, x: number]} start
+ * @param {[y: number, y: number]} end
+ * @returns {RGBColor[]} the array of colors
+ */
+function createPalette(image, colorCount, start, end) {
   // h/t to Jer Thorp for this!
 
   let palette = [];
 
-  for (let i = 0; i < num; i++) {
-    let x = map(i, 0, num, start[0], end[0]);
-    let y = map(i, 0, num, start[1], end[1]);
+  for (let i = 0; i < colorCount; i++) {
+    let x = map(i, 0, colorCount, start[0], end[0]);
+    let y = map(i, 0, colorCount, start[1], end[1]);
 
     palette.push(image.get(floor(x), floor(y)));
+  }
+
+  return palette;
+}
+
+/**
+ * @param {P5Image} image
+ * @param {number} colorCount
+ * @param {[x: number, y: number]} firstPoint
+ * @param {[x: number, y: number]} secondPoint
+ * @returns {RGBColor[]} the array of colors
+ */
+function createPaletteFast(image, colorCount, firstPoint, secondPoint) {
+  image.loadPixels();
+
+  const imageWidth = image.width;
+  const imagePixels = image.pixels;
+
+  let startPoint;
+  let endPoint;
+
+  if (firstPoint[0] < secondPoint[0]) {
+    startPoint = firstPoint;
+    endPoint = secondPoint;
+  } else {
+    startPoint = secondPoint;
+    endPoint = firstPoint;
+  }
+
+  const [startX, startY] = startPoint;
+  const [endX, endY] = endPoint;
+
+  const length = dist(startX, startY, endX, endY);
+
+  const slope = (endY - startY) / (endX - startX);
+  // y = mx + b
+  // 0 = mx + b - y
+  // -b = mx - y
+  // b = -mx + y
+  // b = y - mx
+  const b = startY - slope * startX;
+  const getYOnLine = x => slope * x + b;
+
+  const getStartIndex = (x, y) => (x + y * imageWidth) * 4;
+
+  const palette = [];
+
+  const step = floor(length / (colorCount - 1)) || 1;
+  // console.debug({ distanceBetweenPoints: length, stepSize: step, colorCount })
+  console.debug({step})
+
+  for (let x = startX, index = 0; x < endX; x += step, index += 1) {
+    const y = floor(getYOnLine(x));
+    // console.debug(x,y)
+    const startIndex = floor(getStartIndex(x, y));
+
+    const color = [
+      imagePixels[startIndex],
+      imagePixels[startIndex + 1],
+      imagePixels[startIndex + 2],
+      imagePixels[startIndex + 3],
+    ];
+
+    // console.debug(color)
+
+    palette[index] = color;
   }
 
   return palette;
@@ -120,9 +193,45 @@ function createGradient(
   gradient.addColorStop(0.5, cssStartColor);
   gradient.addColorStop(
     0.75,
-    lerpColor(color(startColor), color(endColor), 0.5)
+    lerpColor(color(startColor), color(endColor), 0.5).toString()
   );
   gradient.addColorStop(1, cssEndColor);
 
   return gradient;
 }
+
+/*
+-- for a 3x3 image there are 9 pixels
+
+firstColorIndex = (index * 4)
+
+//
+
+width = 3
+height = 3
+
+say I want (0,0,  1,1,  2,2)
+slope = 1
+y - y1 = m(x - x1)
+y - y1 = x - x1
+
+FIRST ROW
+x = 0
+0,0 = 0,1,2,3        0
+0,1 = 4,5,6,7        1
+0,2 = 8,9,10,11      2
+
+x = 1
+SECOND ROW
+1,0 = 12,13,14,15    3
+1,1 = 16,17,18,19    4
+1,2 = 20,21,22,23    5
+
+x = 2
+THIRD ROW
+2,0 = 24,25,26,27    6
+2,1 = 28,29,30,31    7
+2,2 = 32,33,34,35    8
+
+x,y = (index*4) + (4y)
+*/
