@@ -60,7 +60,7 @@ function createPaletteFast(image, colorCount, firstPoint, secondPoint) {
   // b = -mx + y
   // b = y - mx
   const b = startY - slope * startX;
-  const getYOnLine = x => slope * x + b;
+  const getYOnLine = (x) => slope * x + b;
 
   const getStartIndex = (x, y) => (x + y * imageWidth) * 4;
 
@@ -68,11 +68,13 @@ function createPaletteFast(image, colorCount, firstPoint, secondPoint) {
 
   const step = floor(length / (colorCount - 1)) || 1;
   // console.debug({ distanceBetweenPoints: length, stepSize: step, colorCount })
-  console.debug({step})
+  console.debug({ step });
+
+  let previousColor = null;
+  let lerpColor = null;
 
   for (let x = startX, index = 0; x < endX; x += step, index += 1) {
     const y = floor(getYOnLine(x));
-    // console.debug(x,y)
     const startIndex = floor(getStartIndex(x, y));
 
     const color = [
@@ -82,9 +84,25 @@ function createPaletteFast(image, colorCount, firstPoint, secondPoint) {
       imagePixels[startIndex + 3],
     ];
 
-    // console.debug(color)
+    // palette[index] = color;
+    palette.push(color)
 
-    palette[index] = color;
+    if (previousColor) {
+      const amount = 0.001;
+
+      for (let i = 0; i < 1; i += amount) {
+        lerpColor = [
+          lerp(previousColor[0], color[0], amount),
+          lerp(previousColor[1], color[1], amount),
+          lerp(previousColor[2], color[2], amount),
+          lerp(previousColor[3], color[3], amount),
+        ];
+
+        palette.push(lerpColor)
+        previousColor = lerpColor;
+
+      }
+    }
   }
 
   return palette;
@@ -102,7 +120,7 @@ function getColorAtIndex(index, value, colors) {
  */
 function getRandomStrokeWeight() {
   const randomNumber = Math.random();
-  const strokeWeight = map(randomNumber, 0, 1, 0.25, 1.5);
+  const strokeWeight = map(randomNumber, 0, 1, 0.1, 1);
 
   return strokeWeight;
 }
@@ -172,66 +190,3 @@ function drawGradientLine(optionsOrGradient, { start, end }, thickness = 1) {
 
   pop();
 }
-
-function createGradient(
-  { x: x_0, y: y_0 },
-  { x: x_1, y: y_1 },
-  startColor,
-  endColor
-) {
-  const ctx = drawingContext;
-
-  const gradient = ctx.createLinearGradient(x_0, y_0, x_1, y_1);
-  const cssStartColor = `rgba(${startColor[0]}, ${startColor[1]}, ${
-    startColor[2]
-  }, ${map(startColor[3], 0, 255, 0, 1)})`;
-
-  const cssEndColor = `rgba(${endColor[0]}, ${endColor[1]}, ${
-    endColor[2]
-  }, ${map(endColor[3], 0, 255, 0, 1)})`;
-
-  gradient.addColorStop(0.5, cssStartColor);
-  gradient.addColorStop(
-    0.75,
-    lerpColor(color(startColor), color(endColor), 0.5).toString()
-  );
-  gradient.addColorStop(1, cssEndColor);
-
-  return gradient;
-}
-
-/*
--- for a 3x3 image there are 9 pixels
-
-firstColorIndex = (index * 4)
-
-//
-
-width = 3
-height = 3
-
-say I want (0,0,  1,1,  2,2)
-slope = 1
-y - y1 = m(x - x1)
-y - y1 = x - x1
-
-FIRST ROW
-x = 0
-0,0 = 0,1,2,3        0
-0,1 = 4,5,6,7        1
-0,2 = 8,9,10,11      2
-
-x = 1
-SECOND ROW
-1,0 = 12,13,14,15    3
-1,1 = 16,17,18,19    4
-1,2 = 20,21,22,23    5
-
-x = 2
-THIRD ROW
-2,0 = 24,25,26,27    6
-2,1 = 28,29,30,31    7
-2,2 = 32,33,34,35    8
-
-x,y = (index*4) + (4y)
-*/

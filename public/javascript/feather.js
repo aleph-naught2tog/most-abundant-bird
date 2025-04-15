@@ -56,10 +56,10 @@ class Feather {
 
   createBarbs() {
     const pointCount = this.length;
-    const points = generatePoints(pointCount);
+    const barbCount = generatePoints(pointCount);
 
-    for (const { p0, p2, index } of points) {
-      const currentColor = getColorAtIndex(index, this.length, this.colors);
+    for (const { p0, p2, index } of barbCount) {
+      const currentColor = getColorAtIndex(index, pointCount, this.colors);
       const [r, g, b, _alpha] = currentColor;
 
       const scaledAlpha = map(ALPHA, 0, 1, 0, 255);

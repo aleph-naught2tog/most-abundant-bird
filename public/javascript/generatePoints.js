@@ -8,6 +8,7 @@ const WIDTH_SCALE = SCALE_SCALE * 0.15;
  * @param {number} length
  * @returns {Generator<{p0: P5Vector, p2: P5Vector, index: number}>}
  */
+// TODO: separate out the length vs pointcount vs barb count
 function* generatePoints(length) {
   // length also represents the point count
   const featherWidth = length * WIDTH_SCALE;
