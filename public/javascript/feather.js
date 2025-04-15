@@ -110,7 +110,7 @@ class Feather {
         return isMouseWithinCircle || this.highlighted;
       }
 
-      return isMouseWithinCircle// || this.highlighted;
+      return isMouseWithinCircle;
     }
 
     return false;

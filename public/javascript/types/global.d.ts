@@ -28,7 +28,7 @@ declare class P5Vector {
 }
 
 declare function lerp(firstVector: P5Vector, secondVector: P5Vector, amount: number): P5Vector;
-declare function lerp(firstNumber: number, secondNumber: number, amount: number);
+declare function lerp(firstNumber: number, secondNumber: number, amount: number): number;
 
 interface P5Image {
   width: number;

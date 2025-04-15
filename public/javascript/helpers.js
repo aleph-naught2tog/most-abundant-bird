@@ -54,29 +54,28 @@ function createPaletteFast(image, colorCount, firstPoint, secondPoint) {
   const length = dist(startX, startY, endX, endY);
 
   const slope = (endY - startY) / (endX - startX);
-  // y = mx + b
-  // 0 = mx + b - y
-  // -b = mx - y
-  // b = -mx + y
-  // b = y - mx
   const b = startY - slope * startX;
   const getYOnLine = (x) => slope * x + b;
 
   const getStartIndex = (x, y) => (x + y * imageWidth) * 4;
 
+  /** @type {RGBColor[]} */
   const palette = [];
 
   const step = floor(length / (colorCount - 1)) || 1;
-  // console.debug({ distanceBetweenPoints: length, stepSize: step, colorCount })
+
   console.debug({ step });
 
   let previousColor = null;
+
+  /** @type {RGBColor|null} */
   let lerpColor = null;
 
   for (let x = startX, index = 0; x < endX; x += step, index += 1) {
     const y = floor(getYOnLine(x));
     const startIndex = floor(getStartIndex(x, y));
 
+    /** @type {RGBColor} */
     const color = [
       imagePixels[startIndex],
       imagePixels[startIndex + 1],
@@ -100,7 +99,6 @@ function createPaletteFast(image, colorCount, firstPoint, secondPoint) {
 
         palette.push(lerpColor)
         previousColor = lerpColor;
-
       }
     }
   }
@@ -161,32 +159,4 @@ function getCurrentOriginInCanvasCoords() {
   let yOfOrigin = y_0 / scaleFactor;
 
   return { x: xOfOrigin, y: yOfOrigin };
-}
-
-/**
- */
-function drawGradientLine(optionsOrGradient, { start, end }, thickness = 1) {
-  let gradient;
-
-  if (optionsOrGradient instanceof CanvasGradient) {
-    gradient = optionsOrGradient;
-  } else {
-    const { startColor, endColor } = optionsOrGradient;
-
-    gradient = createGradient(start, end, startColor, endColor);
-  }
-
-  const ctx = drawingContext;
-  const originalStrokeStyle = ctx.strokeStyle;
-
-  push();
-
-  ctx.strokeStyle = gradient;
-
-  strokeWeight(thickness);
-  line(start.x, start.y, end.x, end.y);
-
-  ctx.strokeStyle = originalStrokeStyle;
-
-  pop();
 }
