@@ -1,5 +1,5 @@
 const ASPECT_RATIO = 6 / 4;
-const BACKGROUND_COLOR = "lemonchiffon";
+const BACKGROUND_COLOR = 'lemonchiffon';
 
 const DONUT_HOLE = 0.2;
 const EXTRA_DIAMETER = 100;
@@ -8,7 +8,7 @@ const OFFSET_FROM_INTERNAL_CIRCLE = 10;
 const TOTAL_COUNT = 48;
 // upper limit is half of TOTAL_COUNT
 const CHUNK_SIZE = 2;
-const COLOR_COUNT = 200;
+const COLOR_COUNT = 1000;
 const GRAPH_ROTATION = Math.PI;
 const ANGLE_SLICED_WIDTH = (Math.PI * 2) / (TOTAL_COUNT / CHUNK_SIZE);
 
@@ -47,7 +47,7 @@ const getTranslationToCircleCenter = () => ({
 // -----------------------------------
 
 function preload() {
-  loadTable("/data/wi_histogram.tsv", (data) => {
+  loadTable('/data/wi_histogram.tsv', (data) => {
     loadedTableData = data;
   });
 
@@ -62,16 +62,14 @@ function preload() {
 // BUG/PERFORMANCE: the first one you hover over takes the longest
 function setup() {
   // this is the default, but good for clarity
-  console.debug({ RADIANS })
+  console.debug({ RADIANS });
   angleMode(RADIANS);
 
   const canvasHeight = getCanvasHeight();
   const canvasWidth = getCanvasWidth();
 
   const canvas = createCanvas(canvasWidth, canvasHeight);
-  canvas.parent("canvas_container");
-  let res =canvas.mouseClicked((args) => console.log('click', args))
-  console.log({res})
+  canvas.parent('canvas_container');
 
   maximumData = toMaximumInfoColumns(loadedTableData, CHUNK_SIZE);
   initPalettes();
@@ -103,16 +101,34 @@ function mouseMoved() {
 // -----------------------------------
 
 function initPalettes() {
+  console.debug('init palettes start')
   for (const birdName in BIRD_INFO) {
     const metadata = BIRD_INFO[birdName];
 
+    let start = +new Date()
     metadata.palette = createPalette(
       metadata.image,
       COLOR_COUNT,
       metadata.palettePoints.start,
       metadata.palettePoints.end
     );
+
+    console.debug(metadata.palette)
+
+    let afterOld = +new Date()
+
+    let newStart = +new Date()
+    metadata.palette = createPaletteFast(
+      metadata.image,
+      COLOR_COUNT,
+      metadata.palettePoints.start,
+      metadata.palettePoints.end
+    );
+
+    let afterNew = +new Date()
+    console.debug({old: (afterOld - start) / 1000, new: (afterNew - newStart) / 1000 })
   }
+  console.debug('init palettes end')
 }
 
 /**
@@ -249,7 +265,9 @@ function drawMonths() {
     const theta = map(monthIndex, 0, numberOfMonths, 0, TAU) - PI / 2;
 
     const date = new Date(1990, monthIndex, 10); // 2009-11-10
-    const month = date.toLocaleString("default", { month: "long" }).slice(0, 1);
+    const month = date
+      .toLocaleString('default', { month: 'long' })
+      .slice(0, 1);
 
     strokeWeight(2);
     textAlign(CENTER, CENTER);

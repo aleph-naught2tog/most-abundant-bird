@@ -27,6 +27,8 @@ declare class P5Vector {
   lerp(otherVector: P5Vector, amount: number): P5Vector;
 }
 
+declare function lerp(firstVector: P5Vector, secondVector: P5Vector, amount: number): P5Vector;
+
 interface P5Image {
   width: number;
   height: number;
@@ -42,6 +44,9 @@ interface P5Image {
   get(): number[];
   get(x: number, y: number): RGBColor;
   get(x0: number, y0: number, x1: number, y1: number): P5Image;
+
+  pixelDensity(): number;
+  pixelDensity(newDensity: number): void;
 }
 // depends on colorMode
 type CSSColorName = string;

@@ -24,14 +24,14 @@ class Barb {
     if (isHighlighted) {
       scale(scaleFactor, scaleFactor);
     } else {
-      const [r, g, b] = strokeColor;
-      let f = 1; // desaturate by 20%
-      let L = 0.3 * r + 0.6 * g + 0.1 * b;
-      let new_r = r + f * (L - r);
-      let new_g = g + f * (L - g);
-      let new_b = b + f * (L - b);
+      // const [r, g, b] = strokeColor;
+      // let f = 1; // desaturate by 20%
+      // let L = 0.3 * r + 0.6 * g + 0.1 * b;
+      // let new_r = r + f * (L - r);
+      // let new_g = g + f * (L - g);
+      // let new_b = b + f * (L - b);
 
-      strokeColor = [new_r, new_g, new_b];
+      // strokeColor = [new_r, new_g, new_b];
     }
 
     stroke(
