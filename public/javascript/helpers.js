@@ -68,6 +68,7 @@ function createPaletteFast(image, colorCount, firstPoint, secondPoint) {
 
   const step = floor(length / (colorCount - 1)) || 1;
   // console.debug({ distanceBetweenPoints: length, stepSize: step, colorCount })
+  console.debug({step})
 
   for (let x = startX, index = 0; x < endX; x += step, index += 1) {
     const y = floor(getYOnLine(x));
