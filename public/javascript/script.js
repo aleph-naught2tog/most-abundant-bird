@@ -22,7 +22,9 @@ let maximumData = null;
 
 /** @type {Array<Feather>} */
 let cachedFeathers = [];
-let loadedTableData = null;
+
+/** * @type {P5Table} */
+let loadedTableData;
 
 const getCanvasHeight = () => {
   return windowHeight - 32;
@@ -104,12 +106,14 @@ function initPalettes() {
   for (const birdName in BIRD_INFO) {
     const metadata = BIRD_INFO[birdName];
 
-    metadata.imagePalette = createPaletteFromImageByPixelLoad(
-      metadata.image,
-      COLOR_COUNT,
-      metadata.palettePoints.start,
-      metadata.palettePoints.end
-    );
+    if (metadata.image) {
+      metadata.imagePalette = createPaletteFromImageByPixelLoad(
+        metadata.image,
+        COLOR_COUNT,
+        metadata.palettePoints.start,
+        metadata.palettePoints.end
+      );
+    }
   }
 }
 
@@ -132,7 +136,7 @@ function drawFeathers(chartDiameter) {
     push();
     noFill();
     circle(0, 0, internalCircleDiameter);
-    // circle(0, 0, getMaximumChartRadius() * 2 + EXTRA_DIAMETER);
+    circle(0, 0, getMaximumChartRadius() * 2 + EXTRA_DIAMETER);
     pop();
 
     rotate(feather.angle);
@@ -185,7 +189,7 @@ function drawFeathers(chartDiameter) {
 /**
  *
  * @param {Record<string, BirdMetadata>} birdInfo
- * @param {*} preppedData
+ * @param {{ maximum: number, maximumIndex: number, birdName: string}[]} preppedData
  * @returns
  */
 function createFeathers(birdInfo, preppedData) {
@@ -261,8 +265,8 @@ function drawMonths() {
     textAlign(CENTER, CENTER);
     text(
       month,
-      circleCenter.x + cos(theta) * (internalCircleDiameter / 2) * 0.85, // * dir.x),
-      circleCenter.y + sin(theta) * (internalCircleDiameter / 2) * 0.85 + 2 // + (10 * dir.y)
+      circleCenter.x + cos(theta) * (internalCircleDiameter / 2) * 0.85,
+      circleCenter.y + sin(theta) * (internalCircleDiameter / 2) * 0.85 + 2
     );
 
     pop();

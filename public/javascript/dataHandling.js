@@ -1,9 +1,14 @@
 // -----------------------------------
 // ---------- Data functions ---------
 // -----------------------------------
-
+/**
+ *
+ * @param {P5Table} tableData
+ * @param {number} chunkSize
+ * @returns {{ maximum: number; maximumIndex: number; birdName: string; }[]}}
+ */
 function toMaximumInfoColumns(tableData, chunkSize) {
-  const [birdNames, ...columns] = parseToColumns(tableData, chunkSize);
+  const { birdNames, columns } = parseToColumns(tableData, chunkSize);
 
   const maxInfo = columns.map((col) => {
     return calculateMaximumFromColumn(col, birdNames);
@@ -12,41 +17,55 @@ function toMaximumInfoColumns(tableData, chunkSize) {
   return maxInfo;
 }
 
+/**
+ * @param {P5Table} tableData
+ * @param {number} chunkSize
+ * @returns {{ birdNames: string[], columns: number[][] }}
+ */
 function parseToColumns(tableData, chunkSize) {
   const columnCount = tableData.getColumnCount();
   const rowCount = tableData.getRowCount();
 
   const columnarData = [];
 
+  const birdNames = [];
+
   // not sure why we need to do - 1 here, but
   for (let columnIndex = 0; columnIndex < columnCount - 1; columnIndex += 1) {
-    const currentColumns = [];
+    const numericColumns = [];
+
     let monthlyTotal = 0;
 
     for (let rowIndex = 0; rowIndex < rowCount; rowIndex += 1) {
       const datum = tableData.get(rowIndex, columnIndex);
 
       if (columnIndex > 0) {
-        const datumAsFloat = parseFloat(datum);
+        const datumAsFloat = parseFloat(datum.toString());
         monthlyTotal += datumAsFloat;
 
         if (columnIndex % chunkSize === 0) {
-          currentColumns.push(monthlyTotal);
+          numericColumns.push(monthlyTotal);
           monthlyTotal = 0;
         }
       } else {
-        currentColumns.push(datum);
+        birdNames.push(datum.toString());
       }
     }
 
-    if (currentColumns.length > 0) {
-      columnarData.push(currentColumns);
+    if (numericColumns.length > 0) {
+      columnarData.push(numericColumns);
     }
   }
 
-  return columnarData.filter((arr) => arr.length);
+  return { birdNames, columns: columnarData.filter((arr) => arr.length) };
 }
 
+/**
+ *
+ * @param {number[]} column
+ * @param {string[]} birdNames
+ * @returns {{ maximum: number; maximumIndex: number; birdName: string; }}
+ */
 function calculateMaximumFromColumn(column, birdNames) {
   return column.reduce(
     ({ maximum, maximumIndex, birdName }, currentValue, currentIndex) => {

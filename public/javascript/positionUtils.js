@@ -1,3 +1,7 @@
+/**
+ * @param {{x: number, y: number}} point to draw
+ * @param {P5Color} desiredColor
+ */
 function drawProbablyGreenCanvasPoint({ x, y }, desiredColor) {
   push();
   strokeWeight(15);
@@ -8,6 +12,10 @@ function drawProbablyGreenCanvasPoint({ x, y }, desiredColor) {
   pop();
 }
 
+/**
+ * @param {{x: number, y: number}} point to draw
+ * @param {P5Color} desiredColor
+ */
 function drawProbablyBlueCirclePoint({ x, y }, desiredColor) {
   push();
   strokeWeight(25);
@@ -18,8 +26,9 @@ function drawProbablyBlueCirclePoint({ x, y }, desiredColor) {
   pop();
 }
 
-const vecToPoint = ([x, y]) => ({ x, y });
-
+/**
+ * @param {number} gridCount
+ */
 function drawGrid(gridCount) {
   push();
 
@@ -36,6 +45,9 @@ function drawGrid(gridCount) {
   pop();
 }
 
+/**
+ * @param {ColorValue} strokeColor
+ */
 function drawCoordinatePoints(strokeColor) {
   push();
 

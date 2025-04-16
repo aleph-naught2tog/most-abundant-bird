@@ -24,6 +24,29 @@ function createPaletteFromImageByGet(image, colorCount, start, end) {
   return palette;
 }
 
+
+/**
+ * @param {number} x
+ * @param {number} y
+ * @param {number} imageWidth
+ * @returns
+ */
+const getStartIndex = (x, y, imageWidth) => (x + y * imageWidth) * 4;
+
+/**
+ *
+ * @param {[number, number]} startPoint
+ * @param {[number, number]} endPoint
+ * @returns {(x: number) => number}
+ */
+const getLinearEquation = ([startX, startY], [endX, endY]) => {
+  const slope = (endY - startY) / (endX - startX);
+  const b = startY - slope * startX;
+  const getYOnLine = (/** @type {number} */ x) => slope * x + b;
+
+  return getYOnLine;
+}
+
 /**
  * @param {P5Image} image
  * @param {number} colorCount
@@ -58,11 +81,7 @@ function createPaletteFromImageByPixelLoad(
 
   const length = dist(startX, startY, endX, endY);
 
-  const slope = (endY - startY) / (endX - startX);
-  const b = startY - slope * startX;
-  const getYOnLine = (x) => slope * x + b;
-
-  const getStartIndex = (x, y) => (x + y * imageWidth) * 4;
+  const getYOnLine = getLinearEquation(startPoint, endPoint)
 
   /** @type {RGBColor[]} */
   const palette = [];
@@ -78,7 +97,7 @@ function createPaletteFromImageByPixelLoad(
 
   for (let x = startX, index = 0; x < endX; x += step, index += 1) {
     const y = floor(getYOnLine(x));
-    const startIndex = floor(getStartIndex(x, y));
+    const startIndex = floor(getStartIndex(x, y,  imageWidth));
 
     /** @type {RGBColor} */
     const color = [
@@ -111,6 +130,11 @@ function createPaletteFromImageByPixelLoad(
   return palette;
 }
 
+/**
+ * @param {number} index
+ * @param {number} value
+ * @param {RGBColor[]} colors
+ */
 function getColorAtIndex(index, value, colors) {
   const colorIndex = floor(map(index, 0, value, 0, colors.length));
 

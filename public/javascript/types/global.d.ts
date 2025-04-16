@@ -27,8 +27,16 @@ declare class P5Vector {
   lerp(otherVector: P5Vector, amount: number): P5Vector;
 }
 
-declare function lerp(firstVector: P5Vector, secondVector: P5Vector, amount: number): P5Vector;
-declare function lerp(firstNumber: number, secondNumber: number, amount: number): number;
+declare function lerp(
+  firstVector: P5Vector,
+  secondVector: P5Vector,
+  amount: number
+): P5Vector;
+declare function lerp(
+  firstNumber: number,
+  secondNumber: number,
+  amount: number
+): number;
 
 interface P5Image {
   width: number;
@@ -69,7 +77,8 @@ type ColorValue =
   | RGBColor
   | HSBColor
   | HSLColor
-  | GrayscaleValue;
+  | GrayscaleValue
+  | P5Color;
 type SpreadableColorValue = RGBColor | HSBColor | HSLColor;
 
 declare function push(): void;
@@ -159,10 +168,13 @@ type VerticalAlignment =
   | typeof BOTTOM
   | typeof CENTER
   | typeof BASELINE;
-declare function textAlign(horizAlign: string, vertAlign?: string);
+declare function textAlign(horizAlign: string, vertAlign?: string): void;
 
-// needs table type
-declare function loadTable(filename: string, callback: () => void): void;
+declare function loadTable(
+  filename: string,
+  callback: (table: P5Table) => void
+): P5Table;
+
 declare function loadImage(
   url: string,
   onSuccess?: (i: P5Image) => void,
@@ -197,7 +209,7 @@ declare interface Window {
 }
 
 declare function angleMode(): AngleMode;
-declare function angleMode(mode: AngleMode);
+declare function angleMode(mode: AngleMode): void;
 
 declare function createCanvas(): P5Element;
 declare function createCanvas(width: number): P5Element;
@@ -235,12 +247,19 @@ interface P5Element {
   class(): string;
 }
 
-declare function point(vector: P5Vector);
+declare function point(vector: P5Vector): void;
 declare function point(x: number, y: number): void;
 declare function point(x: number, y: number, z: number): void;
 
-declare function dist(x0, y0, x1, y1): number;
-declare function dist(x0, y0, z0, x1, y1, z1): number;
+declare function dist(x0: number, y0: number, x1: number, y1: number): number;
+declare function dist(
+  x0: number,
+  y0: number,
+  z0: number,
+  x1: number,
+  y1: number,
+  z1: number
+): number;
 
 declare const drawingContext: CanvasRenderingContext2D;
 
@@ -249,3 +268,31 @@ declare function lerpColor(
   endColor: P5Color,
   amount: number
 ): P5Color;
+
+declare interface P5TableRow {
+  set(columnSpecifier: string | number, value: string | number): void;
+  setNum(columnSpecifier: string | number, value: number): void;
+  setString(columnSpecifier: string | number, value: string): void;
+
+  get(columnSpecifier: string | number): string | number;
+  getNum(columnSpecifier: string | number): number;
+  getString(columnSpecifier: string | number): string;
+}
+
+declare interface P5Table {
+  columns: string[];
+  rows: P5TableRow[];
+
+  addRow(): P5TableRow;
+  addRow(row: P5TableRow): P5TableRow;
+
+  removeRow(id: number): void;
+
+  get(rowIndex: number, columnId: string | number): string | number;
+
+  getRow(id: number): P5TableRow
+  getRows(): P5TableRow[]
+
+  getColumnCount(): number;
+  getRowCount(): number;
+}

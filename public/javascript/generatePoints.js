@@ -6,7 +6,7 @@ const WIDTH_SCALE = SCALE_SCALE * 0.15;
 
 /**
  * @param {number} length
- * @param {pointCount} length
+ * @param {number} pointCount
  * @returns {Generator<{p0: P5Vector, p2: P5Vector, index: number}>}
  */
 // TODO: separate out the length vs pointcount vs barb count
