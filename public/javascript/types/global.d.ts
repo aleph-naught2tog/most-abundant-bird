@@ -144,6 +144,8 @@ declare function line(
   z1: number
 ): void;
 
+declare function vertex(x: number, y: number, z?: number, u?: number, v?: number): void;
+
 declare function circle(
   centerX: number,
   centerY: number,
