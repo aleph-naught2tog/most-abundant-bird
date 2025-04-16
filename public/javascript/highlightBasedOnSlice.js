@@ -34,10 +34,16 @@ function highlightFeatherBasedOnSlice() {
     true
   );
 
-  const feather = cachedFeathers[round(hoveredFeatherIndex) % cachedFeathers.length];
+  const feather =
+    cachedFeathers[round(hoveredFeatherIndex) % cachedFeathers.length];
 
   if (!feather) {
-    console.debug({ mouseX, mouseY, hoveredFeatherIndex, r: round(hoveredFeatherIndex) })
+    console.debug({
+      mouseX,
+      mouseY,
+      hoveredFeatherIndex,
+      r: round(hoveredFeatherIndex),
+    });
     throw new Error('no feather');
   }
 
