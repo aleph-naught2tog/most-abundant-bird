@@ -41,6 +41,7 @@ class Barb {
       isHighlighted ? 255 : 200
     );
 
+
     line(this.start.x, this.start.y, this.end.x, this.end.y);
 
     pop();
