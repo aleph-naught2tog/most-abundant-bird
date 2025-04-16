@@ -1,6 +1,6 @@
 // BUG: we only seem to care about the feather for half of it
 
-function highlightBasedOnSlice() {
+function highlightFeatherBasedOnSlice() {
   cachedFeathers.forEach((f) => (f.highlighted = false));
   const mousePoint = { x: mouseX, y: mouseY };
 
@@ -9,6 +9,10 @@ function highlightBasedOnSlice() {
     getTranslationToCircleCenter(),
     getMaximumChartRadius() + EXTRA_DIAMETER / 2
   );
+
+  if (!isMouseWithinBigFeatherCircle) {
+    return;
+  }
 
   const trans = getTranslationToCircleCenter();
   translate(trans.x, trans.y);
@@ -30,17 +34,19 @@ function highlightBasedOnSlice() {
     true
   );
 
-  const feather = cachedFeathers[floor(hoveredFeatherIndex)];
+  const feather = cachedFeathers[round(hoveredFeatherIndex)];
 
-  // subtracting ANGLE_SLICED_WIDTH / 2 centers us, like the feather
+  const startAngle =
+    hoveredFeatherIndex * ANGLE_SLICED_WIDTH - ANGLE_SLICED_WIDTH / 2;
+  const endAngle = (hoveredFeatherIndex + 1) * ANGLE_SLICED_WIDTH;
+
   const angleBounds = {
-    start: hoveredFeatherIndex * ANGLE_SLICED_WIDTH - ANGLE_SLICED_WIDTH / 2,
-    end:
-      (hoveredFeatherIndex + 1) * ANGLE_SLICED_WIDTH - ANGLE_SLICED_WIDTH / 2,
+    start: startAngle,
+    end: endAngle,
   };
 
   feather.highlighted =
     isMouseWithinBigFeatherCircle &&
-    angleOfMouse < angleBounds.end &&
-    angleOfMouse > angleBounds.start;
+    angleOfMouse <= angleBounds.end &&
+    angleOfMouse >= angleBounds.start;
 }

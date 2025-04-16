@@ -116,6 +116,8 @@ declare function min(...arr: number[]): number;
 
 declare function floor(value: number): number;
 
+declare function round(value: number, decimalPlaces?: number): number;
+
 declare function random(): number;
 declare function random(excludedMax: number): number;
 declare function random(min: number, excludedMax: number): number;

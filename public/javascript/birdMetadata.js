@@ -1,4 +1,5 @@
 // TODO: this is a good palette, but some of the colors are similar enough that it implies a relationship
+/** @type {RGBColor[]} */
 const COLOR_BLIND_PALETTE = [
   // [0, 0, 0, 255],
   [86, 180, 233, 255],
