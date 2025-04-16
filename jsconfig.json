@@ -1,4 +1,0 @@
-{
-  "compilerOptions": { "noEmit": true, "checkJs": true, "target": "ES2019" },
-  "include": ["./public/javascript/**/*"]
-}

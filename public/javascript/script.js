@@ -22,7 +22,9 @@ let maximumData = null;
 
 /** @type {Array<Feather>} */
 let cachedFeathers = [];
-let loadedTableData = null;
+
+/** * @type {P5Table} */
+let loadedTableData;
 
 const getCanvasHeight = () => {
   return windowHeight - 32;
@@ -101,33 +103,18 @@ function mouseMoved() {
 // -----------------------------------
 
 function initPalettes() {
-  console.debug('init palettes start')
   for (const birdName in BIRD_INFO) {
     const metadata = BIRD_INFO[birdName];
-    console.debug(birdName, metadata.palettePoints.start, metadata.palettePoints.end)
 
-    let start = +new Date()
-    metadata.palette = createPalette(
-      metadata.image,
-      COLOR_COUNT,
-      metadata.palettePoints.start,
-      metadata.palettePoints.end
-    );
-
-    let afterOld = +new Date()
-
-    let newStart = +new Date()
-    metadata.palette = createPaletteFast(
-      metadata.image,
-      COLOR_COUNT,
-      metadata.palettePoints.start,
-      metadata.palettePoints.end
-    );
-
-    let afterNew = +new Date()
-    console.debug({old: (afterOld - start) / 1000, new: (afterNew - newStart) / 1000 })
+    if (metadata.image) {
+      metadata.imagePalette = createPaletteFromImageByPixelLoad(
+        metadata.image,
+        COLOR_COUNT,
+        metadata.palettePoints.start,
+        metadata.palettePoints.end
+      );
+    }
   }
-  console.debug('init palettes end')
 }
 
 /**
@@ -149,7 +136,7 @@ function drawFeathers(chartDiameter) {
     push();
     noFill();
     circle(0, 0, internalCircleDiameter);
-    // circle(0, 0, getMaximumChartRadius() * 2 + EXTRA_DIAMETER);
+    circle(0, 0, getMaximumChartRadius() * 2 + EXTRA_DIAMETER);
     pop();
 
     rotate(feather.angle);
@@ -199,6 +186,12 @@ function drawFeathers(chartDiameter) {
   }
 }
 
+/**
+ *
+ * @param {Record<string, BirdMetadata>} birdInfo
+ * @param {{ maximum: number, maximumIndex: number, birdName: string}[]} preppedData
+ * @returns
+ */
 function createFeathers(birdInfo, preppedData) {
   const absoluteMaximum = max(preppedData.map((m) => m.maximum));
   const absoluteMinimum = min(preppedData.map((m) => m.maximum));
@@ -236,7 +229,7 @@ function createFeathers(birdInfo, preppedData) {
 
     const feather = new Feather({
       angle: rotationAngle,
-      colors: metadata.palette,
+      colors: metadata.imagePalette,
       length: radius,
       data: {
         label: closestBirdName,
@@ -272,8 +265,8 @@ function drawMonths() {
     textAlign(CENTER, CENTER);
     text(
       month,
-      circleCenter.x + cos(theta) * (internalCircleDiameter / 2) * 0.85, // * dir.x),
-      circleCenter.y + sin(theta) * (internalCircleDiameter / 2) * 0.85 + 2 // + (10 * dir.y)
+      circleCenter.x + cos(theta) * (internalCircleDiameter / 2) * 0.85,
+      circleCenter.y + sin(theta) * (internalCircleDiameter / 2) * 0.85 + 2
     );
 
     pop();

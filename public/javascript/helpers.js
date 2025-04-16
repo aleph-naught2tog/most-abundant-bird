@@ -9,7 +9,7 @@
  * @param {[y: number, y: number]} end
  * @returns {RGBColor[]} the array of colors
  */
-function createPalette(image, colorCount, start, end) {
+function createPaletteFromImageByGet(image, colorCount, start, end) {
   // h/t to Jer Thorp for this!
 
   let palette = [];
@@ -25,13 +25,40 @@ function createPalette(image, colorCount, start, end) {
 }
 
 /**
+ * @param {number} x
+ * @param {number} y
+ * @param {number} imageWidth
+ * @returns
+ */
+const getStartIndex = (x, y, imageWidth) => (x + y * imageWidth) * 4;
+
+/**
+ *
+ * @param {[number, number]} startPoint
+ * @param {[number, number]} endPoint
+ * @returns {(x: number) => number}
+ */
+const getLinearEquation = ([startX, startY], [endX, endY]) => {
+  const slope = (endY - startY) / (endX - startX);
+  const b = startY - slope * startX;
+  const getYOnLine = (/** @type {number} */ x) => slope * x + b;
+
+  return getYOnLine;
+};
+
+/**
  * @param {P5Image} image
  * @param {number} colorCount
  * @param {[x: number, y: number]} firstPoint
  * @param {[x: number, y: number]} secondPoint
  * @returns {RGBColor[]} the array of colors
  */
-function createPaletteFast(image, colorCount, firstPoint, secondPoint) {
+function createPaletteFromImageByPixelLoad(
+  image,
+  colorCount,
+  firstPoint,
+  secondPoint,
+) {
   image.loadPixels();
 
   const imageWidth = image.width;
@@ -53,28 +80,17 @@ function createPaletteFast(image, colorCount, firstPoint, secondPoint) {
 
   const length = dist(startX, startY, endX, endY);
 
-  const slope = (endY - startY) / (endX - startX);
-  // y = mx + b
-  // 0 = mx + b - y
-  // -b = mx - y
-  // b = -mx + y
-  // b = y - mx
-  const b = startY - slope * startX;
-  const getYOnLine = x => slope * x + b;
-
-  const getStartIndex = (x, y) => (x + y * imageWidth) * 4;
+  const getYOnLine = getLinearEquation(startPoint, endPoint);
 
   const palette = [];
 
   const step = floor(length / (colorCount - 1)) || 1;
-  // console.debug({ distanceBetweenPoints: length, stepSize: step, colorCount })
-  console.debug({step})
 
   for (let x = startX, index = 0; x < endX; x += step, index += 1) {
     const y = floor(getYOnLine(x));
-    // console.debug(x,y)
-    const startIndex = floor(getStartIndex(x, y));
+    const startIndex = floor(getStartIndex(x, y, imageWidth));
 
+    /** @type {RGBColor} */
     const color = [
       imagePixels[startIndex],
       imagePixels[startIndex + 1],
@@ -82,14 +98,17 @@ function createPaletteFast(image, colorCount, firstPoint, secondPoint) {
       imagePixels[startIndex + 3],
     ];
 
-    // console.debug(color)
-
     palette[index] = color;
   }
 
   return palette;
 }
 
+/**
+ * @param {number} index
+ * @param {number} value
+ * @param {RGBColor[]} colors
+ */
 function getColorAtIndex(index, value, colors) {
   const colorIndex = floor(map(index, 0, value, 0, colors.length));
 
@@ -102,7 +121,7 @@ function getColorAtIndex(index, value, colors) {
  */
 function getRandomStrokeWeight() {
   const randomNumber = Math.random();
-  const strokeWeight = map(randomNumber, 0, 1, 0.25, 1.5);
+  const strokeWeight = map(randomNumber, 0, 1, 0.1, 1);
 
   return strokeWeight;
 }
@@ -144,94 +163,3 @@ function getCurrentOriginInCanvasCoords() {
 
   return { x: xOfOrigin, y: yOfOrigin };
 }
-
-/**
- */
-function drawGradientLine(optionsOrGradient, { start, end }, thickness = 1) {
-  let gradient;
-
-  if (optionsOrGradient instanceof CanvasGradient) {
-    gradient = optionsOrGradient;
-  } else {
-    const { startColor, endColor } = optionsOrGradient;
-
-    gradient = createGradient(start, end, startColor, endColor);
-  }
-
-  const ctx = drawingContext;
-  const originalStrokeStyle = ctx.strokeStyle;
-
-  push();
-
-  ctx.strokeStyle = gradient;
-
-  strokeWeight(thickness);
-  line(start.x, start.y, end.x, end.y);
-
-  ctx.strokeStyle = originalStrokeStyle;
-
-  pop();
-}
-
-function createGradient(
-  { x: x_0, y: y_0 },
-  { x: x_1, y: y_1 },
-  startColor,
-  endColor
-) {
-  const ctx = drawingContext;
-
-  const gradient = ctx.createLinearGradient(x_0, y_0, x_1, y_1);
-  const cssStartColor = `rgba(${startColor[0]}, ${startColor[1]}, ${
-    startColor[2]
-  }, ${map(startColor[3], 0, 255, 0, 1)})`;
-
-  const cssEndColor = `rgba(${endColor[0]}, ${endColor[1]}, ${
-    endColor[2]
-  }, ${map(endColor[3], 0, 255, 0, 1)})`;
-
-  gradient.addColorStop(0.5, cssStartColor);
-  gradient.addColorStop(
-    0.75,
-    lerpColor(color(startColor), color(endColor), 0.5).toString()
-  );
-  gradient.addColorStop(1, cssEndColor);
-
-  return gradient;
-}
-
-/*
--- for a 3x3 image there are 9 pixels
-
-firstColorIndex = (index * 4)
-
-//
-
-width = 3
-height = 3
-
-say I want (0,0,  1,1,  2,2)
-slope = 1
-y - y1 = m(x - x1)
-y - y1 = x - x1
-
-FIRST ROW
-x = 0
-0,0 = 0,1,2,3        0
-0,1 = 4,5,6,7        1
-0,2 = 8,9,10,11      2
-
-x = 1
-SECOND ROW
-1,0 = 12,13,14,15    3
-1,1 = 16,17,18,19    4
-1,2 = 20,21,22,23    5
-
-x = 2
-THIRD ROW
-2,0 = 24,25,26,27    6
-2,1 = 28,29,30,31    7
-2,2 = 32,33,34,35    8
-
-x,y = (index*4) + (4y)
-*/

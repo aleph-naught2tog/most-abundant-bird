@@ -29,10 +29,7 @@ class Feather {
       length,
       data: { label, value },
     } = options;
-    // this is awkward but types!
-    const defaultBarbs = /** @type {Array<Barb>} */ ([]);
-
-    this.barbs = barbs ?? defaultBarbs;
+    this.barbs = barbs ?? [];
     this.angle = angle;
     this.colors = colors;
     this.length = length;
@@ -56,13 +53,13 @@ class Feather {
 
   createBarbs() {
     const pointCount = this.length;
-    const points = generatePoints(pointCount);
+    const barbCount = generatePoints(this.length, pointCount);
 
-    for (const { p0, p2, index } of points) {
-      const currentColor = getColorAtIndex(index, this.length, this.colors);
-      const [r, g, b, _alpha] = currentColor;
+    for (const { p0, p2, index } of barbCount) {
+      const currentColor = getColorAtIndex(index, pointCount, this.colors);
+      const [r, g, b, alpha = 255] = currentColor;
 
-      const scaledAlpha = map(ALPHA, 0, 1, 0, 255);
+      const scaledAlpha = map(alpha, 0, 1, 0, 255);
       const barb = new Barb({
         start: { x: p0.x, y: p0.y },
         end: { x: p2.x, y: p2.y },
@@ -110,7 +107,7 @@ class Feather {
         return isMouseWithinCircle || this.highlighted;
       }
 
-      return isMouseWithinCircle// || this.highlighted;
+      return isMouseWithinCircle;
     }
 
     return false;
@@ -178,7 +175,7 @@ class Feather {
     const rachisLength = this.length / 2;
 
     // draw a line from the outer circle to halfway up the feather
-    line(0, 0, 0, rachisLength );
+    line(0, 0, 0, rachisLength);
     pop();
   }
 
@@ -189,10 +186,12 @@ class Feather {
   _getRachisColor() {
     const exemplarBarb = this.barbs[0];
 
-    const red = exemplarBarb.color[0] / 1.25;
-    const green = exemplarBarb.color[1] / 1.25;
-    const blue = exemplarBarb.color[2] / 1.25;
-    const alpha = exemplarBarb.color[3] * 0.85;
+    const [r, g, b, a = 255] = exemplarBarb.color;
+
+    const red = r / 1.25;
+    const green = g / 1.25;
+    const blue = b / 1.25;
+    const alpha = a * 0.85;
 
     return [red, green, blue, alpha];
   }
@@ -207,5 +206,4 @@ class Feather {
       y,
     };
   }
-
 }

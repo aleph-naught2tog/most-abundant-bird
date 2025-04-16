@@ -27,7 +27,16 @@ declare class P5Vector {
   lerp(otherVector: P5Vector, amount: number): P5Vector;
 }
 
-declare function lerp(firstVector: P5Vector, secondVector: P5Vector, amount: number): P5Vector;
+declare function lerp(
+  firstVector: P5Vector,
+  secondVector: P5Vector,
+  amount: number
+): P5Vector;
+declare function lerp(
+  firstNumber: number,
+  secondNumber: number,
+  amount: number
+): number;
 
 interface P5Image {
   width: number;
@@ -68,7 +77,8 @@ type ColorValue =
   | RGBColor
   | HSBColor
   | HSLColor
-  | GrayscaleValue;
+  | GrayscaleValue
+  | P5Color;
 type SpreadableColorValue = RGBColor | HSBColor | HSLColor;
 
 declare function push(): void;
@@ -119,7 +129,7 @@ declare function map(
   valueRangeMax: number,
   targetRangeMin: number,
   targetRangeMax: number,
-  withinBounds = true
+  withinBounds?: boolean
 ): number;
 
 declare function line(x0: number, y0: number, x1: number, y1: number): void;
@@ -158,15 +168,18 @@ type VerticalAlignment =
   | typeof BOTTOM
   | typeof CENTER
   | typeof BASELINE;
-declare function textAlign(horizAlign: string, vertAlign?: string);
+declare function textAlign(horizAlign: string, vertAlign?: string): void;
 
-// needs table type
-declare function loadTable(filename: string, callback: () => void): void;
+declare function loadTable(
+  filename: string,
+  callback: (table: P5Table) => void
+): P5Table;
+
 declare function loadImage(
   url: string,
   onSuccess?: (i: P5Image) => void,
   onError?: (e: any) => void
-): void;
+): P5Image;
 
 declare const RADIANS = 'RADIANS';
 declare const DEGREES = 'DEGREES';
@@ -174,7 +187,7 @@ declare type AngleMode = typeof RADIANS | typeof DEGREES;
 
 declare function cos(theta: number): number;
 declare function sin(theta: number): number;
-declare function atan2(y: number, x: number): Angle;
+declare function atan2(y: number, x: number): number;
 
 declare const P2D = 'p2d';
 declare const WEBGL = 'webgl';
@@ -196,27 +209,27 @@ declare interface Window {
 }
 
 declare function angleMode(): AngleMode;
-declare function angleMode(mode: AngleMode);
+declare function angleMode(mode: AngleMode): void;
 
-declare function createCanvas(): P5Render;
-declare function createCanvas(width: number): P5Render;
-declare function createCanvas(width: number, height: number): P5Render;
+declare function createCanvas(): P5Element;
+declare function createCanvas(width: number): P5Element;
+declare function createCanvas(width: number, height: number): P5Element;
 declare function createCanvas(
   width: number,
   height: number,
   renderMode: RenderMode
-): P5Render;
+): P5Element;
 declare function createCanvas(
   width: number,
   height: number,
   canvasElement: HTMLCanvasElement
-): P5Render;
+): P5Element;
 declare function createCanvas(
   width: number,
   height: number,
   renderMode: RenderMode,
   canvasElement: HTMLCanvasElement
-): P5Render;
+): P5Element;
 
 interface P5Element {
   width: number;
@@ -234,12 +247,19 @@ interface P5Element {
   class(): string;
 }
 
-declare function point(vector: P5Vector);
+declare function point(vector: P5Vector): void;
 declare function point(x: number, y: number): void;
 declare function point(x: number, y: number, z: number): void;
 
-declare function dist(x0, y0, x1, y1): number;
-declare function dist(x0, y0, z0, x1, y1, z1): number;
+declare function dist(x0: number, y0: number, x1: number, y1: number): number;
+declare function dist(
+  x0: number,
+  y0: number,
+  z0: number,
+  x1: number,
+  y1: number,
+  z1: number
+): number;
 
 declare const drawingContext: CanvasRenderingContext2D;
 
@@ -248,3 +268,31 @@ declare function lerpColor(
   endColor: P5Color,
   amount: number
 ): P5Color;
+
+declare interface P5TableRow {
+  set(columnSpecifier: string | number, value: string | number): void;
+  setNum(columnSpecifier: string | number, value: number): void;
+  setString(columnSpecifier: string | number, value: string): void;
+
+  get(columnSpecifier: string | number): string | number;
+  getNum(columnSpecifier: string | number): number;
+  getString(columnSpecifier: string | number): string;
+}
+
+declare interface P5Table {
+  columns: string[];
+  rows: P5TableRow[];
+
+  addRow(): P5TableRow;
+  addRow(row: P5TableRow): P5TableRow;
+
+  removeRow(id: number): void;
+
+  get(rowIndex: number, columnId: string | number): string | number;
+
+  getRow(id: number): P5TableRow
+  getRows(): P5TableRow[]
+
+  getColumnCount(): number;
+  getRowCount(): number;
+}
