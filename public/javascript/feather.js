@@ -6,6 +6,11 @@ const ANNOTATION_LINE_LENGTH = 30;
 // this must be less than the anchorLength
 const OFFSET_FROM_FEATHER_TIP = 15;
 
+// TODO: feather outline? try with a minimal thing first.
+//    I think that we can make an if...
+//      1) we wrap the lines in a shape?
+//      2) failing that, get all the end points, make them vertices
+
 if (ANNOTATION_LINE_LENGTH <= OFFSET_FROM_FEATHER_TIP) {
   throw new Error('Your annotation line will not appear.');
 }

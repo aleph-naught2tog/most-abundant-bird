@@ -1,5 +1,5 @@
 const ASPECT_RATIO = 6 / 4;
-const BACKGROUND_COLOR = 'lemonchiffon';
+const BACKGROUND_COLOR = "lemonchiffon";
 
 const DONUT_HOLE = 0.2;
 const EXTRA_DIAMETER = 100;
@@ -7,10 +7,12 @@ const OFFSET_FROM_INTERNAL_CIRCLE = 10;
 
 const TOTAL_COUNT = 48;
 // upper limit is half of TOTAL_COUNT
-const CHUNK_SIZE = 2;
+const CHUNK_SIZE = 1;
 const COLOR_COUNT = 1000;
 const GRAPH_ROTATION = Math.PI;
 const ANGLE_SLICED_WIDTH = (Math.PI * 2) / (TOTAL_COUNT / CHUNK_SIZE);
+
+const COLOR_BLIND_MODE = true;
 
 let shouldUseFeatherHover = true;
 
@@ -49,7 +51,7 @@ const getTranslationToCircleCenter = () => ({
 // -----------------------------------
 
 function preload() {
-  loadTable('/data/wi_histogram.tsv', (data) => {
+  loadTable("/data/wi_histogram.tsv", (data) => {
     loadedTableData = data;
   });
 
@@ -71,7 +73,7 @@ function setup() {
   const canvasWidth = getCanvasWidth();
 
   const canvas = createCanvas(canvasWidth, canvasHeight);
-  canvas.parent('canvas_container');
+  canvas.parent("canvas_container");
 
   maximumData = toMaximumInfoColumns(loadedTableData, CHUNK_SIZE);
   initPalettes();
@@ -103,10 +105,19 @@ function mouseMoved() {
 // -----------------------------------
 
 function initPalettes() {
-  for (const birdName in BIRD_INFO) {
+  const birdNames = Object.keys(BIRD_INFO);
+  for (let index = 0; index < birdNames.length; index += 1) {
+    const birdName = birdNames[index];
     const metadata = BIRD_INFO[birdName];
-
     if (metadata.image) {
+      const colorBlindColor = COLOR_BLIND_PALETTE[index];
+        
+      if (!colorBlindColor) {
+        throw new Error(`No colorblind color for index ${index}`);
+      }
+      
+      metadata.colorBlindPalette = [colorBlindColor];
+      
       metadata.imagePalette = createPaletteFromImageByPixelLoad(
         metadata.image,
         COLOR_COUNT,
@@ -204,6 +215,7 @@ function createFeathers(birdInfo, preppedData) {
     const num = preppedData[index].maximum;
     const closestBirdName = Object.keys(birdInfo).find((key) => {
       const birdName = preppedData[index].birdName;
+      console.debug({ birdName })
 
       return birdName.toLowerCase().startsWith(key.toLowerCase());
     });
@@ -229,7 +241,7 @@ function createFeathers(birdInfo, preppedData) {
 
     const feather = new Feather({
       angle: rotationAngle,
-      colors: metadata.imagePalette,
+      colors: COLOR_BLIND_MODE ? metadata.colorBlindPalette : metadata.imagePalette,
       length: radius,
       data: {
         label: closestBirdName,
@@ -257,9 +269,7 @@ function drawMonths() {
     const theta = map(monthIndex, 0, numberOfMonths, 0, TAU) - PI / 2;
 
     const date = new Date(1990, monthIndex, 10); // 2009-11-10
-    const month = date
-      .toLocaleString('default', { month: 'long' })
-      .slice(0, 1);
+    const month = date.toLocaleString("default", { month: "long" }).slice(0, 1);
 
     strokeWeight(2);
     textAlign(CENTER, CENTER);
