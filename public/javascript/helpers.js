@@ -24,7 +24,6 @@ function createPaletteFromImageByGet(image, colorCount, start, end) {
   return palette;
 }
 
-
 /**
  * @param {number} x
  * @param {number} y
@@ -45,7 +44,7 @@ const getLinearEquation = ([startX, startY], [endX, endY]) => {
   const getYOnLine = (/** @type {number} */ x) => slope * x + b;
 
   return getYOnLine;
-}
+};
 
 /**
  * @param {P5Image} image
@@ -58,7 +57,7 @@ function createPaletteFromImageByPixelLoad(
   image,
   colorCount,
   firstPoint,
-  secondPoint
+  secondPoint,
 ) {
   image.loadPixels();
 
@@ -81,23 +80,15 @@ function createPaletteFromImageByPixelLoad(
 
   const length = dist(startX, startY, endX, endY);
 
-  const getYOnLine = getLinearEquation(startPoint, endPoint)
+  const getYOnLine = getLinearEquation(startPoint, endPoint);
 
-  /** @type {RGBColor[]} */
   const palette = [];
 
   const step = floor(length / (colorCount - 1)) || 1;
 
-  console.debug({ step });
-
-  let previousColor = null;
-
-  /** @type {RGBColor|null} */
-  let lerpColor = null;
-
   for (let x = startX, index = 0; x < endX; x += step, index += 1) {
     const y = floor(getYOnLine(x));
-    const startIndex = floor(getStartIndex(x, y,  imageWidth));
+    const startIndex = floor(getStartIndex(x, y, imageWidth));
 
     /** @type {RGBColor} */
     const color = [
@@ -107,24 +98,7 @@ function createPaletteFromImageByPixelLoad(
       imagePixels[startIndex + 3],
     ];
 
-    // palette[index] = color;
-    palette.push(color);
-
-    if (previousColor) {
-      const amount = 0.001;
-
-      for (let i = 0; i < 1; i += amount) {
-        lerpColor = [
-          lerp(previousColor[0], color[0], amount),
-          lerp(previousColor[1], color[1], amount),
-          lerp(previousColor[2], color[2], amount),
-          lerp(previousColor[3], color[3], amount),
-        ];
-
-        palette.push(lerpColor);
-        previousColor = lerpColor;
-      }
-    }
+    palette[index] = color;
   }
 
   return palette;
