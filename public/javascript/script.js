@@ -150,20 +150,6 @@ function drawFeathers(chartDiameter) {
     circle(0, 0, internalCircleDiameter);
     circle(0, 0, bigDiameter);
 
-    for (let theta = 0; theta < TAU; theta += ANGLE_SLICED_WIDTH) {
-      const x = cos(theta) * (bigDiameter / 2);
-      const y = sin(theta) * (bigDiameter / 2);
-      push();
-      strokeWeight(0.25);
-      line(
-        cos(theta) * (internalCircleDiameter / 2),
-        sin(theta) * (internalCircleDiameter / 2),
-        x,
-        y
-      );
-      pop();
-    }
-
     for (
       let theta = -ANGLE_SLICED_WIDTH / 2;
       theta < TAU;
@@ -171,6 +157,13 @@ function drawFeathers(chartDiameter) {
     ) {
       const x = cos(theta) * (bigDiameter / 2);
       const y = sin(theta) * (bigDiameter / 2);
+
+      line(
+        cos(theta) * (internalCircleDiameter / 2),
+        sin(theta) * (internalCircleDiameter / 2),
+        x,
+        y
+      );
       line(0, 0, x, y);
     }
 
