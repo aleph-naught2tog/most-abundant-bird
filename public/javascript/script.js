@@ -28,6 +28,15 @@ let cachedFeathers = [];
 /** * @type {P5Table} */
 let loadedTableData;
 
+/** @type {P5Element} */
+let dataDisplayDiv;
+
+/** @type {P5Element} */
+let commonNameEl;
+
+/** @type {P5Element} */
+let scientificNameEl;
+
 const getCanvasHeight = () => {
   return windowHeight - 32;
 };
@@ -45,6 +54,8 @@ const getTranslationToCircleCenter = () => ({
   x: width / 4,
   y: height / 3.5,
 });
+
+// BUG: TODO: get the feathers aligned
 
 // -----------------------------------
 // ------- Lifecycle functions -------
@@ -78,6 +89,36 @@ function setup() {
   initPalettes();
 
   cachedFeathers = createFeathers(BIRD_INFO, maximumData);
+
+
+  const leftPos = (getMaximumChartRadius() * 2) + 2;
+  const section = createElement('section');
+  section.position(leftPos, 50);
+
+  const topHeader = createDiv(html`
+    <header>
+      <h1>What birds are most observed over a year?</h1>
+      <p>Wisconsin, 1900–2025</p>
+    </header>
+  `);
+
+  section.child(topHeader);
+
+  dataDisplayDiv = createDiv();
+  section.child(dataDisplayDiv);
+
+  dataDisplayDiv.class('data-display-container');
+
+  commonNameEl = createElement('h2');
+  commonNameEl.class('common-name');
+
+  scientificNameEl = createElement('h3');
+  scientificNameEl.class('scientific-name');
+
+  dataDisplayDiv.child(commonNameEl);
+  dataDisplayDiv.child(scientificNameEl);
+
+  console.debug(dataDisplayDiv.child());
 
   // const maximumChartRadius = getMaximumChartRadius();
   // background(BACKGROUND_COLOR);
@@ -143,38 +184,12 @@ function drawFeathers(chartDiameter) {
 
     translate(translationToCanvasCenter.x, translationToCanvasCenter.y);
 
-    const bigDiameter = getMaximumChartRadius() * 2 + EXTRA_DIAMETER;
-
-    push();
-    noFill();
-    circle(0, 0, internalCircleDiameter);
-    circle(0, 0, bigDiameter);
-
-    for (
-      let theta = -ANGLE_SLICED_WIDTH / 2;
-      theta < TAU;
-      theta += ANGLE_SLICED_WIDTH
-    ) {
-      const x = cos(theta) * (bigDiameter / 2);
-      const y = sin(theta) * (bigDiameter / 2);
-
-      line(
-        cos(theta) * (internalCircleDiameter / 2),
-        sin(theta) * (internalCircleDiameter / 2),
-        x,
-        y
-      );
-      line(0, 0, x, y);
-    }
-
-    pop();
-
     rotate(feather.angle);
 
     // translates us to the outside of the circle above
     const offset = feather.highlighted ? 10 : 0;
     const translationToDonutHoleEdge = {
-      x: 0,
+      x: 4,
       y: internalCircleDiameter / 2 + OFFSET_FROM_INTERNAL_CIRCLE + offset,
     };
 
@@ -218,6 +233,9 @@ function drawFeathers(chartDiameter) {
 
     rotate(-theta - PI / 2);
     translate(-x, -y);
+
+    commonNameEl.html(highlightedFeather.commonName);
+    scientificNameEl.html(highlightedFeather.scientificName);
   }
 }
 
@@ -269,8 +287,9 @@ function createFeathers(birdInfo, preppedData) {
         : metadata.imagePalette,
       length: radius,
       data: {
-        label: closestBirdName,
+        commonName: closestBirdName,
         value: num,
+        scientificName: metadata.scientificName,
       },
     });
 
@@ -308,4 +327,28 @@ function drawMonths() {
 
     pop();
   }
+
+  const bigDiameter = getMaximumChartRadius() * 2 + EXTRA_DIAMETER;
+
+  push();
+  noFill();
+  circle(circleCenter.x, circleCenter.y, internalCircleDiameter);
+  circle(circleCenter.x, circleCenter.y, bigDiameter);
+
+  for (
+    let theta = -ANGLE_SLICED_WIDTH / 2;
+    theta < TAU;
+    theta += ANGLE_SLICED_WIDTH
+  ) {
+    const x = circleCenter.x + cos(theta) * (bigDiameter / 2);
+    const y = circleCenter.y + sin(theta) * (bigDiameter / 2);
+
+    line(
+      circleCenter.x + cos(theta) * (internalCircleDiameter / 2),
+      circleCenter.y + sin(theta) * (internalCircleDiameter / 2),
+      x,
+      y
+    );
+  }
+  pop();
 }
