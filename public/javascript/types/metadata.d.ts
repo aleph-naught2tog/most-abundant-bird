@@ -8,4 +8,5 @@ interface BirdMetadata {
   imagePalette: RGBColor[];
   colorBlindPalette: RGBColor[];
   // highContrastPalette: RGBColor[] | null;
+  scientificName: string;
 }

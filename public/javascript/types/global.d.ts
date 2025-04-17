@@ -116,6 +116,8 @@ declare function min(...arr: number[]): number;
 
 declare function floor(value: number): number;
 
+declare function round(value: number, decimalPlaces?: number): number;
+
 declare function random(): number;
 declare function random(excludedMax: number): number;
 declare function random(min: number, excludedMax: number): number;
@@ -140,6 +142,14 @@ declare function line(
   y1: number,
   z0: number,
   z1: number
+): void;
+
+declare function vertex(
+  x: number,
+  y: number,
+  z?: number,
+  u?: number,
+  v?: number
 ): void;
 
 declare function circle(
@@ -245,7 +255,22 @@ interface P5Element {
 
   class(className: string): void;
   class(): string;
+
+  child(): Node[];
+  child(id: string): void;
+  child(node: Node): void;
+  child(element: P5Element): void;
+
+  position(x: number, y: number, cssPosition?: CssPosition): Point;
 }
+
+type CssPosition =
+  | 'static'
+  | 'fixed'
+  | 'relative'
+  | 'sticky'
+  | 'initial'
+  | 'inherit';
 
 declare function point(vector: P5Vector): void;
 declare function point(x: number, y: number): void;
@@ -290,9 +315,12 @@ declare interface P5Table {
 
   get(rowIndex: number, columnId: string | number): string | number;
 
-  getRow(id: number): P5TableRow
-  getRows(): P5TableRow[]
+  getRow(id: number): P5TableRow;
+  getRows(): P5TableRow[];
 
   getColumnCount(): number;
   getRowCount(): number;
 }
+
+declare function createDiv(innerHTML?: string): P5Element;
+declare function createElement(tagName: string, content?: string): P5Element;

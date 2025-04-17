@@ -1,4 +1,5 @@
 // TODO: this is a good palette, but some of the colors are similar enough that it implies a relationship
+/** @type {RGBColor[]} */
 const COLOR_BLIND_PALETTE = [
   // [0, 0, 0, 255],
   [86, 180, 233, 255],
@@ -20,6 +21,7 @@ const BIRD_INFO = {
     image: null,
     imagePalette: [],
     colorBlindPalette: [],
+    scientificName: 'Corvus brachyrhynchos',
   },
   "American Robin": {
     imageUrl:
@@ -28,6 +30,7 @@ const BIRD_INFO = {
     image: null,
     imagePalette: [],
     colorBlindPalette: [],
+    scientificName: 'Turdus migratorius',
   },
   "Black-capped Chickadee": {
     imageUrl:
@@ -36,6 +39,7 @@ const BIRD_INFO = {
     image: null,
     imagePalette: [],
     colorBlindPalette: [],
+    scientificName: 'Poecile atricapillus'
   },
   "American Goldfinch": {
     imageUrl:
@@ -44,6 +48,7 @@ const BIRD_INFO = {
     image: null,
     imagePalette: [],
     colorBlindPalette: [],
+    scientificName: 'Spinus tristis'
   },
   "Blue Jay": {
     imageUrl:
@@ -52,6 +57,7 @@ const BIRD_INFO = {
     image: null,
     imagePalette: [],
     colorBlindPalette: [],
+    scientificName: 'Cyanocitta cristata'
   },
   "Canada Goose": {
     imageUrl:
@@ -60,5 +66,6 @@ const BIRD_INFO = {
     image: null,
     imagePalette: [],
     colorBlindPalette: [],
+    scientificName: 'Branta canadensis'
   },
 };

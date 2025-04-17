@@ -1,5 +1,5 @@
 const ASPECT_RATIO = 6 / 4;
-const BACKGROUND_COLOR = "lemonchiffon";
+const BACKGROUND_COLOR = 'lemonchiffon';
 
 const DONUT_HOLE = 0.2;
 const EXTRA_DIAMETER = 100;
@@ -7,10 +7,10 @@ const OFFSET_FROM_INTERNAL_CIRCLE = 10;
 
 const TOTAL_COUNT = 48;
 // upper limit is half of TOTAL_COUNT
-const CHUNK_SIZE = 1;
+const CHUNK_SIZE = 2;
 const COLOR_COUNT = 1000;
 const GRAPH_ROTATION = Math.PI;
-const ANGLE_SLICED_WIDTH = (Math.PI * 2) / (TOTAL_COUNT / CHUNK_SIZE);
+const ANGLE_SLICED_WIDTH = (2 * Math.PI) / (TOTAL_COUNT / CHUNK_SIZE);
 
 const COLOR_BLIND_MODE = true;
 
@@ -27,6 +27,15 @@ let cachedFeathers = [];
 
 /** * @type {P5Table} */
 let loadedTableData;
+
+/** @type {P5Element} */
+let dataDisplayDiv;
+
+/** @type {P5Element} */
+let commonNameEl;
+
+/** @type {P5Element} */
+let scientificNameEl;
 
 const getCanvasHeight = () => {
   return windowHeight - 32;
@@ -46,12 +55,14 @@ const getTranslationToCircleCenter = () => ({
   y: height / 3.5,
 });
 
+// BUG: TODO: get the feathers aligned
+
 // -----------------------------------
 // ------- Lifecycle functions -------
 // -----------------------------------
 
 function preload() {
-  loadTable("/data/wi_histogram.tsv", (data) => {
+  loadTable('/data/wi_histogram.tsv', (data) => {
     loadedTableData = data;
   });
 
@@ -66,19 +77,48 @@ function preload() {
 // BUG/PERFORMANCE: the first one you hover over takes the longest
 function setup() {
   // this is the default, but good for clarity
-  console.debug({ RADIANS });
   angleMode(RADIANS);
 
   const canvasHeight = getCanvasHeight();
   const canvasWidth = getCanvasWidth();
 
   const canvas = createCanvas(canvasWidth, canvasHeight);
-  canvas.parent("canvas_container");
+  canvas.parent('canvas_container');
 
   maximumData = toMaximumInfoColumns(loadedTableData, CHUNK_SIZE);
   initPalettes();
 
   cachedFeathers = createFeathers(BIRD_INFO, maximumData);
+
+
+  const leftPos = (getMaximumChartRadius() * 2) + 2;
+  const section = createElement('section');
+  section.position(leftPos, 50);
+
+  const topHeader = createDiv(html`
+    <header>
+      <h1>What birds are most observed over a year?</h1>
+      <p>Wisconsin, 1900–2025</p>
+    </header>
+  `);
+
+  section.child(topHeader);
+
+  dataDisplayDiv = createDiv();
+  section.child(dataDisplayDiv);
+
+  dataDisplayDiv.class('data-display-container');
+
+  commonNameEl = createElement('h2');
+  commonNameEl.class('common-name');
+
+  scientificNameEl = createElement('h3');
+  scientificNameEl.class('scientific-name');
+
+  dataDisplayDiv.child(commonNameEl);
+  dataDisplayDiv.child(scientificNameEl);
+
+  console.debug(dataDisplayDiv.child());
 
   // const maximumChartRadius = getMaximumChartRadius();
   // background(BACKGROUND_COLOR);
@@ -96,7 +136,7 @@ function draw() {
 
 function mouseMoved() {
   if (shouldUseFeatherHover) {
-    highlightBasedOnSlice();
+    highlightFeatherBasedOnSlice();
   }
 }
 
@@ -111,13 +151,13 @@ function initPalettes() {
     const metadata = BIRD_INFO[birdName];
     if (metadata.image) {
       const colorBlindColor = COLOR_BLIND_PALETTE[index];
-        
+
       if (!colorBlindColor) {
         throw new Error(`No colorblind color for index ${index}`);
       }
-      
+
       metadata.colorBlindPalette = [colorBlindColor];
-      
+
       metadata.imagePalette = createPaletteFromImageByPixelLoad(
         metadata.image,
         COLOR_COUNT,
@@ -144,18 +184,12 @@ function drawFeathers(chartDiameter) {
 
     translate(translationToCanvasCenter.x, translationToCanvasCenter.y);
 
-    push();
-    noFill();
-    circle(0, 0, internalCircleDiameter);
-    circle(0, 0, getMaximumChartRadius() * 2 + EXTRA_DIAMETER);
-    pop();
-
     rotate(feather.angle);
 
     // translates us to the outside of the circle above
     const offset = feather.highlighted ? 10 : 0;
     const translationToDonutHoleEdge = {
-      x: 0,
+      x: 4,
       y: internalCircleDiameter / 2 + OFFSET_FROM_INTERNAL_CIRCLE + offset,
     };
 
@@ -185,8 +219,13 @@ function drawFeathers(chartDiameter) {
     const theta = highlightedFeather.angle + PI / 2;
     const circleCenter = getTranslationToCircleCenter();
 
-    const x = circleCenter.x + cos(theta) * (internalCircleDiameter / 2 + 11);
-    const y = circleCenter.y + sin(theta) * (internalCircleDiameter / 2 + 11);
+    const x =
+      circleCenter.x +
+      cos(theta) * (internalCircleDiameter / 2 + OFFSET_FROM_INTERNAL_CIRCLE);
+    const y =
+      circleCenter.y +
+      sin(theta) * (internalCircleDiameter / 2 + OFFSET_FROM_INTERNAL_CIRCLE);
+
     translate(x, y);
     rotate(theta - PI / 2);
 
@@ -194,6 +233,9 @@ function drawFeathers(chartDiameter) {
 
     rotate(-theta - PI / 2);
     translate(-x, -y);
+
+    commonNameEl.html(highlightedFeather.commonName);
+    scientificNameEl.html(highlightedFeather.scientificName);
   }
 }
 
@@ -215,7 +257,6 @@ function createFeathers(birdInfo, preppedData) {
     const num = preppedData[index].maximum;
     const closestBirdName = Object.keys(birdInfo).find((key) => {
       const birdName = preppedData[index].birdName;
-      console.debug({ birdName })
 
       return birdName.toLowerCase().startsWith(key.toLowerCase());
     });
@@ -241,11 +282,14 @@ function createFeathers(birdInfo, preppedData) {
 
     const feather = new Feather({
       angle: rotationAngle,
-      colors: COLOR_BLIND_MODE ? metadata.colorBlindPalette : metadata.imagePalette,
+      colors: COLOR_BLIND_MODE
+        ? metadata.colorBlindPalette
+        : metadata.imagePalette,
       length: radius,
       data: {
-        label: closestBirdName,
+        commonName: closestBirdName,
         value: num,
+        scientificName: metadata.scientificName,
       },
     });
 
@@ -269,7 +313,9 @@ function drawMonths() {
     const theta = map(monthIndex, 0, numberOfMonths, 0, TAU) - PI / 2;
 
     const date = new Date(1990, monthIndex, 10); // 2009-11-10
-    const month = date.toLocaleString("default", { month: "long" }).slice(0, 1);
+    const month = date
+      .toLocaleString('default', { month: 'long' })
+      .slice(0, 1);
 
     strokeWeight(2);
     textAlign(CENTER, CENTER);
@@ -281,4 +327,28 @@ function drawMonths() {
 
     pop();
   }
+
+  const bigDiameter = getMaximumChartRadius() * 2 + EXTRA_DIAMETER;
+
+  push();
+  noFill();
+  circle(circleCenter.x, circleCenter.y, internalCircleDiameter);
+  circle(circleCenter.x, circleCenter.y, bigDiameter);
+
+  for (
+    let theta = -ANGLE_SLICED_WIDTH / 2;
+    theta < TAU;
+    theta += ANGLE_SLICED_WIDTH
+  ) {
+    const x = circleCenter.x + cos(theta) * (bigDiameter / 2);
+    const y = circleCenter.y + sin(theta) * (bigDiameter / 2);
+
+    line(
+      circleCenter.x + cos(theta) * (internalCircleDiameter / 2),
+      circleCenter.y + sin(theta) * (internalCircleDiameter / 2),
+      x,
+      y
+    );
+  }
+  pop();
 }

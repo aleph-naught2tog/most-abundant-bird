@@ -23,7 +23,8 @@ class Feather {
    * @param {number} options.length
    * @param {Array<RGBColor>} options.colors;
    * @param {Object} options.data
-   * @param {string} options.data.label
+   * @param {string} options.data.commonName
+   * @param {string} options.data.scientificName
    * @param {number} options.data.value
    */
   constructor(options) {
@@ -32,14 +33,15 @@ class Feather {
       angle,
       colors,
       length,
-      data: { label, value },
+      data: { commonName, value, scientificName },
     } = options;
     this.barbs = barbs ?? [];
     this.angle = angle;
     this.colors = colors;
     this.length = length;
 
-    this.label = label;
+    this.commonName = commonName;
+    this.scientificName = scientificName;
     this.value = value;
 
     this.highlighted = false;
@@ -83,6 +85,7 @@ class Feather {
     const rightBarbs = this.barbs.slice(lengthDivider).reverse();
 
     push();
+
     scale(1, 2);
 
     for (const barb of leftBarbs) {
@@ -95,6 +98,30 @@ class Feather {
       barb.draw(this.highlighted, SCALE_FACTOR);
     }
 
+    pop();
+  }
+
+  _drawAsShape() {
+    const lengthDivider = floor(this.barbs.length / 2);
+
+    const leftBarbs = this.barbs.slice(0, lengthDivider).reverse();
+    const rightBarbs = this.barbs.slice(lengthDivider).reverse();
+
+    push();
+    beginShape()
+    // fill('orange')
+    stroke('orange')
+
+    for (const barb of leftBarbs) {
+      vertex(barb.end.x, barb.end.y * 2)
+    }
+
+
+    for (const barb of rightBarbs) {
+      vertex(barb.end.x * -1, barb.end.y * 2)
+    }
+
+    endShape()
     pop();
   }
 
