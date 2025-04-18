@@ -1,13 +1,13 @@
 // TODO: this is a good palette, but some of the colors are similar enough that it implies a relationship
 /** @type {RGBColor[]} */
 const COLOR_BLIND_PALETTE = [
-  // [0, 0, 0, 255],
+  [80, 80, 70, 255],
   [86, 180, 233, 255],
   [0, 114, 178, 255],
   [213, 94, 0, 255],
-  [188, 158, 235, 255],
   [147, 30, 236, 255],
   [126, 216, 38, 255],
+  [188, 158, 235, 255],
 ];
 
 /**

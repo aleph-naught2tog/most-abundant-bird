@@ -15,7 +15,8 @@ function* generatePoints(featherLength, pointCount) {
   const featherWidth = featherLength * WIDTH_SCALE;
   const featherHeight = featherLength * HEIGHT_SCALE;
 
-  // const step = floor(map(Math.random(), 0, 1, 3, 5, true));
+  console.debug(featherLength / pointCount);
+  // const stepSize = floor(map(Math.random(), 0, 1, 3, 5, true));
   const stepSize = featherLength / pointCount;
 
   const endVector = createVector(0, featherHeight);
@@ -52,8 +53,7 @@ function* generatePoints(featherLength, pointCount) {
 
     // if we are not stuck, we increment up the stack
     if (!stuck) {
-      const stackStep =
-        HEIGHT_SCALE * (stepSize + pow(index, 0.25) * 0.5);
+      const stackStep = HEIGHT_SCALE * (stepSize + pow(index, 0.25) * 0.5);
 
       stack += stackStep;
     }

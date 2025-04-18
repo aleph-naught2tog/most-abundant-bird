@@ -38,7 +38,7 @@ let commonNameEl;
 let scientificNameEl;
 
 const getCanvasHeight = () => {
-  return windowHeight - 32;
+  return windowHeight;
 };
 
 const getCanvasWidth = () => {
@@ -189,7 +189,7 @@ function drawFeathers(chartDiameter) {
     // translates us to the outside of the circle above
     const offset = feather.highlighted ? 10 : 0;
     const translationToDonutHoleEdge = {
-      x: 4,
+      x: 0,
       y: internalCircleDiameter / 2 + OFFSET_FROM_INTERNAL_CIRCLE + offset,
     };
 

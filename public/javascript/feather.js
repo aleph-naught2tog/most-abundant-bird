@@ -78,7 +78,7 @@ class Feather {
     }
   }
 
-  _drawBarbs() {
+  _drawBarbs() {    
     const lengthDivider = floor(this.barbs.length / 2);
 
     const leftBarbs = this.barbs.slice(0, lengthDivider).reverse();
@@ -98,30 +98,6 @@ class Feather {
       barb.draw(this.highlighted, SCALE_FACTOR);
     }
 
-    pop();
-  }
-
-  _drawAsShape() {
-    const lengthDivider = floor(this.barbs.length / 2);
-
-    const leftBarbs = this.barbs.slice(0, lengthDivider).reverse();
-    const rightBarbs = this.barbs.slice(lengthDivider).reverse();
-
-    push();
-    beginShape()
-    // fill('orange')
-    stroke('orange')
-
-    for (const barb of leftBarbs) {
-      vertex(barb.end.x, barb.end.y * 2)
-    }
-
-
-    for (const barb of rightBarbs) {
-      vertex(barb.end.x * -1, barb.end.y * 2)
-    }
-
-    endShape()
     pop();
   }
 
