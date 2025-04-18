@@ -1,5 +1,5 @@
 const ASPECT_RATIO = 6 / 4;
-const BACKGROUND_COLOR = 'lemonchiffon';
+const BACKGROUND_COLOR = '#fffcde';
 
 const DONUT_HOLE = 0.2;
 const EXTRA_DIAMETER = 100;
@@ -12,7 +12,7 @@ const COLOR_COUNT = 1000;
 const GRAPH_ROTATION = Math.PI;
 const ANGLE_SLICED_WIDTH = (2 * Math.PI) / (TOTAL_COUNT / CHUNK_SIZE);
 
-const COLOR_BLIND_MODE = true;
+const COLOR_BLIND_MODE = false;
 
 let shouldUseFeatherHover = true;
 
@@ -54,8 +54,6 @@ const getTranslationToCircleCenter = () => ({
   x: width / 4,
   y: height / 3.5,
 });
-
-// BUG: TODO: get the feathers aligned
 
 // -----------------------------------
 // ------- Lifecycle functions -------
@@ -333,16 +331,20 @@ function drawMonths() {
   push();
   noFill();
   circle(circleCenter.x, circleCenter.y, internalCircleDiameter);
-  circle(circleCenter.x, circleCenter.y, bigDiameter);
+  // stroke(0.85 * 255)
+  stroke('#ca9d98')
+  // circle(circleCenter.x, circleCenter.y, bigDiameter);
 
   for (
     let theta = -ANGLE_SLICED_WIDTH / 2;
     theta < TAU;
     theta += ANGLE_SLICED_WIDTH
   ) {
-    const x = circleCenter.x + cos(theta) * (bigDiameter / 2);
-    const y = circleCenter.y + sin(theta) * (bigDiameter / 2);
+    const length = dist(circleCenter.x, circleCenter.y, 0, height)
+    const x = circleCenter.x + cos(theta) * (bigDiameter / 2) * length;
+    const y = circleCenter.y + sin(theta) * (bigDiameter / 2) * length;
 
+    stroke('#ca9d98')
     line(
       circleCenter.x + cos(theta) * (internalCircleDiameter / 2),
       circleCenter.y + sin(theta) * (internalCircleDiameter / 2),

@@ -262,6 +262,8 @@ interface P5Element {
   child(element: P5Element): void;
 
   position(x: number, y: number, cssPosition?: CssPosition): Point;
+
+  html(innerHtml: string, append?: boolean): void;
 }
 
 type CssPosition =
