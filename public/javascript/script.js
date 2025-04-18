@@ -1,5 +1,5 @@
 const ASPECT_RATIO = 6 / 4;
-const BACKGROUND_COLOR = '#fffcde';
+const BACKGROUND_COLOR = 'lemonchiffon';
 
 const DONUT_HOLE = 0.2;
 const EXTRA_DIAMETER = 100;
@@ -17,8 +17,6 @@ const COLOR_BLIND_MODE = false;
 let shouldUseFeatherHover = true;
 
 let internalCircleDiameter = -1;
-
-let hoveredBirdName = null;
 
 let maximumData = null;
 
@@ -42,7 +40,7 @@ const getCanvasHeight = () => {
 };
 
 const getCanvasWidth = () => {
-  return getCanvasHeight() * ASPECT_RATIO;
+  return windowWidth;
 };
 
 const getMaximumChartRadius = () => {
@@ -88,8 +86,7 @@ function setup() {
 
   cachedFeathers = createFeathers(BIRD_INFO, maximumData);
 
-
-  const leftPos = (getMaximumChartRadius() * 2) + 2;
+  const leftPos = getMaximumChartRadius() * 2 + 2;
   const section = createElement('section');
   section.position(leftPos, 50);
 
@@ -115,13 +112,6 @@ function setup() {
 
   dataDisplayDiv.child(commonNameEl);
   dataDisplayDiv.child(scientificNameEl);
-
-  console.debug(dataDisplayDiv.child());
-
-  // const maximumChartRadius = getMaximumChartRadius();
-  // background(BACKGROUND_COLOR);
-  // drawFeathers(maximumChartRadius * 2);
-  // drawMonths();
 }
 
 function draw() {
@@ -329,28 +319,27 @@ function drawMonths() {
   const bigDiameter = getMaximumChartRadius() * 2 + EXTRA_DIAMETER;
 
   push();
-  noFill();
-  circle(circleCenter.x, circleCenter.y, internalCircleDiameter);
-  // stroke(0.85 * 255)
-  stroke('#ca9d98')
-  // circle(circleCenter.x, circleCenter.y, bigDiameter);
+  stroke('#ffdea0');
 
   for (
     let theta = -ANGLE_SLICED_WIDTH / 2;
     theta < TAU;
-    theta += ANGLE_SLICED_WIDTH
+    theta += ANGLE_SLICED_WIDTH / 4
   ) {
-    const length = dist(circleCenter.x, circleCenter.y, 0, height)
-    const x = circleCenter.x + cos(theta) * (bigDiameter / 2) * length;
-    const y = circleCenter.y + sin(theta) * (bigDiameter / 2) * length;
+    const length = dist(circleCenter.x, circleCenter.y, 0, height);
 
-    stroke('#ca9d98')
-    line(
-      circleCenter.x + cos(theta) * (internalCircleDiameter / 2),
-      circleCenter.y + sin(theta) * (internalCircleDiameter / 2),
-      x,
-      y
-    );
+    const xStart = circleCenter.x + cos(theta) * (internalCircleDiameter / 2);
+    const yStart =
+      circleCenter.y + sin(theta) * (internalCircleDiameter / 2);
+
+    const xEnd = circleCenter.x + cos(theta) * (bigDiameter / 2) * length;
+    const yEnd = circleCenter.y + sin(theta) * (bigDiameter / 2) * length;
+
+    line(xStart, yStart, xEnd, yEnd);
   }
+
+  noFill();
+  circle(circleCenter.x, circleCenter.y, internalCircleDiameter);
+
   pop();
 }

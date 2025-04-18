@@ -4,7 +4,12 @@
 
 body {
   font-family: HK Grotesk;
-  background-color: var(--color-bg);
+  background-color: lemonchiffon;
   padding: 0;
   margin: 0;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
+

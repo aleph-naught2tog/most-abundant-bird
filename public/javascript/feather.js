@@ -1,5 +1,4 @@
 const ALPHA = 0.8;
-const SCALE_FACTOR = 1.05;
 
 const ANNOTATION_RADIUS = 15;
 const ANNOTATION_LINE_LENGTH = 30;
@@ -79,16 +78,23 @@ class Feather {
 
     push();
 
+    // drawingContext.shadowColor = 'rgba(0,0,0,0.3)';
+
+    // const i = 1;
+    // drawingContext.shadowBlur = i * 1;
+    // drawingContext.shadowOffsetX = i * 1;
+    // drawingContext.shadowOffsetY = i * 1;
+
     scale(1, 2);
 
     for (const barb of leftBarbs) {
-      barb.draw(this.highlighted, SCALE_FACTOR);
+      barb.draw(this.highlighted);
     }
 
     scale(-2, 1);
 
     for (const barb of rightBarbs) {
-      barb.draw(this.highlighted, SCALE_FACTOR);
+      barb.draw(this.highlighted);
     }
 
     pop();
@@ -129,16 +135,25 @@ class Feather {
 
     const strokeColor = this.highlighted ? 'cyan' : 'black';
     const strokeThickness = this.highlighted ? 3 : 1;
-    const offset = this.highlighted
-      ? OFFSET_FROM_FEATHER_TIP * 2
-      : OFFSET_FROM_FEATHER_TIP;
 
     push();
-    noFill();
+
+    drawingContext.shadowColor = 'rgba(0,0,0,0.3)';
+
+    const i = 1;
+    drawingContext.shadowBlur = i * 5;
+    drawingContext.shadowOffsetX = i * 5;
+    drawingContext.shadowOffsetY = i * 5;
+    // stroke([0,0,0,0])
+    // noFill()
+    // ellipse(0,0, ANNOTATION_RADIUS * 2);
+
+    fill(BACKGROUND_COLOR)
     stroke(strokeColor);
     strokeWeight(strokeThickness);
-    circle(0, offset, ANNOTATION_RADIUS * 2);
+    circle(0, OFFSET_FROM_FEATHER_TIP, ANNOTATION_RADIUS * 2);
     pop();
+
 
     translate(-annotationCircleCenter.x, -annotationCircleCenter.y);
 
