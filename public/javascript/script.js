@@ -90,13 +90,13 @@ function setup() {
 
   cachedFeathers = createFeathers(BIRD_INFO, maximumData);
 
-  const leftPos = getMaximumChartRadius() * 2 + 2;
+  const leftPos = getMaximumChartRadius() * 2 - 100;
   const section = createElement('section');
   section.position(leftPos, 50);
 
   const topHeader = createDiv(html`
     <header>
-      <h1>What birds are most observed over a year?</h1>
+      <h1>Which birds are most observed over a year?</h1>
       <p>Wisconsin, 1900–2025</p>
     </header>
   `);
@@ -303,9 +303,7 @@ function drawMonths() {
 
   for (let monthIndex = 1; monthIndex <= numberOfMonths; monthIndex += 1) {
     push();
-    stroke('white')
-    strokeWeight(4)
-    fill('#814648')
+
     const theta = map(monthIndex, 0, numberOfMonths, 0, TAU) - PI / 2;
 
     const date = new Date(1990, monthIndex, 10); // 2009-11-10

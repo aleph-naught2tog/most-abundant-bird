@@ -1,5 +1,5 @@
 * {
-  box-sizing:border-box;
+  box-sizing: border-box;
 }
 
 html {
@@ -18,10 +18,26 @@ body {
   align-items: center;
 }
 
-section{
-
+h1 {
+  margin-bottom: 1rem;
 }
 
-header {
+.data-display-container {
+  text-align: center;
+  padding: 5rem;
+  display: flex;
+  flex-direction: column;
+}
 
+.common-name {
+  font-size: 3rem;
+  padding: 0;
+  margin: 0;
+}
+
+.scientific-name {
+  font-size: 2rem;
+  font-style: italic;
+  padding-bottom: 0;
+  margin-bottom: 0;
 }
