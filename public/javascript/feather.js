@@ -46,6 +46,12 @@ class Feather {
   }
 
   draw() {
+    describeElement(
+      `Feather`,
+      `A feather representing the observations of ${this.commonName} (${
+        this.scientificName
+      }). The value is ${(this.value * 100).toFixed(2)}.${this.highlighted ? ' This feather is focused and vividly colored, with its names visible.': ''}`
+    );
     this.highlighted = this._shouldBeHighlighted();
 
     this._drawBarbs();
@@ -106,15 +112,13 @@ class Feather {
         ANNOTATION_RADIUS
       );
 
-        return isMouseWithinCircle || this.highlighted;
-
+      return isMouseWithinCircle || this.highlighted;
     }
 
     return false;
   }
 
   _drawAnnotation() {
-
     push();
 
     const annotationCircleCenter = this._getAnnotationCenter();
@@ -125,7 +129,9 @@ class Feather {
       this.originInCanvasCoords = getCurrentOriginInCanvasCoords();
     }
 
-    const highlightedStrokeColor = COLOR_BLIND_MODE ? this.colors[0] : this.highlightColor;
+    const highlightedStrokeColor = COLOR_BLIND_MODE
+      ? this.colors[0]
+      : this.highlightColor;
     const strokeColor = this.highlighted ? highlightedStrokeColor : '#b4a386';
     const strokeThickness = this.highlighted ? 4 : 2;
 

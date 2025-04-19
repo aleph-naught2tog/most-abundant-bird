@@ -129,6 +129,8 @@ function setup() {
 
   dataDisplayDiv.child(commonNameEl);
   dataDisplayDiv.child(scientificNameEl);
+
+  describe('a radial graph made out of feathers. In the center of the graph are the months, and each feather corresponds to a portion of the year. The feathers are colored to look like the feathers of the bird they represent -- blue jay feathers have lots of blue, white and black, goldfinch feathers much yellow, etc. On the right side, the text reads "Which birds are most observed over a years? Wisconsin, 1900 - 2025." When a feather is selected, the common name and scientific name of the bird are shown.');
 }
 
 function draw() {
@@ -310,6 +312,8 @@ function drawMonths() {
   const numberOfMonths = 12;
   const circleCenter = getTranslationToCircleCenter();
 
+  describeElement('Months', 'A small circle showing each month as if around a clock, with rays radiating out from it.')
+
   for (let monthIndex = 1; monthIndex <= numberOfMonths; monthIndex += 1) {
     push();
 
@@ -320,6 +324,7 @@ function drawMonths() {
       .toLocaleString('default', { month: 'long' })
       .slice(0, 1);
 
+    describeElement(month, month)
     strokeWeight(2);
     textAlign(CENTER, CENTER);
     text(
