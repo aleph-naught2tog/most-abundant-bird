@@ -326,3 +326,6 @@ declare interface P5Table {
 
 declare function createDiv(innerHTML?: string): P5Element;
 declare function createElement(tagName: string, content?: string): P5Element;
+
+declare function textSize(size: number): void;
+declare function textFont(fontName: string): void;

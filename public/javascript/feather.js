@@ -114,7 +114,6 @@ class Feather {
   }
 
   _drawAnnotation() {
-    /* REMEMBER: isMousePressed won't work if you aren't using `draw`! */
 
     push();
 

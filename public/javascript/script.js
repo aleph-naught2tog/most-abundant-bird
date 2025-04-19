@@ -12,7 +12,7 @@ const COLOR_COUNT = 1000;
 const GRAPH_ROTATION = Math.PI;
 const ANGLE_SLICED_WIDTH = (2 * Math.PI) / (TOTAL_COUNT / CHUNK_SIZE);
 
-const COLOR_BLIND_MODE = false;
+let COLOR_BLIND_MODE = false;
 
 let internalCircleDiameter = -1;
 
@@ -70,14 +70,17 @@ function preload() {
   }
 }
 
-// BUG/PERFORMANCE: the first one you hover over takes the longest
 function setup() {
   // this is the default, but good for clarity
   angleMode(RADIANS);
 
   textSize(20);
   textFont('Amarante');
-  // fill([0, 139, 139, 255])
+
+  const buttonText = COLOR_BLIND_MODE ? 'Change to bird-color mode' : 'Change to colorblind mode';
+
+  let button = createButton(buttonText);
+  button.position(0, 100);
 
   const canvasHeight = getCanvasHeight();
   const canvasWidth = getCanvasWidth();
@@ -89,6 +92,12 @@ function setup() {
   initPalettes();
 
   cachedFeathers = createFeathers(BIRD_INFO, maximumData);
+
+  button.mousePressed(() => {
+    COLOR_BLIND_MODE = !COLOR_BLIND_MODE;
+    cachedFeathers = createFeathers(BIRD_INFO, maximumData);
+  });
+
 
   const leftPos = getMaximumChartRadius() * 2 - 100;
   const section = createElement('section');
@@ -127,10 +136,6 @@ function draw() {
 }
 
 function mouseMoved() {
-  highlightFeatherBasedOnSlice();
-}
-
-function mouseClicked() {
   highlightFeatherBasedOnSlice();
 }
 
