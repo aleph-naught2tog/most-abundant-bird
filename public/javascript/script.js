@@ -77,13 +77,17 @@ function setup() {
   textSize(20);
   textFont('Amarante');
 
-  const buttonText = COLOR_BLIND_MODE ? 'Change to bird-color mode' : 'Change to colorblind mode';
-
-  let button = createButton(buttonText);
-  button.position(0, 100);
-
   const canvasHeight = getCanvasHeight();
   const canvasWidth = getCanvasWidth();
+
+
+  const getButtonText = () => COLOR_BLIND_MODE
+  ? 'Bird-color mode'
+  : 'Colorblind mode';
+  const buttonText = getButtonText();
+
+  let button = createButton(buttonText);
+  button.position(24, canvasHeight - 128);
 
   const canvas = createCanvas(canvasWidth, canvasHeight);
   canvas.parent('canvas_container');
@@ -96,8 +100,8 @@ function setup() {
   button.mousePressed(() => {
     COLOR_BLIND_MODE = !COLOR_BLIND_MODE;
     cachedFeathers = createFeathers(BIRD_INFO, maximumData);
+    button.elt.innerText = getButtonText();
   });
-
 
   const leftPos = getMaximumChartRadius() * 2 - 100;
   const section = createElement('section');
@@ -320,8 +324,8 @@ function drawMonths() {
     textAlign(CENTER, CENTER);
     text(
       month,
-      circleCenter.x + cos(theta) * (internalCircleDiameter / 2) * 0.85,
-      circleCenter.y + sin(theta) * (internalCircleDiameter / 2) * 0.85 + 2
+      circleCenter.x + cos(theta) * (internalCircleDiameter / 2) * 0.8,
+      circleCenter.y + sin(theta) * (internalCircleDiameter / 2) * 0.8
     );
 
     pop();

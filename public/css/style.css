@@ -41,3 +41,30 @@ h1 {
   padding-bottom: 0;
   margin-bottom: 0;
 }
+
+button {
+  padding: 0.75rem;
+  font-family: Amarante;
+  font-size: 120%;
+  background: #ffdd99;
+  border: 2px solid #ffb623;
+  border-radius: 4px;
+
+  box-shadow: 4px 4px 1.5px #99855e77;
+}
+
+button:hover {
+  background: #ffe5b0;
+  border: 2px solid #ffb623;
+  border-radius: 4px;
+
+  box-shadow: 5px 6px 3px #99855e66;
+}
+
+button:active {
+  background: #fdc75a;
+  border: 2px solid #ffb623;
+  border-radius: 4px;
+
+  box-shadow: 2px 3px 1px #99855e66;
+}
