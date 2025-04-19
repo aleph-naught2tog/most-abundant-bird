@@ -33,8 +33,6 @@ let commonNameEl;
 /** @type {P5Element} */
 let scientificNameEl;
 
-let clicked = false;
-
 const getCanvasHeight = () => {
   return windowHeight;
 };
@@ -77,7 +75,7 @@ function setup() {
   // this is the default, but good for clarity
   angleMode(RADIANS);
 
-  textSize(16);
+  textSize(20);
   textFont('Amarante');
   // fill([0, 139, 139, 255])
 
@@ -129,14 +127,11 @@ function draw() {
 }
 
 function mouseMoved() {
-  if (!clicked) {
-    highlightFeatherBasedOnSlice();
-  }
+  highlightFeatherBasedOnSlice();
 }
 
 function mouseClicked() {
-    clicked = !clicked;
-    highlightFeatherBasedOnSlice();
+  highlightFeatherBasedOnSlice();
 }
 
 // -----------------------------------
@@ -308,7 +303,9 @@ function drawMonths() {
 
   for (let monthIndex = 1; monthIndex <= numberOfMonths; monthIndex += 1) {
     push();
-
+    stroke('white')
+    strokeWeight(4)
+    fill('#814648')
     const theta = map(monthIndex, 0, numberOfMonths, 0, TAU) - PI / 2;
 
     const date = new Date(1990, monthIndex, 10); // 2009-11-10
