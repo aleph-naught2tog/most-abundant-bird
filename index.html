@@ -1,27 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <!--
-      This is an HTML comment
-      You can write text in a comment and the content won't be visible in the page
-    -->
-
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" href="https://glitch.com/favicon.ico" />
 
-    <!--
-      This is the page head - it contains info the browser uses
-      Like the title, which appears on the browser tab but not inside the page
-      Further down you'll see the content that displays in the page
-    -->
     <title>Most Abundant Wisconsin Birds</title>
+
+    <!-- Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amarante&family=Glass+Antiqua&display=swap" rel="stylesheet">
 
     <!-- The website stylesheet -->
     <link rel="stylesheet" href="/public/css/style.css" />
+
     <!-- p5.js -->
     <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.js"></script>
-    <!-- The website JavaScript file -->
+
+    <!-- The website JavaScript files -->
     <script src="/public/javascript/editorHelpers.js"></script>
     <script src="/public/javascript/birdMetadata.js" defer></script>
     <script src="/public/javascript/positionUtils.js"></script>
@@ -35,9 +31,6 @@
   </head>
   <body>
     <main>
-      <!-- <header>
-        <h1>Most Frequently Observed Birds Per Month in Wisconsin</h1>
-      </header> -->
       <div id="canvas_container"></div>
 
       <!-- An element with an id of p5_loading shows during preload -->

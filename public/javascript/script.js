@@ -14,8 +14,6 @@ const ANGLE_SLICED_WIDTH = (2 * Math.PI) / (TOTAL_COUNT / CHUNK_SIZE);
 
 const COLOR_BLIND_MODE = false;
 
-let shouldUseFeatherHover = true;
-
 let internalCircleDiameter = -1;
 
 let maximumData = null;
@@ -35,6 +33,8 @@ let commonNameEl;
 /** @type {P5Element} */
 let scientificNameEl;
 
+let clicked = false;
+
 const getCanvasHeight = () => {
   return windowHeight;
 };
@@ -48,10 +48,13 @@ const getMaximumChartRadius = () => {
   return baseWidth + (ANNOTATION_RADIUS - ANNOTATION_LINE_LENGTH) + 100;
 };
 
-const getTranslationToCircleCenter = () => ({
-  x: width / 4,
-  y: height / 3.5,
-});
+// TODO: deal with smaller sizes; can do conditionally
+const getTranslationToCircleCenter = () => {
+  return {
+    x: width / 4,
+    y: height / 3.25,
+  };
+};
 
 // -----------------------------------
 // ------- Lifecycle functions -------
@@ -62,7 +65,6 @@ function preload() {
     loadedTableData = data;
   });
 
-  // TODO: we could probably speed this up a lot by just grabbing the color palettes ahead of time?
   for (const birdName in BIRD_INFO) {
     const metadata = BIRD_INFO[birdName];
 
@@ -74,6 +76,10 @@ function preload() {
 function setup() {
   // this is the default, but good for clarity
   angleMode(RADIANS);
+
+  textSize(16);
+  textFont('Amarante');
+  // fill([0, 139, 139, 255])
 
   const canvasHeight = getCanvasHeight();
   const canvasWidth = getCanvasWidth();
@@ -123,9 +129,14 @@ function draw() {
 }
 
 function mouseMoved() {
-  if (shouldUseFeatherHover) {
+  if (!clicked) {
     highlightFeatherBasedOnSlice();
   }
+}
+
+function mouseClicked() {
+    clicked = !clicked;
+    highlightFeatherBasedOnSlice();
 }
 
 // -----------------------------------
@@ -228,7 +239,6 @@ function drawFeathers(chartDiameter) {
 }
 
 /**
- *
  * @param {Record<string, BirdMetadata>} birdInfo
  * @param {{ maximum: number, maximumIndex: number, birdName: string}[]} preppedData
  * @returns
@@ -274,6 +284,7 @@ function createFeathers(birdInfo, preppedData) {
         ? metadata.colorBlindPalette
         : metadata.imagePalette,
       length: radius,
+      highlightColor: metadata.highlightColor,
       data: {
         commonName: closestBirdName,
         value: num,
@@ -329,8 +340,7 @@ function drawMonths() {
     const length = dist(circleCenter.x, circleCenter.y, 0, height);
 
     const xStart = circleCenter.x + cos(theta) * (internalCircleDiameter / 2);
-    const yStart =
-      circleCenter.y + sin(theta) * (internalCircleDiameter / 2);
+    const yStart = circleCenter.y + sin(theta) * (internalCircleDiameter / 2);
 
     const xEnd = circleCenter.x + cos(theta) * (bigDiameter / 2) * length;
     const yEnd = circleCenter.y + sin(theta) * (bigDiameter / 2) * length;

@@ -22,6 +22,7 @@ const BIRD_INFO = {
     imagePalette: [],
     colorBlindPalette: [],
     scientificName: 'Corvus brachyrhynchos',
+    highlightColor: '#7771ad'
   },
   "American Robin": {
     imageUrl:
@@ -31,6 +32,7 @@ const BIRD_INFO = {
     imagePalette: [],
     colorBlindPalette: [],
     scientificName: 'Turdus migratorius',
+    highlightColor: '#ed904a',
   },
   "Black-capped Chickadee": {
     imageUrl:
@@ -39,7 +41,8 @@ const BIRD_INFO = {
     image: null,
     imagePalette: [],
     colorBlindPalette: [],
-    scientificName: 'Poecile atricapillus'
+    scientificName: 'Poecile atricapillus',
+    highlightColor: '#7e8f9d',
   },
   "American Goldfinch": {
     imageUrl:
@@ -48,7 +51,8 @@ const BIRD_INFO = {
     image: null,
     imagePalette: [],
     colorBlindPalette: [],
-    scientificName: 'Spinus tristis'
+    scientificName: 'Spinus tristis',
+    highlightColor: '#e6d152'
   },
   "Blue Jay": {
     imageUrl:
@@ -57,7 +61,8 @@ const BIRD_INFO = {
     image: null,
     imagePalette: [],
     colorBlindPalette: [],
-    scientificName: 'Cyanocitta cristata'
+    scientificName: 'Cyanocitta cristata',
+    highlightColor: '#42acf9'
   },
   "Canada Goose": {
     imageUrl:
@@ -66,6 +71,7 @@ const BIRD_INFO = {
     image: null,
     imagePalette: [],
     colorBlindPalette: [],
-    scientificName: 'Branta canadensis'
+    scientificName: 'Branta canadensis',
+    highlightColor: '#8c7b73'
   },
 };

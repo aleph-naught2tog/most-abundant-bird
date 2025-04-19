@@ -2,8 +2,15 @@
   box-sizing:border-box;
 }
 
+html {
+  margin: 0;
+  padding: 0;
+
+  color: #15233d;
+}
+
 body {
-  font-family: HK Grotesk;
+  font-family: Amarante;
   background-color: lemonchiffon;
   padding: 0;
   margin: 0;
@@ -13,3 +20,10 @@ body {
   align-items: center;
 }
 
+section{
+
+}
+
+header {
+
+}

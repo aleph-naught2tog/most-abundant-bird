@@ -16,6 +16,7 @@ class Feather {
    * @param {number} options.angle in radians
    * @param {number} options.length
    * @param {Array<RGBColor>} options.colors;
+   * @param {ColorValue} options.highlightColor
    * @param {Object} options.data
    * @param {string} options.data.commonName
    * @param {string} options.data.scientificName
@@ -27,12 +28,14 @@ class Feather {
       angle,
       colors,
       length,
+      highlightColor,
       data: { commonName, value, scientificName },
     } = options;
     this.barbs = barbs ?? [];
     this.angle = angle;
     this.colors = colors;
     this.length = length;
+    this.highlightColor = highlightColor;
 
     this.commonName = commonName;
     this.scientificName = scientificName;
@@ -78,13 +81,6 @@ class Feather {
 
     push();
 
-    // drawingContext.shadowColor = 'rgba(0,0,0,0.3)';
-
-    // const i = 1;
-    // drawingContext.shadowBlur = i * 1;
-    // drawingContext.shadowOffsetX = i * 1;
-    // drawingContext.shadowOffsetY = i * 1;
-
     scale(1, 2);
 
     for (const barb of leftBarbs) {
@@ -110,11 +106,8 @@ class Feather {
         ANNOTATION_RADIUS
       );
 
-      if (shouldUseFeatherHover) {
         return isMouseWithinCircle || this.highlighted;
-      }
 
-      return isMouseWithinCircle;
     }
 
     return false;
@@ -133,27 +126,23 @@ class Feather {
       this.originInCanvasCoords = getCurrentOriginInCanvasCoords();
     }
 
-    const strokeColor = this.highlighted ? 'cyan' : 'black';
-    const strokeThickness = this.highlighted ? 3 : 1;
+    const highlightedStrokeColor = COLOR_BLIND_MODE ? this.colors[0] : this.highlightColor;
+    const strokeColor = this.highlighted ? highlightedStrokeColor : '#b4a386';
+    const strokeThickness = this.highlighted ? 4 : 2;
 
     push();
 
-    drawingContext.shadowColor = 'rgba(0,0,0,0.3)';
-
-    const i = 1;
-    drawingContext.shadowBlur = i * 5;
-    drawingContext.shadowOffsetX = i * 5;
-    drawingContext.shadowOffsetY = i * 5;
-    // stroke([0,0,0,0])
-    // noFill()
-    // ellipse(0,0, ANNOTATION_RADIUS * 2);
-
-    fill(BACKGROUND_COLOR)
-    stroke(strokeColor);
     strokeWeight(strokeThickness);
-    circle(0, OFFSET_FROM_FEATHER_TIP, ANNOTATION_RADIUS * 2);
-    pop();
+    noStroke();
 
+    stroke(strokeColor);
+    fill(BACKGROUND_COLOR);
+    circle(
+      0,
+      OFFSET_FROM_FEATHER_TIP + (this.highlighted ? 2 : 0),
+      ANNOTATION_RADIUS * 2
+    );
+    pop();
 
     translate(-annotationCircleCenter.x, -annotationCircleCenter.y);
 
