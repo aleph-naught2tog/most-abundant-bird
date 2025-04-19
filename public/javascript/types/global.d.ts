@@ -262,6 +262,8 @@ interface P5Element {
   child(element: P5Element): void;
 
   position(x: number, y: number, cssPosition?: CssPosition): Point;
+
+  html(innerHtml: string, append?: boolean): void;
 }
 
 type CssPosition =
@@ -324,3 +326,6 @@ declare interface P5Table {
 
 declare function createDiv(innerHTML?: string): P5Element;
 declare function createElement(tagName: string, content?: string): P5Element;
+
+declare function textSize(size: number): void;
+declare function textFont(fontName: string): void;

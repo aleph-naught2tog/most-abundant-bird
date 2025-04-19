@@ -1,5 +1,3 @@
-// BUG: we only seem to care about the feather for half of it
-
 function highlightFeatherBasedOnSlice() {
   cachedFeathers.forEach((f) => (f.highlighted = false));
   const mousePoint = { x: mouseX, y: mouseY };
@@ -16,6 +14,7 @@ function highlightFeatherBasedOnSlice() {
 
   const trans = getTranslationToCircleCenter();
   translate(trans.x, trans.y);
+
   // Get the mouse's coordinates relative to the origin.
   const x = mouseX - trans.x;
   const y = mouseY - trans.y;
@@ -34,8 +33,8 @@ function highlightFeatherBasedOnSlice() {
     true
   );
 
-  const feather =
-    cachedFeathers[round(hoveredFeatherIndex) % cachedFeathers.length];
+  const index = round(hoveredFeatherIndex) % cachedFeathers.length;
+  const feather = cachedFeathers[index];
 
   if (!feather) {
     console.debug({
@@ -47,17 +46,5 @@ function highlightFeatherBasedOnSlice() {
     throw new Error('no feather');
   }
 
-  const startAngle =
-    hoveredFeatherIndex * ANGLE_SLICED_WIDTH - ANGLE_SLICED_WIDTH / 2;
-  const endAngle = (hoveredFeatherIndex + 1) * ANGLE_SLICED_WIDTH;
-
-  const angleBounds = {
-    start: startAngle,
-    end: endAngle,
-  };
-
-  feather.highlighted =
-    isMouseWithinBigFeatherCircle &&
-    angleOfMouse <= angleBounds.end &&
-    angleOfMouse >= angleBounds.start;
+  feather.highlighted = true;
 }

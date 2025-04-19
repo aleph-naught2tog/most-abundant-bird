@@ -1,10 +1,70 @@
 * {
-  box-sizing:border-box;
+  box-sizing: border-box;
+}
+
+html {
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  font-family: HK Grotesk;
-  background-color: var(--color-bg);
+  font-family: Amarante;
+  background-color: lemonchiffon;
   padding: 0;
   margin: 0;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+h1 {
+  margin-bottom: 1rem;
+}
+
+.data-display-container {
+  text-align: center;
+  padding: 5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.common-name {
+  font-size: 3rem;
+  padding: 0;
+  margin: 0;
+}
+
+.scientific-name {
+  font-size: 2rem;
+  font-style: italic;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+button {
+  padding: 0.75rem;
+  font-family: Amarante;
+  font-size: 120%;
+  background: #ffdd99;
+  border: 2px solid #ffb623;
+  border-radius: 4px;
+
+  box-shadow: 4px 4px 1.5px #99855e77;
+}
+
+button:hover {
+  background: #ffe5b0;
+  border: 2px solid #ffb623;
+  border-radius: 4px;
+
+  box-shadow: 5px 6px 3px #99855e66;
+}
+
+button:active {
+  background: #fdc75a;
+  border: 2px solid #ffb623;
+  border-radius: 4px;
+
+  box-shadow: 2px 3px 1px #99855e66;
 }

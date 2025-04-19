@@ -1,15 +1,9 @@
 const ALPHA = 0.8;
-const SCALE_FACTOR = 1.05;
 
 const ANNOTATION_RADIUS = 15;
 const ANNOTATION_LINE_LENGTH = 30;
 // this must be less than the anchorLength
-const OFFSET_FROM_FEATHER_TIP = 15;
-
-// TODO: feather outline? try with a minimal thing first.
-//    I think that we can make an if...
-//      1) we wrap the lines in a shape?
-//      2) failing that, get all the end points, make them vertices
+const OFFSET_FROM_FEATHER_TIP = 5;
 
 if (ANNOTATION_LINE_LENGTH <= OFFSET_FROM_FEATHER_TIP) {
   throw new Error('Your annotation line will not appear.');
@@ -22,6 +16,7 @@ class Feather {
    * @param {number} options.angle in radians
    * @param {number} options.length
    * @param {Array<RGBColor>} options.colors;
+   * @param {ColorValue} options.highlightColor
    * @param {Object} options.data
    * @param {string} options.data.commonName
    * @param {string} options.data.scientificName
@@ -33,12 +28,14 @@ class Feather {
       angle,
       colors,
       length,
+      highlightColor,
       data: { commonName, value, scientificName },
     } = options;
     this.barbs = barbs ?? [];
     this.angle = angle;
     this.colors = colors;
     this.length = length;
+    this.highlightColor = highlightColor;
 
     this.commonName = commonName;
     this.scientificName = scientificName;
@@ -50,8 +47,6 @@ class Feather {
 
   draw() {
     this.highlighted = this._shouldBeHighlighted();
-
-    this._drawRachis();
 
     this._drawBarbs();
 
@@ -78,7 +73,7 @@ class Feather {
     }
   }
 
-  _drawBarbs() {    
+  _drawBarbs() {
     const lengthDivider = floor(this.barbs.length / 2);
 
     const leftBarbs = this.barbs.slice(0, lengthDivider).reverse();
@@ -89,13 +84,13 @@ class Feather {
     scale(1, 2);
 
     for (const barb of leftBarbs) {
-      barb.draw(this.highlighted, SCALE_FACTOR);
+      barb.draw(this.highlighted);
     }
 
     scale(-2, 1);
 
     for (const barb of rightBarbs) {
-      barb.draw(this.highlighted, SCALE_FACTOR);
+      barb.draw(this.highlighted);
     }
 
     pop();
@@ -111,18 +106,14 @@ class Feather {
         ANNOTATION_RADIUS
       );
 
-      if (shouldUseFeatherHover) {
         return isMouseWithinCircle || this.highlighted;
-      }
 
-      return isMouseWithinCircle;
     }
 
     return false;
   }
 
   _drawAnnotation() {
-    /* REMEMBER: isMousePressed won't work if you aren't using `draw`! */
 
     push();
 
@@ -130,78 +121,31 @@ class Feather {
 
     translate(annotationCircleCenter.x, annotationCircleCenter.y);
 
-    push();
-    noFill();
-    stroke('black');
-    circle(0, 0, ANNOTATION_RADIUS * 2);
-    push();
-    strokeWeight(4);
-
-    const xStart = annotationCircleCenter.x;
-
-    // backs us to the radius + how long the anchor should be;
-    // offsetFromFeatherTip bumps us off the feather tip (we ADD it here instead
-    // of subtract because we are on the -Y axis, so this moves us back up)
-    const yStart =
-      -1 * (ANNOTATION_RADIUS + ANNOTATION_LINE_LENGTH) +
-      OFFSET_FROM_FEATHER_TIP;
-
-    // lands us at the bottom point of the circle
-    const yEnd = -1 * ANNOTATION_RADIUS;
-
-    pop();
-    line(xStart, yStart, xStart, yEnd);
-    pop();
-
-    // this puts us with the text facing upwards for EVERY feather
-
     if (!this.originInCanvasCoords) {
       this.originInCanvasCoords = getCurrentOriginInCanvasCoords();
     }
 
-    if (this.highlighted) {
-      push();
-      noFill();
-      stroke('cyan');
-      strokeWeight(3);
-      circle(0, 0, ANNOTATION_RADIUS * 2);
-      line(xStart, yStart, xStart, yEnd);
-      pop();
+    const highlightedStrokeColor = COLOR_BLIND_MODE ? this.colors[0] : this.highlightColor;
+    const strokeColor = this.highlighted ? highlightedStrokeColor : '#b4a386';
+    const strokeThickness = this.highlighted ? 4 : 2;
 
-      translate(-annotationCircleCenter.x, -annotationCircleCenter.y);
-    }
-
-    pop();
-  }
-
-  _drawRachis() {
     push();
-    const sw = map(this.length, 10, window.width / 4, 0.5, 1);
-    strokeWeight(sw);
-    stroke(this._getRachisColor());
 
-    const rachisLength = this.length / 2;
+    strokeWeight(strokeThickness);
+    noStroke();
 
-    // draw a line from the outer circle to halfway up the feather
-    line(0, 0, 0, rachisLength);
+    stroke(strokeColor);
+    fill(BACKGROUND_COLOR);
+    circle(
+      0,
+      OFFSET_FROM_FEATHER_TIP + (this.highlighted ? 2 : 0),
+      ANNOTATION_RADIUS * 2
+    );
     pop();
-  }
 
-  /**
-   *
-   * @returns {RGBColor}
-   */
-  _getRachisColor() {
-    const exemplarBarb = this.barbs[0];
+    translate(-annotationCircleCenter.x, -annotationCircleCenter.y);
 
-    const [r, g, b, a = 255] = exemplarBarb.color;
-
-    const red = r / 1.25;
-    const green = g / 1.25;
-    const blue = b / 1.25;
-    const alpha = a * 0.85;
-
-    return [red, green, blue, alpha];
+    pop();
   }
 
   _getAnnotationCenter() {

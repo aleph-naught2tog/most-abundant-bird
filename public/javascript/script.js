@@ -12,13 +12,9 @@ const COLOR_COUNT = 1000;
 const GRAPH_ROTATION = Math.PI;
 const ANGLE_SLICED_WIDTH = (2 * Math.PI) / (TOTAL_COUNT / CHUNK_SIZE);
 
-const COLOR_BLIND_MODE = true;
-
-let shouldUseFeatherHover = true;
+let COLOR_BLIND_MODE = false;
 
 let internalCircleDiameter = -1;
-
-let hoveredBirdName = null;
 
 let maximumData = null;
 
@@ -42,7 +38,7 @@ const getCanvasHeight = () => {
 };
 
 const getCanvasWidth = () => {
-  return getCanvasHeight() * ASPECT_RATIO;
+  return windowWidth;
 };
 
 const getMaximumChartRadius = () => {
@@ -50,12 +46,13 @@ const getMaximumChartRadius = () => {
   return baseWidth + (ANNOTATION_RADIUS - ANNOTATION_LINE_LENGTH) + 100;
 };
 
-const getTranslationToCircleCenter = () => ({
-  x: width / 4,
-  y: height / 3.5,
-});
-
-// BUG: TODO: get the feathers aligned
+// TODO: deal with smaller sizes; can do conditionally
+const getTranslationToCircleCenter = () => {
+  return {
+    x: width / 4,
+    y: height / 3.25,
+  };
+};
 
 // -----------------------------------
 // ------- Lifecycle functions -------
@@ -66,7 +63,6 @@ function preload() {
     loadedTableData = data;
   });
 
-  // TODO: we could probably speed this up a lot by just grabbing the color palettes ahead of time?
   for (const birdName in BIRD_INFO) {
     const metadata = BIRD_INFO[birdName];
 
@@ -74,13 +70,24 @@ function preload() {
   }
 }
 
-// BUG/PERFORMANCE: the first one you hover over takes the longest
 function setup() {
   // this is the default, but good for clarity
   angleMode(RADIANS);
 
+  textSize(20);
+  textFont('Amarante');
+
   const canvasHeight = getCanvasHeight();
   const canvasWidth = getCanvasWidth();
+
+
+  const getButtonText = () => COLOR_BLIND_MODE
+  ? 'Bird-color mode'
+  : 'Colorblind mode';
+  const buttonText = getButtonText();
+
+  let button = createButton(buttonText);
+  button.position(24, canvasHeight - 128);
 
   const canvas = createCanvas(canvasWidth, canvasHeight);
   canvas.parent('canvas_container');
@@ -90,14 +97,19 @@ function setup() {
 
   cachedFeathers = createFeathers(BIRD_INFO, maximumData);
 
+  button.mousePressed(() => {
+    COLOR_BLIND_MODE = !COLOR_BLIND_MODE;
+    cachedFeathers = createFeathers(BIRD_INFO, maximumData);
+    button.elt.innerText = getButtonText();
+  });
 
-  const leftPos = (getMaximumChartRadius() * 2) + 2;
+  const leftPos = getMaximumChartRadius() * 2 - 100;
   const section = createElement('section');
   section.position(leftPos, 50);
 
   const topHeader = createDiv(html`
     <header>
-      <h1>What birds are most observed over a year?</h1>
+      <h1>Which birds are most observed over a year?</h1>
       <p>Wisconsin, 1900–2025</p>
     </header>
   `);
@@ -117,13 +129,6 @@ function setup() {
 
   dataDisplayDiv.child(commonNameEl);
   dataDisplayDiv.child(scientificNameEl);
-
-  console.debug(dataDisplayDiv.child());
-
-  // const maximumChartRadius = getMaximumChartRadius();
-  // background(BACKGROUND_COLOR);
-  // drawFeathers(maximumChartRadius * 2);
-  // drawMonths();
 }
 
 function draw() {
@@ -135,9 +140,7 @@ function draw() {
 }
 
 function mouseMoved() {
-  if (shouldUseFeatherHover) {
-    highlightFeatherBasedOnSlice();
-  }
+  highlightFeatherBasedOnSlice();
 }
 
 // -----------------------------------
@@ -240,7 +243,6 @@ function drawFeathers(chartDiameter) {
 }
 
 /**
- *
  * @param {Record<string, BirdMetadata>} birdInfo
  * @param {{ maximum: number, maximumIndex: number, birdName: string}[]} preppedData
  * @returns
@@ -286,6 +288,7 @@ function createFeathers(birdInfo, preppedData) {
         ? metadata.colorBlindPalette
         : metadata.imagePalette,
       length: radius,
+      highlightColor: metadata.highlightColor,
       data: {
         commonName: closestBirdName,
         value: num,
@@ -321,8 +324,8 @@ function drawMonths() {
     textAlign(CENTER, CENTER);
     text(
       month,
-      circleCenter.x + cos(theta) * (internalCircleDiameter / 2) * 0.85,
-      circleCenter.y + sin(theta) * (internalCircleDiameter / 2) * 0.85 + 2
+      circleCenter.x + cos(theta) * (internalCircleDiameter / 2) * 0.8,
+      circleCenter.y + sin(theta) * (internalCircleDiameter / 2) * 0.8
     );
 
     pop();
@@ -331,24 +334,26 @@ function drawMonths() {
   const bigDiameter = getMaximumChartRadius() * 2 + EXTRA_DIAMETER;
 
   push();
-  noFill();
-  circle(circleCenter.x, circleCenter.y, internalCircleDiameter);
-  circle(circleCenter.x, circleCenter.y, bigDiameter);
+  stroke('#ffdea0');
 
   for (
     let theta = -ANGLE_SLICED_WIDTH / 2;
     theta < TAU;
-    theta += ANGLE_SLICED_WIDTH
+    theta += ANGLE_SLICED_WIDTH / 4
   ) {
-    const x = circleCenter.x + cos(theta) * (bigDiameter / 2);
-    const y = circleCenter.y + sin(theta) * (bigDiameter / 2);
+    const length = dist(circleCenter.x, circleCenter.y, 0, height);
 
-    line(
-      circleCenter.x + cos(theta) * (internalCircleDiameter / 2),
-      circleCenter.y + sin(theta) * (internalCircleDiameter / 2),
-      x,
-      y
-    );
+    const xStart = circleCenter.x + cos(theta) * (internalCircleDiameter / 2);
+    const yStart = circleCenter.y + sin(theta) * (internalCircleDiameter / 2);
+
+    const xEnd = circleCenter.x + cos(theta) * (bigDiameter / 2) * length;
+    const yEnd = circleCenter.y + sin(theta) * (bigDiameter / 2) * length;
+
+    line(xStart, yStart, xEnd, yEnd);
   }
+
+  noFill();
+  circle(circleCenter.x, circleCenter.y, internalCircleDiameter);
+
   pop();
 }
